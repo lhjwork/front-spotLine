@@ -1,65 +1,189 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { QrCode, MapPin, Star, ArrowRight, Smartphone } from 'lucide-react';
+import Layout from '@/components/layout/Layout';
+import Button from '@/components/common/Button';
 
 export default function Home() {
+  const [demoQrId] = useState('6ccbb682-df55-4566-ac30-703ddb5cfb7f');
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <Layout showFooter>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 히어로 섹션 */}
+        <section className="py-12 md:py-20 text-center">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center justify-center space-x-3 mb-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-xl">
+                <QrCode className="h-7 w-7 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+                Spotline
+              </h1>
+            </div>
+            
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+              지금 있는 장소에서, 다음으로 이어지는 최적의 동선을 추천받아보세요
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link href={`/qr/${demoQrId}`}>
+                <Button size="lg" className="w-full sm:w-auto">
+                  <QrCode className="mr-2 h-5 w-5" />
+                  데모 체험하기
+                </Button>
+              </Link>
+              
+              <Link href="/about">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  서비스 소개 보기
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="bg-blue-50 rounded-lg p-6 text-left">
+              <h3 className="font-semibold text-blue-900 mb-2">💡 이런 순간에 Spotline을 사용해보세요</h3>
+              <ul className="text-blue-800 space-y-1 text-sm">
+                <li>• 카페에서 커피를 마신 후 &ldquo;이제 어디 가지?&rdquo; 고민될 때</li>
+                <li>• 전시를 관람한 후 근처에서 식사할 곳을 찾을 때</li>
+                <li>• 미팅이 끝나고 다음 약속 장소를 정할 때</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* 특징 섹션 */}
+        <section className="py-16 bg-white rounded-2xl shadow-sm border mb-16">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+              왜 Spotline인가요?
+            </h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-xl mx-auto mb-4">
+                  <Smartphone className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">간편한 QR 접근</h3>
+                <p className="text-gray-600">
+                  앱 설치 없이 QR 코드만 스캔하면 바로 추천을 받을 수 있어요
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-xl mx-auto mb-4">
+                  <MapPin className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">맥락 기반 추천</h3>
+                <p className="text-gray-600">
+                  현재 위치와 상황을 고려한 개인화된 장소를 추천해드려요
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-xl mx-auto mb-4">
+                  <Star className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">큐레이션 품질</h3>
+                <p className="text-gray-600">
+                  무작위 검색이 아닌 의도된 동선으로 더 나은 경험을 제공해요
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 사용법 섹션 */}
+        <section className="py-16">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+              사용법은 정말 간단해요
+            </h2>
+            
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full mx-auto mb-4 font-bold">
+                  1
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">QR 스캔</h3>
+                <p className="text-sm text-gray-600">매장 테이블의 Spotline QR 코드를 스캔하세요</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full mx-auto mb-4 font-bold">
+                  2
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">추천 확인</h3>
+                <p className="text-sm text-gray-600">현재 매장 기준으로 다음에 가기 좋은 곳들을 확인하세요</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full mx-auto mb-4 font-bold">
+                  3
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">카테고리 선택</h3>
+                <p className="text-sm text-gray-600">식사, 디저트, 활동 등 원하는 카테고리를 선택하세요</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full mx-auto mb-4 font-bold">
+                  4
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">지도 연결</h3>
+                <p className="text-sm text-gray-600">마음에 드는 장소를 선택하고 지도로 이동하세요</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 통계 섹션 */}
+        <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl text-white mb-16">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <h2 className="text-3xl font-bold mb-12">Spotline과 함께하는 사람들</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <div className="text-4xl font-bold mb-2">1,000+</div>
+                <div className="text-blue-100">참여 매장</div>
+              </div>
+              
+              <div>
+                <div className="text-4xl font-bold mb-2">50,000+</div>
+                <div className="text-blue-100">월간 추천</div>
+              </div>
+              
+              <div>
+                <div className="text-4xl font-bold mb-2">85%</div>
+                <div className="text-blue-100">실제 방문율</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA 섹션 */}
+        <section className="py-16 text-center">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              지금 바로 시작해보세요
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              다음에 가기 좋은 장소를 찾는 새로운 방법을 경험해보세요
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href={`/qr/${demoQrId}`}>
+                <Button size="lg" className="w-full sm:w-auto">
+                  <QrCode className="mr-2 h-5 w-5" />
+                  데모 체험하기
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </Layout>
   );
 }

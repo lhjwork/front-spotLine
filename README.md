@@ -1,36 +1,202 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Spotline Frontend
 
-## Getting Started
+QR 코드 기반 로컬 연결 서비스 Spotline의 프론트엔드 애플리케이션입니다.
 
-First, run the development server:
+## 🚀 프로젝트 개요
+
+Spotline은 카페, 전시, 호텔 등 체류형 공간에서 "이제 어디 가지?"라는 순간적 니즈를 해결하는 웹 애플리케이션입니다. QR 코드를 스캔하면 현재 위치 기준으로 다음에 가기 좋은 장소들을 추천받을 수 있습니다.
+
+## 🛠 기술 스택
+
+- **Framework**: Next.js 14+ (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Package Manager**: pnpm
+- **State Management**: Zustand
+- **HTTP Client**: Axios
+- **UI Components**: Headless UI
+- **Icons**: Lucide React
+
+## 📦 설치 및 실행
+
+### 1. 의존성 설치
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 환경 변수 설정
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`.env.local` 파일을 생성하고 다음 변수들을 설정하세요:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
+NEXT_PUBLIC_KAKAO_MAP_API_KEY=your_kakao_map_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-## Learn More
+### 3. 개발 서버 실행
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. 빌드
 
-## Deploy on Vercel
+```bash
+pnpm build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 5. 프로덕션 실행
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm start
+```
+
+## 📁 프로젝트 구조
+
+```
+src/
+├── app/                    # Next.js App Router 페이지
+│   ├── qr/[qrId]/         # QR 코드 페이지
+│   ├── globals.css        # 글로벌 스타일
+│   ├── layout.tsx         # 루트 레이아웃
+│   └── page.tsx           # 홈페이지
+├── components/            # 재사용 가능한 컴포넌트
+│   ├── analytics/         # 분석 관련 컴포넌트
+│   ├── common/           # 공통 컴포넌트
+│   ├── layout/           # 레이아웃 컴포넌트
+│   ├── map/              # 지도 관련 컴포넌트
+│   ├── recommendation/   # 추천 관련 컴포넌트
+│   └── store/            # 매장 관련 컴포넌트
+├── lib/                  # 유틸리티 함수
+│   ├── api.ts           # API 호출 함수
+│   └── utils.ts         # 공통 유틸리티
+├── store/               # Zustand 상태 관리
+│   └── useSpotlineStore.ts
+└── types/               # TypeScript 타입 정의
+    └── index.ts
+```
+
+## 🎯 주요 기능
+
+### 1. QR 스캔 페이지 (`/qr/[qrId]`)
+- QR 코드 ID를 URL 파라미터로 받아 처리
+- 현재 매장 정보 표시 (이름, 카테고리, 주소, 영업시간)
+- 매장 이미지 및 태그 표시
+- 로딩 상태 및 에러 처리
+
+### 2. 추천 리스트 섹션
+- 현재 매장 기준 다음 장소 추천 표시
+- 카테고리별 필터링 (식사, 디저트, 활동, 문화 등)
+- 각 추천 매장의 정보 카드
+- 지도 보기 버튼
+
+### 3. 지도 연동
+- 카카오맵, 구글맵, 네이버맵 연결
+- 추천 매장 위치를 지도에 표시
+- 현재 위치에서 목적지까지의 경로 안내
+
+### 4. 분석 이벤트 추적
+- QR 스캔 이벤트 로깅
+- 페이지 뷰 추적
+- 추천 클릭 이벤트 추적
+- 지도 클릭 이벤트 추적
+
+## 🎨 UI/UX 특징
+
+- **모바일 퍼스트**: 스마트폰에서 QR 스캔 후 사용하는 시나리오에 최적화
+- **미니멀하고 직관적**: 빠른 의사결정을 돕는 깔끔한 인터페이스
+- **카드 기반 레이아웃**: 각 추천 매장을 카드 형태로 표시
+- **부드러운 애니메이션**: 페이지 전환 및 상호작용에 자연스러운 애니메이션
+
+## 🔧 개발 스크립트
+
+```bash
+# 개발 서버 실행
+pnpm dev
+
+# 빌드
+pnpm build
+
+# 프로덕션 서버 실행
+pnpm start
+
+# 린트 검사
+pnpm lint
+
+# 린트 자동 수정
+pnpm lint:fix
+
+# 타입 체크
+pnpm type-check
+
+# 빌드 후 프리뷰
+pnpm preview
+
+# 캐시 정리
+pnpm clean
+```
+
+## 🌐 API 연동
+
+백엔드 API와의 연동을 위해 다음 엔드포인트들을 사용합니다:
+
+- `GET /api/stores/qr/{qrId}` - QR 코드로 매장 정보 조회
+- `GET /api/recommendations/qr/{qrId}` - QR 기반 추천 조회
+- `POST /api/analytics/event` - 분석 이벤트 로깅
+
+## 📱 반응형 디자인
+
+- **Mobile**: 320px ~ 768px (주요 타겟)
+- **Tablet**: 768px ~ 1024px
+- **Desktop**: 1024px 이상
+
+## ♿ 접근성
+
+- 키보드 네비게이션 지원
+- 스크린 리더 호환성
+- 색상 대비 WCAG 2.1 AA 준수
+- 포커스 인디케이터 명확히 표시
+
+## 🚀 배포
+
+### Vercel 배포
+
+1. Vercel에 프로젝트 연결
+2. 환경 변수 설정
+3. 자동 배포 설정
+
+### 환경 변수
+
+프로덕션 환경에서 다음 환경 변수들을 설정해야 합니다:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://api.spotline.app
+NEXT_PUBLIC_KAKAO_MAP_API_KEY=your_production_kakao_map_key
+NEXT_PUBLIC_SITE_URL=https://spotline.app
+GOOGLE_SITE_VERIFICATION=your_google_verification_code
+```
+
+## 🤝 기여하기
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
+
+## 📞 문의
+
+- 이메일: contact@spotline.app
+- 웹사이트: https://spotline.app
+
+---
+
+Made with ❤️ by Spotline Team
