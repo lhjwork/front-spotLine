@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Store, RecommendationResponse, AnalyticsEvent, FilterOptions } from "@/types";
+import { Store, Recommendation, AnalyticsEvent, FilterOptions, ApiResponse, NearbyStoreParams, GeocodeResponse, CoordinateValidation, StatsResponse, HealthCheckResponse, Coordinates } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
 const getApiBaseUrl = (): string => {
@@ -27,53 +27,270 @@ if (process.env.NODE_ENV === "development") {
   console.log("🔗 API Base URL:", API_BASE_URL);
 }
 
-// QR 코드로 매장 정보 조회
-export const getStoreByQR = async (qrId: string): Promise<Store> => {
+// 에러 처리 헬퍼 함수
+const handleApiError = (error: any, defaultMessage: string): never => {
+  if (axios.isAxiosError(error)) {
+    const errorMessage = error.response?.data?.message || defaultMessage;
+    throw new Error(errorMessage);
+  }
+  throw new Error("네트워크 오류가 발생했습니다");
+};
+
+// ==================== 매장 API ====================
+
+// 모든 매장 조회
+export const getAllStores = async (options?: FilterOptions): Promise<Store[]> => {
   try {
-    const response = await api.get(`/stores/qr/${qrId}`);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.error || "매장을 찾을 수 없습니다");
+    const params = new URLSearchParams();
+    if (options?.category) params.append("category", options.category);
+    if (options?.area) params.append("area", options.area);
+    if (options?.limit) params.append("limit", options.limit.toString());
+
+    const url = `/stores${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await api.get<ApiResponse<Store[]>>(url);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
-    throw new Error("네트워크 오류가 발생했습니다");
+    throw new Error(response.data.message || "매장 목록을 가져올 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "매장 목록을 가져올 수 없습니다");
   }
 };
 
-// QR 기반 추천 조회
-export const getRecommendationsByQR = async (qrId: string, options?: FilterOptions): Promise<RecommendationResponse> => {
+// QR 코드로 매장 정보 조회 (핵심 기능)
+export const getStoreByQR = async (qrId: string): Promise<Store> => {
+  try {
+    const response = await api.get<ApiResponse<Store>>(`/stores/qr/${qrId}`);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "매장을 찾을 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "매장을 찾을 수 없습니다");
+  }
+};
+
+// 근처 매장 검색
+export const getNearbyStores = async (params: NearbyStoreParams): Promise<Store[]> => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params.radius) queryParams.append("radius", params.radius.toString());
+    if (params.category) queryParams.append("category", params.category);
+
+    const url = `/stores/nearby/${params.lat}/${params.lng}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const response = await api.get<ApiResponse<Store[]>>(url);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "근처 매장을 찾을 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "근처 매장을 찾을 수 없습니다");
+  }
+};
+
+// 특정 매장 조회
+export const getStoreById = async (storeId: string): Promise<Store> => {
+  try {
+    const response = await api.get<ApiResponse<Store>>(`/stores/${storeId}`);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "매장을 찾을 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "매장을 찾을 수 없습니다");
+  }
+};
+
+// ==================== 추천 API ====================
+
+// QR 기반 추천 조회 (핵심 기능)
+export const getRecommendationsByQR = async (qrId: string, options?: FilterOptions): Promise<Recommendation[]> => {
   try {
     const params = new URLSearchParams();
     if (options?.category) params.append("category", options.category);
     if (options?.limit) params.append("limit", options.limit.toString());
 
     const url = `/recommendations/qr/${qrId}${params.toString() ? `?${params.toString()}` : ""}`;
-    const response = await api.get(url);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.error || "추천 정보를 가져올 수 없습니다");
+    const response = await api.get<ApiResponse<Recommendation[]>>(url);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
     }
-    throw new Error("네트워크 오류가 발생했습니다");
+    throw new Error(response.data.message || "추천 정보를 가져올 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "추천 정보를 가져올 수 없습니다");
   }
 };
 
-// 분석 이벤트 로깅
-export const logAnalyticsEvent = async (eventData: AnalyticsEvent): Promise<void> => {
+// 매장별 추천 조회
+export const getRecommendationsByStore = async (storeId: string, options?: FilterOptions): Promise<Recommendation[]> => {
   try {
-    await api.post("/analytics/event", eventData);
+    const params = new URLSearchParams();
+    if (options?.category) params.append("category", options.category);
+
+    const url = `/recommendations/store/${storeId}${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await api.get<ApiResponse<Recommendation[]>>(url);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "추천 정보를 가져올 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "추천 정보를 가져올 수 없습니다");
+  }
+};
+
+// 카테고리별 추천 통계
+export const getRecommendationStats = async (): Promise<StatsResponse> => {
+  try {
+    const response = await api.get<ApiResponse<StatsResponse>>("/recommendations/stats/categories");
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "통계 정보를 가져올 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "통계 정보를 가져올 수 없습니다");
+  }
+};
+
+// ==================== 분석 API ====================
+
+// 분석 이벤트 로깅 (중요!)
+export const logAnalyticsEvent = async (eventData: AnalyticsEvent): Promise<boolean> => {
+  try {
+    const response = await api.post<ApiResponse<{ id: string }>>("/analytics/event", eventData);
+    return response.data.success;
   } catch (error) {
     // 분석 이벤트 실패는 사용자 경험에 영향을 주지 않도록 조용히 처리
     console.warn("Analytics event failed:", error);
+    return false;
   }
 };
 
-// 헬스 체크
-export const healthCheck = async (): Promise<{ status: string; message: string }> => {
+// QR 코드별 통계 조회
+export const getQRAnalytics = async (qrId: string, startDate?: string, endDate?: string): Promise<any> => {
   try {
-    const response = await api.get("/health");
+    const params = new URLSearchParams();
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
+
+    const url = `/analytics/qr/${qrId}${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await api.get<ApiResponse<any>>(url);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "분석 데이터를 가져올 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "분석 데이터를 가져올 수 없습니다");
+  }
+};
+
+// 매장별 통계 조회
+export const getStoreAnalytics = async (storeId: string, period?: "day" | "week" | "month"): Promise<any> => {
+  try {
+    const params = new URLSearchParams();
+    if (period) params.append("period", period);
+
+    const url = `/analytics/store/${storeId}${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await api.get<ApiResponse<any>>(url);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "분석 데이터를 가져올 수 없습니다");
+  } catch (error) {
+    handleApiError(error, "분석 데이터를 가져올 수 없습니다");
+  }
+};
+
+// ==================== 지오코딩 API ====================
+
+// 통합 지오코딩
+export const geocodeAddress = async (address: string): Promise<GeocodeResponse> => {
+  try {
+    const response = await api.get<GeocodeResponse>(`/geocoding/unified?address=${encodeURIComponent(address)}`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, "주소를 좌표로 변환할 수 없습니다");
+  }
+};
+
+// 좌표 유효성 검증
+export const validateCoordinates = async (coordinates: Coordinates): Promise<CoordinateValidation> => {
+  try {
+    const response = await api.post<CoordinateValidation>("/geocoding/validate", coordinates);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, "좌표 유효성을 검증할 수 없습니다");
+  }
+};
+
+// ==================== 헬스 체크 ====================
+
+// 헬스 체크
+export const healthCheck = async (): Promise<HealthCheckResponse> => {
+  try {
+    const response = await api.get<HealthCheckResponse>("/health");
     return response.data;
   } catch (error) {
     throw new Error("서버에 연결할 수 없습니다");
   }
+};
+
+// ==================== 유틸리티 함수 ====================
+
+// 세션 ID 생성
+export const generateSessionId = (): string => {
+  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// 이벤트 로깅 헬퍼 함수들
+export const logQRScan = (qrId: string, storeId?: string) => {
+  const sessionId = generateSessionId();
+  return logAnalyticsEvent({
+    qrCode: qrId,
+    store: storeId,
+    eventType: "qr_scan",
+    sessionId,
+  });
+};
+
+export const logRecommendationClick = (qrId: string, targetStoreId: string, category?: string, position?: number) => {
+  const sessionId = generateSessionId();
+  return logAnalyticsEvent({
+    qrCode: qrId,
+    eventType: "recommendation_click",
+    targetStore: targetStoreId,
+    sessionId,
+    metadata: {
+      category,
+      position,
+    },
+  });
+};
+
+export const logMapClick = (qrId: string, targetStoreId: string) => {
+  const sessionId = generateSessionId();
+  return logAnalyticsEvent({
+    qrCode: qrId,
+    eventType: "map_click",
+    targetStore: targetStoreId,
+    sessionId,
+  });
+};
+
+export const logPageView = (qrId: string, storeId?: string) => {
+  const sessionId = generateSessionId();
+  return logAnalyticsEvent({
+    qrCode: qrId,
+    store: storeId,
+    eventType: "page_view",
+    sessionId,
+  });
 };
