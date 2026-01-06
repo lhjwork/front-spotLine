@@ -52,8 +52,18 @@ export const isCurrentlyOpen = (businessHours?: BusinessHours): boolean => {
   if (!businessHours) return false;
 
   const now = new Date();
-  const currentDay = now.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-  const currentTime = now.toTimeString().slice(0, 5); // HH:MM 형식
+  const currentDay = now
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: "Asia/Seoul",
+    })
+    .toLowerCase();
+  const currentTime = now.toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Seoul",
+  }); // HH:MM 형식
 
   const todayHours = businessHours[currentDay];
   if (!todayHours || !todayHours.open || !todayHours.close) return false;

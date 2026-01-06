@@ -54,7 +54,7 @@ export const getAllStores = async (options?: FilterOptions): Promise<Store[]> =>
     }
     throw new Error(response.data.message || "매장 목록을 가져올 수 없습니다");
   } catch (error) {
-    handleApiError(error, "매장 목록을 가져올 수 없습니다");
+    return handleApiError(error, "매장 목록을 가져올 수 없습니다");
   }
 };
 
@@ -68,7 +68,7 @@ export const getStoreByQR = async (qrId: string): Promise<Store> => {
     }
     throw new Error(response.data.message || "매장을 찾을 수 없습니다");
   } catch (error) {
-    handleApiError(error, "매장을 찾을 수 없습니다");
+    return handleApiError(error, "매장을 찾을 수 없습니다");
   }
 };
 
@@ -87,7 +87,7 @@ export const getNearbyStores = async (params: NearbyStoreParams): Promise<Store[
     }
     throw new Error(response.data.message || "근처 매장을 찾을 수 없습니다");
   } catch (error) {
-    handleApiError(error, "근처 매장을 찾을 수 없습니다");
+    return handleApiError(error, "근처 매장을 찾을 수 없습니다");
   }
 };
 
@@ -101,7 +101,7 @@ export const getStoreById = async (storeId: string): Promise<Store> => {
     }
     throw new Error(response.data.message || "매장을 찾을 수 없습니다");
   } catch (error) {
-    handleApiError(error, "매장을 찾을 수 없습니다");
+    return handleApiError(error, "매장을 찾을 수 없습니다");
   }
 };
 
@@ -122,7 +122,7 @@ export const getRecommendationsByQR = async (qrId: string, options?: FilterOptio
     }
     throw new Error(response.data.message || "추천 정보를 가져올 수 없습니다");
   } catch (error) {
-    handleApiError(error, "추천 정보를 가져올 수 없습니다");
+    return handleApiError(error, "추천 정보를 가져올 수 없습니다");
   }
 };
 
@@ -140,7 +140,7 @@ export const getRecommendationsByStore = async (storeId: string, options?: Filte
     }
     throw new Error(response.data.message || "추천 정보를 가져올 수 없습니다");
   } catch (error) {
-    handleApiError(error, "추천 정보를 가져올 수 없습니다");
+    return handleApiError(error, "추천 정보를 가져올 수 없습니다");
   }
 };
 
@@ -154,7 +154,7 @@ export const getRecommendationStats = async (): Promise<StatsResponse> => {
     }
     throw new Error(response.data.message || "통계 정보를 가져올 수 없습니다");
   } catch (error) {
-    handleApiError(error, "통계 정보를 가져올 수 없습니다");
+    return handleApiError(error, "통계 정보를 가져올 수 없습니다");
   }
 };
 
@@ -187,7 +187,7 @@ export const getQRAnalytics = async (qrId: string, startDate?: string, endDate?:
     }
     throw new Error(response.data.message || "분석 데이터를 가져올 수 없습니다");
   } catch (error) {
-    handleApiError(error, "분석 데이터를 가져올 수 없습니다");
+    return handleApiError(error, "분석 데이터를 가져올 수 없습니다");
   }
 };
 
@@ -205,7 +205,7 @@ export const getStoreAnalytics = async (storeId: string, period?: "day" | "week"
     }
     throw new Error(response.data.message || "분석 데이터를 가져올 수 없습니다");
   } catch (error) {
-    handleApiError(error, "분석 데이터를 가져올 수 없습니다");
+    return handleApiError(error, "분석 데이터를 가져올 수 없습니다");
   }
 };
 
@@ -217,7 +217,7 @@ export const geocodeAddress = async (address: string): Promise<GeocodeResponse> 
     const response = await api.get<GeocodeResponse>(`/geocoding/unified?address=${encodeURIComponent(address)}`);
     return response.data;
   } catch (error) {
-    handleApiError(error, "주소를 좌표로 변환할 수 없습니다");
+    return handleApiError(error, "주소를 좌표로 변환할 수 없습니다");
   }
 };
 
@@ -227,7 +227,7 @@ export const validateCoordinates = async (coordinates: Coordinates): Promise<Coo
     const response = await api.post<CoordinateValidation>("/geocoding/validate", coordinates);
     return response.data;
   } catch (error) {
-    handleApiError(error, "좌표 유효성을 검증할 수 없습니다");
+    return handleApiError(error, "좌표 유효성을 검증할 수 없습니다");
   }
 };
 
