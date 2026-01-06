@@ -30,9 +30,13 @@ pnpm install
 `.env.local` 파일을 생성하고 다음 변수들을 설정하세요:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
-NEXT_PUBLIC_KAKAO_MAP_API_KEY=your_kakao_map_key
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api
+```
+
+또는 `.env.example` 파일을 복사하여 사용하세요:
+
+```bash
+cp .env.example .env.local
 ```
 
 ### 3. 개발 서버 실행
@@ -83,23 +87,27 @@ src/
 ## 🎯 주요 기능
 
 ### 1. QR 스캔 페이지 (`/qr/[qrId]`)
+
 - QR 코드 ID를 URL 파라미터로 받아 처리
 - 현재 매장 정보 표시 (이름, 카테고리, 주소, 영업시간)
 - 매장 이미지 및 태그 표시
 - 로딩 상태 및 에러 처리
 
 ### 2. 추천 리스트 섹션
+
 - 현재 매장 기준 다음 장소 추천 표시
 - 카테고리별 필터링 (식사, 디저트, 활동, 문화 등)
 - 각 추천 매장의 정보 카드
 - 지도 보기 버튼
 
 ### 3. 지도 연동
+
 - 카카오맵, 구글맵, 네이버맵 연결
 - 추천 매장 위치를 지도에 표시
 - 현재 위치에서 목적지까지의 경로 안내
 
 ### 4. 분석 이벤트 추적
+
 - QR 스캔 이벤트 로깅
 - 페이지 뷰 추적
 - 추천 클릭 이벤트 추적
@@ -174,11 +182,23 @@ pnpm clean
 프로덕션 환경에서 다음 환경 변수들을 설정해야 합니다:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api.spotline.app
-NEXT_PUBLIC_KAKAO_MAP_API_KEY=your_production_kakao_map_key
-NEXT_PUBLIC_SITE_URL=https://spotline.app
-GOOGLE_SITE_VERIFICATION=your_google_verification_code
+NEXT_PUBLIC_API_BASE_URL=https://your-backend-domain.com/api
 ```
+
+#### Vercel 환경 변수 설정 방법
+
+1. Vercel 대시보드에서 프로젝트 선택
+2. Settings → Environment Variables 메뉴로 이동
+3. 다음 환경 변수 추가:
+   - Name: `NEXT_PUBLIC_API_BASE_URL`
+   - Value: `https://your-backend-domain.com/api`
+   - Environment: Production (또는 필요에 따라 Preview, Development)
+
+#### 환경별 설정 파일
+
+- `.env.local` - 로컬 개발 환경
+- `.env.production` - 프로덕션 환경 (참고용)
+- `.env.example` - 환경 변수 예시 파일
 
 ## 🤝 기여하기
 
