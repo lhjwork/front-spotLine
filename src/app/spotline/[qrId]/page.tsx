@@ -78,8 +78,6 @@ export default function SpotlinePage() {
     const handleBeforeUnload = () => {
       if (store) {
         const stayDuration = Date.now() - startTime;
-        // 비동기 로깅은 페이지 이탈 시 완료되지 않을 수 있으므로 navigator.sendBeacon 사용 권장
-        // 여기서는 간단히 로그만 남김
         console.log(`SpotLine 체류 시간: ${stayDuration}ms`);
       }
     };
@@ -94,7 +92,7 @@ export default function SpotlinePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <ErrorMessage message={error} onRetry={() => window.location.reload()} />
       </div>
     );
@@ -102,7 +100,7 @@ export default function SpotlinePage() {
 
   if (!store) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <ErrorMessage message="매장 정보를 찾을 수 없습니다" onRetry={() => router.push("/")} />
       </div>
     );
@@ -121,17 +119,15 @@ export default function SpotlinePage() {
       <SpotlineStoreInfo store={store} qrId={qrId} />
 
       {/* 다음 Spot 섹션 */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store.id} />
-      </div>
+      <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store.id} />
 
       {/* SpotLine 브랜딩 푸터 */}
-      <footer className="bg-white border-t border-gray-200 py-6 mt-12">
+      <footer className="bg-white border-t border-gray-200 py-8 mt-8">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-gray-600 mb-2">
             이 경험은 <span className="font-semibold text-blue-600">SpotLine</span>이 큐레이션했습니다
           </p>
-          <p className="text-xs text-gray-400 mt-1">다음에 가기 좋은 곳을 찾는 새로운 방법</p>
+          <p className="text-sm text-gray-500">다음에 가기 좋은 곳을 찾는 새로운 방법</p>
         </div>
       </footer>
     </div>
