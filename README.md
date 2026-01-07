@@ -54,7 +54,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
+브라우저에서 [http://localhost:3003](http://localhost:3003)을 열어 확인하세요.
 
 ### 4. 빌드
 
