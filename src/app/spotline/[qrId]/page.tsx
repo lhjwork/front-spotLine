@@ -69,29 +69,22 @@ export default function SpotlinePage() {
           storeData = {
             id: "demo_cafe_001",
             name: "데모 카페",
-            category: "카페",
-            description: "SpotLine 데모용 카페입니다. 실제 매장이 아닌 서비스 소개용 샘플 데이터입니다.",
+            shortDescription: "SpotLine 데모용 카페입니다. 실제 매장이 아닌 서비스 소개용 샘플 데이터입니다.",
             location: {
               address: "서울시 강남구 테헤란로 123",
-              coordinates: {
-                lat: 37.4979,
-                lng: 127.0276
-              }
+              mapLink: "https://map.kakao.com/link/map/데모카페,37.4979,127.0276"
             },
             representativeImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&h=600&fit=crop",
             qrCode: {
               id: qrId,
               isActive: true
             },
-            spotlineStory: {
-              title: "편안한 분위기의 데모 카페",
-              content: "이곳은 SpotLine 서비스 데모를 위한 샘플 카페입니다. 실제 서비스에서는 진짜 매장 정보가 표시됩니다.",
-              highlights: ["무료 WiFi", "조용한 분위기", "맛있는 커피"]
-            },
+            spotlineStory: "이곳은 SpotLine 서비스 데모를 위한 샘플 카페입니다. 편안한 분위기와 맛있는 커피로 유명한 곳입니다. 실제 서비스에서는 진짜 매장의 이야기가 표시됩니다.",
             externalLinks: {
               instagram: "https://instagram.com/demo_cafe",
               website: "https://demo-cafe.com"
             },
+            isDemoMode: true,
             demoNotice: "이것은 서비스 소개용 데모 데이터입니다."
           };
 
@@ -99,53 +92,32 @@ export default function SpotlinePage() {
             {
               id: "demo_restaurant_001",
               name: "데모 레스토랑",
+              shortDescription: "데모용 레스토랑입니다.",
               category: "음식점",
-              description: "데모용 레스토랑입니다.",
               distance: 150,
               walkingTime: 2,
               representativeImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop",
-              qrCode: {
-                id: "demo_restaurant_001",
-                isActive: true
-              },
-              location: {
-                address: "서울시 강남구 테헤란로 456",
-                coordinates: { lat: 37.4985, lng: 127.0285 }
-              }
+              mapLink: "https://map.kakao.com/link/map/데모레스토랑,37.4985,127.0285"
             },
             {
               id: "demo_bookstore_001", 
               name: "데모 서점",
+              shortDescription: "데모용 서점입니다.",
               category: "서점",
-              description: "데모용 서점입니다.",
               distance: 200,
               walkingTime: 3,
               representativeImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop",
-              qrCode: {
-                id: "demo_bookstore_001",
-                isActive: true
-              },
-              location: {
-                address: "서울시 강남구 테헤란로 789",
-                coordinates: { lat: 37.4975, lng: 127.0290 }
-              }
+              mapLink: "https://map.kakao.com/link/map/데모서점,37.4975,127.0290"
             },
             {
               id: "demo_bakery_001",
               name: "데모 베이커리",
+              shortDescription: "데모용 베이커리입니다.",
               category: "베이커리",
-              description: "데모용 베이커리입니다.",
               distance: 300,
               walkingTime: 4,
               representativeImage: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
-              qrCode: {
-                id: "demo_bakery_001",
-                isActive: true
-              },
-              location: {
-                address: "서울시 강남구 테헤란로 321",
-                coordinates: { lat: 37.4970, lng: 127.0295 }
-              }
+              mapLink: "https://map.kakao.com/link/map/데모베이커리,37.4970,127.0295"
             }
           ];
 
