@@ -47,15 +47,27 @@ export function SkeletonCard() {
 // 페이지 로딩 컴포넌트
 interface PageLoadingProps {
   message?: string;
+  subMessage?: string;
+  showProgress?: boolean;
 }
 
-export function PageLoading({ message = "로딩 중..." }: PageLoadingProps) {
+export function PageLoading({ message = "로딩 중...", subMessage, showProgress = false }: PageLoadingProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
+      <div className="text-center max-w-md mx-auto px-4">
         <Loading size="lg" />
         <h2 className="mt-4 text-lg font-medium text-gray-900">{message}</h2>
-        <p className="mt-2 text-sm text-gray-600">잠시만 기다려주세요</p>
+        {subMessage && (
+          <p className="mt-2 text-sm text-gray-600">{subMessage}</p>
+        )}
+        {!subMessage && (
+          <p className="mt-2 text-sm text-gray-600">잠시만 기다려주세요</p>
+        )}
+        {showProgress && (
+          <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+          </div>
+        )}
       </div>
     </div>
   );
