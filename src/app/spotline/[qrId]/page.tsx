@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { getSpotlineStoreByQR, getNextSpots, logPageEnter, logExperienceStart } from "@/lib/api";
 import { SpotlineStore, NextSpot, ExperienceSession } from "@/types";
+import Layout from "@/components/layout/Layout";
+import StoreImage from "@/components/store/StoreImage";
 import SpotlineStoreInfo from "@/components/spotline/SpotlineStoreInfo";
 import NextSpotsList from "@/components/spotline/NextSpotsList";
+import MapButton from "@/components/map/MapButton";
 import { PageLoading } from "@/components/common/Loading";
 import { ErrorMessage } from "@/components/common/ErrorBoundary";
 
 export default function SpotlinePage() {
   const params = useParams();
-  const router = useRouter();
   const qrId = params.qrId as string;
 
   const [store, setStore] = useState<SpotlineStore | null>(null);
@@ -90,46 +92,69 @@ export default function SpotlinePage() {
     return <PageLoading message="SpotLine 정보를 불러오는 중..." />;
   }
 
-  if (error) {
+  if (error && !store) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <ErrorMessage message={error} onRetry={() => window.location.reload()} />
-      </div>
-    );
-  }
-
-  if (!store) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <ErrorMessage message="매장 정보를 찾을 수 없습니다" onRetry={() => router.push("/")} />
-      </div>
+      <Layout showBackButton>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ErrorMessage title="매장을 찾을 수 없습니다" message={error} onRetry={() => window.location.reload()} />
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Experience 세션 표시 (개발 환경에서만) */}
-      {process.env.NODE_ENV === "development" && experienceSession && (
-        <div className="bg-blue-100 border-b border-blue-200 px-4 py-2 text-sm text-blue-800">
-          Experience 세션: {experienceSession.id} | 시작: {new Date(experienceSession.startedAt).toLocaleTimeString()}
+    <Layout title={store?.name}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="space-y-6">
+          {/* Experience 세션 표시 (개발 환경에서만) */}
+          {process.env.NODE_ENV === "development" && experienceSession && (
+            <div className="bg-blue-100 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
+              Experience 세션: {experienceSession.id} | 시작: {new Date(experienceSession.startedAt).toLocaleTimeString()}
+            </div>
+          )}
+
+          {/* 매장 정보 섹션 */}
+          {store && (
+            <>
+              {/* 매장 이미지 */}
+              <StoreImage images={store.representativeImage ? [store.representativeImage] : []} storeName={store.name} className="h-64 md:h-80" />
+
+              {/* 매장 상세 정보 */}
+              <SpotlineStoreInfo store={store} qrId={qrId} />
+
+              {/* 지도 버튼 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <MapButton
+                  store={{
+                    _id: store.id,
+                    name: store.name,
+                    category: "other" as const,
+                    location: {
+                      address: store.location.address,
+                      coordinates: {
+                        type: "Point" as const,
+                        coordinates: [127.0276, 37.4979], // 기본 좌표 (실제로는 store에서 가져와야 함)
+                      },
+                    },
+                    qrCode: {
+                      id: store.qrCode.id,
+                      isActive: store.qrCode.isActive,
+                    },
+                    isActive: true,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  }}
+                  qrId={qrId}
+                  storeId={store.id}
+                />
+              </div>
+            </>
+          )}
+
+          {/* 추천 목록 섹션 */}
+          <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store?.id || ""} isLoading={false} />
         </div>
-      )}
-
-      {/* 매장 정보 섹션 */}
-      <SpotlineStoreInfo store={store} qrId={qrId} />
-
-      {/* 다음 Spot 섹션 */}
-      <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store.id} />
-
-      {/* SpotLine 브랜딩 푸터 */}
-      <footer className="bg-white border-t border-gray-200 py-8 mt-8">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="text-gray-600 mb-2">
-            이 경험은 <span className="font-semibold text-blue-600">SpotLine</span>이 큐레이션했습니다
-          </p>
-          <p className="text-sm text-gray-500">다음에 가기 좋은 곳을 찾는 새로운 방법</p>
-        </div>
-      </footer>
-    </div>
+      </div>
+    </Layout>
   );
 }

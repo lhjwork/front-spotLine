@@ -33,7 +33,7 @@ export default function Home() {
               <ul className="text-gray-700 space-y-2 text-sm">
                 <li className="flex items-start">
                   <span className="text-blue-600 mr-2">•</span>
-                  카페에서 작업을 마친 후 "이제 어디 가지?" 하는 순간
+                  {` 카페에서 작업을 마친 후 "이제 어디 가지?" 하는 순간`}
                 </li>
                 <li className="flex items-start">
                   <span className="text-blue-600 mr-2">•</span>
