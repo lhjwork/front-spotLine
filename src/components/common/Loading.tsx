@@ -1,27 +1,25 @@
-'use client';
+"use client";
 
-import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LoadingProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   text?: string;
   className?: string;
 }
 
-export default function Loading({ size = 'md', text, className }: LoadingProps) {
+export default function Loading({ size = "md", text, className }: LoadingProps) {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
   };
 
   return (
-    <div className={cn('flex flex-col items-center justify-center space-y-2', className)}>
-      <Loader2 className={cn('animate-spin text-blue-600', sizeClasses[size])} />
-      {text && (
-        <p className="text-sm text-gray-600 animate-pulse">{text}</p>
-      )}
+    <div className={cn("flex flex-col items-center justify-center space-y-2", className)}>
+      <Loader2 className={cn("animate-spin text-blue-600", sizeClasses[size])} />
+      {text && <p className="text-sm text-gray-600 animate-pulse">{text}</p>}
     </div>
   );
 }
@@ -47,13 +45,17 @@ export function SkeletonCard() {
 }
 
 // 페이지 로딩 컴포넌트
-export function PageLoading() {
+interface PageLoadingProps {
+  message?: string;
+}
+
+export function PageLoading({ message = "로딩 중..." }: PageLoadingProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <Loading size="lg" />
-        <h2 className="mt-4 text-lg font-medium text-gray-900">로딩 중...</h2>
-        <p className="mt-2 text-sm text-gray-600">매장 정보를 가져오고 있습니다</p>
+        <h2 className="mt-4 text-lg font-medium text-gray-900">{message}</h2>
+        <p className="mt-2 text-sm text-gray-600">잠시만 기다려주세요</p>
       </div>
     </div>
   );

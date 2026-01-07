@@ -2,15 +2,6 @@
 
 import { NextSpot } from "@/types";
 import NextSpotCard from "./NextSpotCard";
-import { PageLoading } from "@/components/common/Loading";
-
-interface NextSpotsListProps {
-  spots: NextSpot[];
-  qrId: string;
-  storeId: string;
-  isLoading: boolean;
-  onSpotClick: (spot: NextSpot) => void;
-}
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-lg shadow-sm border animate-pulse">
@@ -24,7 +15,19 @@ const SkeletonCard = () => (
   </div>
 );
 
-export default function NextSpotsList({ spots, qrId, storeId, isLoading, onSpotClick }: NextSpotsListProps) {
+interface NextSpotsListProps {
+  nextSpots: NextSpot[];
+  currentQrId: string;
+  currentStoreId: string;
+  isLoading?: boolean;
+}
+
+export default function NextSpotsList({ nextSpots, currentQrId, currentStoreId, isLoading = false }: NextSpotsListProps) {
+  const handleSpotClick = (spot: NextSpot) => {
+    // Spot 클릭 처리 로직
+    console.log("Spot clicked:", spot);
+  };
+
   if (isLoading) {
     return (
       <div className="bg-gray-50 py-8">
@@ -40,7 +43,7 @@ export default function NextSpotsList({ spots, qrId, storeId, isLoading, onSpotC
     );
   }
 
-  if (!spots || spots.length === 0) {
+  if (!nextSpots || nextSpots.length === 0) {
     return (
       <div className="bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -59,8 +62,8 @@ export default function NextSpotsList({ spots, qrId, storeId, isLoading, onSpotC
 
         {/* Spot 그리드 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {spots.slice(0, 4).map((spot, index) => (
-            <NextSpotCard key={spot.id} spot={spot} qrId={qrId} storeId={storeId} position={index} onSpotClick={onSpotClick} />
+          {nextSpots.slice(0, 4).map((spot, index) => (
+            <NextSpotCard key={spot.id} spot={spot} qrId={currentQrId} storeId={currentStoreId} position={index} onSpotClick={handleSpotClick} />
           ))}
         </div>
       </div>
