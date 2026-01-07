@@ -35,7 +35,7 @@ const SpotlineExperienceButton: React.FC<SpotlineExperienceButtonProps> = ({
   const handleClick = async (): Promise<void> => {
     try {
       if (useAPI) {
-        // VERSION002: Experience API 사용
+        // VERSION002: Experience API 사용 (실제 운영 데이터)
         await goToExperienceWithAPI();
       } else {
         // 로컬 로직 사용

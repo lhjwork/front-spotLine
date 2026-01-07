@@ -107,6 +107,36 @@ export interface ExperienceResponse {
   };
 }
 
+// Demo 시스템 타입 (VERSION002 - 데모/실제 분리)
+export interface DemoExperienceResult {
+  qrId: string;
+  storeName: string;
+  storeId: string;
+  area: string;
+  redirectUrl: string;
+  isDemoMode: true;
+}
+
+export interface DemoStore {
+  id: string;
+  name: string;
+  shortDescription: string;
+  representativeImage: string;
+  location: {
+    address: string;
+    mapLink: string;
+  };
+  externalLinks: {
+    instagram?: string;
+    blog?: string;
+    notion?: string;
+    website?: string;
+  };
+  spotlineStory: string;
+  isDemoMode: true;
+  demoNotice: string;
+}
+
 // SpotLine 전용 매장 타입 (간소화)
 export interface SpotlineStore {
   id: string;

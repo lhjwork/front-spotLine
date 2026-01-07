@@ -16,6 +16,8 @@ import {
   ExperienceResult,
   ExperienceResponse,
   QRCodeId,
+  DemoExperienceResult,
+  DemoStore,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -66,6 +68,65 @@ export const getSpotlineExperience = async (): Promise<ExperienceResult> => {
     throw new Error(response.data.message || "SpotLine 체험을 시작할 수 없습니다");
   } catch (error) {
     return handleApiError(error, "SpotLine 체험을 시작할 수 없습니다");
+  }
+};
+
+// ==================== Demo API (VERSION002 - 데모/실제 분리) ====================
+
+// 데모 체험하기 API (업주 소개용)
+export const getDemoExperience = async (): Promise<DemoExperienceResult> => {
+  try {
+    const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL;
+    if (!demoApiUrl) {
+      throw new Error("데모 API URL이 설정되지 않았습니다.");
+    }
+
+    const response = await axios.get<ApiResponse<DemoExperienceResult>>(`${demoApiUrl}/experience`);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "데모 체험을 시작할 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "데모 체험을 시작할 수 없습니다");
+  }
+};
+
+// 데모 매장 정보 조회
+export const getDemoStoreByQR = async (qrId: string): Promise<DemoStore> => {
+  try {
+    const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL;
+    if (!demoApiUrl) {
+      throw new Error("데모 API URL이 설정되지 않았습니다.");
+    }
+
+    const response = await axios.get<ApiResponse<DemoStore>>(`${demoApiUrl}/stores/${qrId}`);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "데모 매장을 찾을 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "데모 매장을 찾을 수 없습니다");
+  }
+};
+
+// 데모 다음 Spot 조회
+export const getDemoNextSpots = async (storeId: string, limit: number = 4): Promise<NextSpot[]> => {
+  try {
+    const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL;
+    if (!demoApiUrl) {
+      throw new Error("데모 API URL이 설정되지 않았습니다.");
+    }
+
+    const response = await axios.get<ApiResponse<NextSpot[]>>(`${demoApiUrl}/next-spots/${storeId}?limit=${limit}`);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "데모 다음 Spot을 가져올 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "데모 다음 Spot을 가져올 수 없습니다");
   }
 };
 

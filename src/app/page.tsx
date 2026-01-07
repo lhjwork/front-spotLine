@@ -114,7 +114,16 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">지금 바로 체험해보세요</h2>
             <p className="text-gray-600 mb-8">다음에 가기 좋은 곳을 찾는 새로운 방법을 경험해보세요</p>
 
-            <SpotlineExperienceButton size="lg" className="px-8 py-4" showArrow useAPI={true} />
+            <div className="space-y-4">
+              <SpotlineExperienceButton size="lg" className="px-8 py-4" showArrow useAPI={true} />
+
+              <div className="text-sm text-gray-500">
+                또는{" "}
+                <a href="/demo" className="text-blue-600 hover:text-blue-700 underline">
+                  데모 버전으로 먼저 체험해보기
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </div>
