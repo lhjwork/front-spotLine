@@ -8,13 +8,20 @@ import { logExternalLinkClick, logStoryExpand, logStoryCollapse } from "@/lib/ap
 interface SpotlineStoreInfoProps {
   store: SpotlineStore;
   qrId: string;
+  isDemoMode?: boolean;
 }
 
-export default function SpotlineStoreInfo({ store, qrId }: SpotlineStoreInfoProps) {
+export default function SpotlineStoreInfo({ store, qrId, isDemoMode = false }: SpotlineStoreInfoProps) {
   const [isStoryExpanded, setIsStoryExpanded] = useState(false);
 
   const handleExternalLinkClick = (linkType: string, url: string) => {
-    logExternalLinkClick(qrId, store.id, linkType);
+    if (isDemoMode) {
+      // 데모에서는 통계 수집하지 않음
+      console.log(`데모 외부 링크 클릭: ${linkType} (통계 수집하지 않음)`);
+    } else {
+      // 실제 운영에서는 통계 수집
+      logExternalLinkClick(qrId, store.id, linkType);
+    }
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
@@ -22,10 +29,16 @@ export default function SpotlineStoreInfo({ store, qrId }: SpotlineStoreInfoProp
     const newState = !isStoryExpanded;
     setIsStoryExpanded(newState);
 
-    if (newState) {
-      logStoryExpand(qrId, store.id, "main_story");
+    if (isDemoMode) {
+      // 데모에서는 통계 수집하지 않음
+      console.log(`데모 스토리 ${newState ? "확장" : "접기"}: ${qrId} (통계 수집하지 않음)`);
     } else {
-      logStoryCollapse(qrId, store.id, "main_story");
+      // 실제 운영에서는 통계 수집
+      if (newState) {
+        logStoryExpand(qrId, store.id, "main_story");
+      } else {
+        logStoryCollapse(qrId, store.id, "main_story");
+      }
     }
   };
 

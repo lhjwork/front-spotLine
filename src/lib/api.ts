@@ -17,7 +17,6 @@ import {
   ExperienceResponse,
   QRCodeId,
   DemoExperienceResult,
-  DemoStore,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -92,15 +91,15 @@ export const getDemoExperience = async (): Promise<DemoExperienceResult> => {
   }
 };
 
-// 데모 매장 정보 조회
-export const getDemoStoreByQR = async (qrId: string): Promise<DemoStore> => {
+// 데모 매장 정보 조회 (동일한 SpotlineStore 타입 사용)
+export const getDemoStoreByQR = async (qrId: string): Promise<SpotlineStore> => {
   try {
     const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL;
     if (!demoApiUrl) {
       throw new Error("데모 API URL이 설정되지 않았습니다.");
     }
 
-    const response = await axios.get<ApiResponse<DemoStore>>(`${demoApiUrl}/stores/${qrId}`);
+    const response = await axios.get<ApiResponse<SpotlineStore>>(`${demoApiUrl}/stores/${qrId}`);
 
     if (response.data.success && response.data.data) {
       return response.data.data;

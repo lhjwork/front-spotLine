@@ -2,7 +2,7 @@
 
 import { QrCode, MapPin, ArrowRight, Smartphone } from "lucide-react";
 import Layout from "@/components/layout/Layout";
-import SpotlineExperienceButton from "@/components/spotline/SpotlineExperienceButton";
+import SpotlineStartButton from "@/components/spotline/SpotlineExperienceButton";
 
 export default function Home() {
   return (
@@ -25,7 +25,7 @@ export default function Home() {
             </p>
 
             <div className="mb-12">
-              <SpotlineExperienceButton size="lg" className="px-8 py-4 text-lg" showArrow useAPI={true} />
+              <SpotlineStartButton size="lg" className="px-8 py-4 text-lg" showArrow />
             </div>
 
             <div className="bg-gray-50 rounded-xl p-6 text-left">
@@ -115,12 +115,12 @@ export default function Home() {
             <p className="text-gray-600 mb-8">다음에 가기 좋은 곳을 찾는 새로운 방법을 경험해보세요</p>
 
             <div className="space-y-4">
-              <SpotlineExperienceButton size="lg" className="px-8 py-4" showArrow useAPI={true} />
+              <SpotlineStartButton size="lg" className="px-8 py-4" showArrow />
 
               <div className="text-sm text-gray-500">
                 또는{" "}
                 <a href="/demo" className="text-blue-600 hover:text-blue-700 underline">
-                  데모 버전으로 먼저 체험해보기
+                  데모보기로 먼저 체험해보기
                 </a>
               </div>
             </div>

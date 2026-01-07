@@ -117,27 +117,7 @@ export interface DemoExperienceResult {
   isDemoMode: true;
 }
 
-export interface DemoStore {
-  id: string;
-  name: string;
-  shortDescription: string;
-  representativeImage: string;
-  location: {
-    address: string;
-    mapLink: string;
-  };
-  externalLinks: {
-    instagram?: string;
-    blog?: string;
-    notion?: string;
-    website?: string;
-  };
-  spotlineStory: string;
-  isDemoMode: true;
-  demoNotice: string;
-}
-
-// SpotLine 전용 매장 타입 (간소화)
+// SpotLine 전용 매장 타입 (간소화) - 데모와 실제 운영 공통 사용
 export interface SpotlineStore {
   id: string;
   name: string;
@@ -157,6 +137,9 @@ export interface SpotlineStore {
     id: string;
     isActive: boolean;
   };
+  // 데모 모드 구분용 (선택적)
+  isDemoMode?: boolean;
+  demoNotice?: string;
 }
 
 // SpotLine 전용 다음 Spot 타입

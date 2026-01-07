@@ -10,17 +10,28 @@ interface NextSpotCardProps {
   storeId: string;
   position: number;
   onSpotClick: (spot: NextSpot) => void;
+  isDemoMode?: boolean;
 }
 
-export default function NextSpotCard({ spot, qrId, storeId, position, onSpotClick }: NextSpotCardProps) {
+export default function NextSpotCard({ spot, qrId, storeId, position, onSpotClick, isDemoMode = false }: NextSpotCardProps) {
   const handleSpotClick = () => {
-    logSpotClick(qrId, storeId, spot.id, position);
+    if (!isDemoMode) {
+      // 실제 운영에서만 통계 수집
+      logSpotClick(qrId, storeId, spot.id, position);
+    } else {
+      console.log(`데모 Spot 클릭: ${spot.name} (통계 수집하지 않음)`);
+    }
     onSpotClick(spot);
   };
 
   const handleMapClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    logMapLinkClick(qrId, storeId, spot.id);
+    if (!isDemoMode) {
+      // 실제 운영에서만 통계 수집
+      logMapLinkClick(qrId, storeId, spot.id);
+    } else {
+      console.log(`데모 지도 클릭: ${spot.name} (통계 수집하지 않음)`);
+    }
     window.open(spot.mapLink, "_blank", "noopener,noreferrer");
   };
 

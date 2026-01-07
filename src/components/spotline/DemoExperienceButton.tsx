@@ -5,7 +5,7 @@ import { QrCode, ArrowRight } from "lucide-react";
 import Button from "@/components/common/Button";
 import { DemoExperienceResult } from "@/types";
 
-interface DemoExperienceButtonProps {
+interface DemoViewButtonProps {
   size?: "sm" | "md" | "lg";
   variant?: "primary" | "secondary" | "outline" | "ghost";
   className?: string;
@@ -16,16 +16,7 @@ interface DemoExperienceButtonProps {
   loadingText?: string;
 }
 
-const DemoExperienceButton: React.FC<DemoExperienceButtonProps> = ({
-  size = "lg",
-  variant = "primary",
-  className = "",
-  style = {},
-  showArrow = false,
-  children,
-  onError,
-  loadingText = "데모 준비 중...",
-}) => {
+const DemoViewButton: React.FC<DemoViewButtonProps> = ({ size = "lg", variant = "primary", className = "", style = {}, showArrow = false, children, onError, loadingText = "데모 준비 중..." }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async (): Promise<void> => {
@@ -41,19 +32,20 @@ const DemoExperienceButton: React.FC<DemoExperienceButtonProps> = ({
 
       if (data.success) {
         const result = data.data as DemoExperienceResult;
+        // 업주 소개용 데모 매장으로 이동 (통계 수집 없음)
         window.location.href = result.redirectUrl;
       } else {
-        throw new Error(data.message || "데모 체험을 시작할 수 없습니다.");
+        throw new Error(data.message || "데모를 시작할 수 없습니다.");
       }
     } catch (error) {
-      console.error("데모 체험 오류:", error);
+      console.error("데모 오류:", error);
 
       // 폴백: 기본 데모 매장으로 이동
       const fallbackUrl = `${process.env.NEXT_PUBLIC_DEMO_API_URL}/stores/demo_cafe_001`;
       window.location.href = fallbackUrl;
 
       if (onError) {
-        const errorObj = error instanceof Error ? error : new Error("데모 체험 중 오류가 발생했습니다.");
+        const errorObj = error instanceof Error ? error : new Error("데모 중 오류가 발생했습니다.");
         onError(errorObj);
       }
     } finally {
@@ -62,26 +54,27 @@ const DemoExperienceButton: React.FC<DemoExperienceButtonProps> = ({
   };
 
   const defaultStyle: React.CSSProperties = {
-    backgroundColor: "#4285f4",
+    background: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
     color: "white",
     padding: size === "lg" ? "12px 24px" : size === "md" ? "10px 20px" : "8px 16px",
-    border: "none",
+    border: "2px dashed #ff6b9d",
     borderRadius: "8px",
     fontSize: size === "lg" ? "16px" : size === "md" ? "14px" : "12px",
     cursor: isLoading ? "not-allowed" : "pointer",
     fontWeight: "bold",
     opacity: isLoading ? 0.7 : 1,
-    transition: "all 0.2s ease",
+    transition: "all 0.3s ease",
+    position: "relative",
     ...style,
   };
 
   return (
-    <Button size={size} variant={variant} className={`${className} ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`} style={defaultStyle} onClick={handleClick} disabled={isLoading}>
+    <Button size={size} variant={variant} className={`${className} demo-mode ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`} style={defaultStyle} onClick={handleClick} disabled={isLoading}>
       <QrCode className="mr-2 h-5 w-5" />
-      {isLoading ? loadingText : children || "🎭 SpotLine 데모 체험"}
+      {isLoading ? loadingText : children || "🎭 데모보기"}
       {showArrow && !isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
     </Button>
   );
 };
 
-export default DemoExperienceButton;
+export default DemoViewButton;

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getSpotlineStoreByQR, getNextSpots, logPageEnter, logExperienceStart } from "@/lib/api";
+import Link from "next/link";
+import { getSpotlineStoreByQR, getDemoStoreByQR, getNextSpots, getDemoNextSpots, logPageEnter, logExperienceStart } from "@/lib/api";
 import { SpotlineStore, NextSpot, ExperienceSession } from "@/types";
 import Layout from "@/components/layout/Layout";
 import StoreImage from "@/components/store/StoreImage";
@@ -21,13 +22,21 @@ export default function SpotlinePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [experienceSession, setExperienceSession] = useState<ExperienceSession | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // 체류 시간 측정을 위한 시작 시간
   const [startTime] = useState(Date.now());
 
-  // Experience 세션 확인
+  // 데모 모드 확인 (QR ID로 판단)
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (qrId && qrId.startsWith("demo_")) {
+      setIsDemoMode(true);
+    }
+  }, [qrId]);
+
+  // Experience 세션 확인 (실제 운영 모드에서만)
+  useEffect(() => {
+    if (!isDemoMode && typeof window !== "undefined") {
       const savedExperience = localStorage.getItem("spotline_experience");
       if (savedExperience) {
         try {
@@ -38,7 +47,7 @@ export default function SpotlinePage() {
         }
       }
     }
-  }, []);
+  }, [isDemoMode]);
 
   // 데이터 로딩
   useEffect(() => {
@@ -49,20 +58,30 @@ export default function SpotlinePage() {
         setIsLoading(true);
         setError(null);
 
-        // 1. SpotLine 매장 정보 조회
-        const storeData = await getSpotlineStoreByQR(qrId);
-        setStore(storeData);
+        let storeData: SpotlineStore;
+        let spotsData: NextSpot[];
 
-        // 2. 페이지 진입 이벤트 로깅
-        await logPageEnter(qrId, storeData.id);
+        if (isDemoMode) {
+          // 데모 모드: 데모 API 사용, 통계 수집 없음
+          storeData = await getDemoStoreByQR(qrId);
+          spotsData = await getDemoNextSpots(storeData.id, 4);
+          console.log("데모 모드: 통계 수집하지 않음");
+        } else {
+          // 실제 운영 모드: 실제 API 사용, 통계 수집
+          storeData = await getSpotlineStoreByQR(qrId);
 
-        // 3. Experience 시작 이벤트 로깅 (세션이 있는 경우)
-        if (experienceSession) {
-          await logExperienceStart(qrId, storeData.id, experienceSession.id);
+          // 페이지 진입 이벤트 로깅
+          await logPageEnter(qrId, storeData.id);
+
+          // Experience 시작 이벤트 로깅 (세션이 있는 경우)
+          if (experienceSession) {
+            await logExperienceStart(qrId, storeData.id, experienceSession.id);
+          }
+
+          spotsData = await getNextSpots(storeData.id, 4);
         }
 
-        // 4. 다음 Spot 조회
-        const spotsData = await getNextSpots(storeData.id, 4);
+        setStore(storeData);
         setNextSpots(spotsData);
       } catch (err) {
         console.error("SpotLine 데이터 로딩 실패:", err);
@@ -73,30 +92,34 @@ export default function SpotlinePage() {
     };
 
     loadSpotlineData();
-  }, [qrId, experienceSession]);
+  }, [qrId, experienceSession, isDemoMode]);
 
-  // 페이지 이탈 시 체류 시간 로깅
+  // 페이지 이탈 시 체류 시간 로깅 (실제 운영 모드에서만)
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (store) {
         const stayDuration = Date.now() - startTime;
-        console.log(`SpotLine 체류 시간: ${stayDuration}ms`);
+        if (isDemoMode) {
+          console.log(`데모 체류 시간: ${stayDuration}ms (로깅하지 않음)`);
+        } else {
+          console.log(`SpotLine 체류 시간: ${stayDuration}ms`);
+        }
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [store, startTime]);
+  }, [store, startTime, isDemoMode]);
 
   if (isLoading) {
-    return <PageLoading message="SpotLine 정보를 불러오는 중..." />;
+    return <PageLoading message={isDemoMode ? "데모 정보를 불러오는 중..." : "SpotLine 정보를 불러오는 중..."} />;
   }
 
   if (error && !store) {
     return (
       <Layout showBackButton>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ErrorMessage title="매장을 찾을 수 없습니다" message={error} onRetry={() => window.location.reload()} />
+          <ErrorMessage title={isDemoMode ? "데모 매장을 찾을 수 없습니다" : "매장을 찾을 수 없습니다"} message={error} onRetry={() => window.location.reload()} />
         </div>
       </Layout>
     );
@@ -106,8 +129,24 @@ export default function SpotlinePage() {
     <Layout title={store?.name}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-6">
-          {/* Experience 세션 표시 (개발 환경에서만) */}
-          {process.env.NODE_ENV === "development" && experienceSession && (
+          {/* 데모 모드 안내 배너 */}
+          {isDemoMode && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+              <div className="flex items-center">
+                <div className="shrink-0">
+                  <span className="text-amber-600 text-lg">🎭</span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-amber-800">
+                    <strong>데모 모드</strong> - {store?.demoNotice || "이것은 업주 소개용 데모 페이지입니다."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Experience 세션 표시 (개발 환경에서만, 실제 운영 모드에서만) */}
+          {process.env.NODE_ENV === "development" && !isDemoMode && experienceSession && (
             <div className="bg-blue-100 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
               Experience 세션: {experienceSession.id} | 시작: {new Date(experienceSession.startedAt).toLocaleTimeString()}
             </div>
@@ -120,7 +159,7 @@ export default function SpotlinePage() {
               <StoreImage images={store.representativeImage ? [store.representativeImage] : []} storeName={store.name} className="h-64 md:h-80" />
 
               {/* 매장 상세 정보 */}
-              <SpotlineStoreInfo store={store} qrId={qrId} />
+              <SpotlineStoreInfo store={store} qrId={qrId} isDemoMode={isDemoMode} />
 
               {/* 지도 버튼 */}
               <div className="bg-white rounded-lg shadow-sm border p-4">
@@ -137,8 +176,8 @@ export default function SpotlinePage() {
                       },
                     },
                     qrCode: {
-                      id: store.qrCode.id,
-                      isActive: store.qrCode.isActive,
+                      id: store.qrCode?.id || qrId,
+                      isActive: store.qrCode?.isActive || true,
                     },
                     isActive: true,
                     createdAt: new Date().toISOString(),
@@ -152,7 +191,19 @@ export default function SpotlinePage() {
           )}
 
           {/* 추천 목록 섹션 */}
-          <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store?.id || ""} isLoading={false} />
+          <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store?.id || ""} isLoading={false} isDemoMode={isDemoMode} />
+
+          {/* 데모 모드 푸터 안내 */}
+          {isDemoMode && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-center">
+              <p className="text-sm text-blue-800">실제 서비스에서는 이와 동일한 방식으로 작동하며, 실제 매장 데이터와 통계가 수집됩니다.</p>
+              <div className="mt-2">
+                <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm font-medium">
+                  실제 SpotLine 시작하기 →
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
