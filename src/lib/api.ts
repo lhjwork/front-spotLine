@@ -2,7 +2,6 @@ import axios from "axios";
 import {
   Store,
   Recommendation,
-  AnalyticsEvent,
   FilterOptions,
   ApiResponse,
   NearbyStoreParams,
@@ -200,18 +199,6 @@ export const getRecommendationStats = async (): Promise<StatsResponse> => {
 };
 
 // ==================== 분석 API ====================
-
-// 분석 이벤트 로깅 (중요!)
-export const logAnalyticsEvent = async (eventData: AnalyticsEvent): Promise<boolean> => {
-  try {
-    const response = await api.post<ApiResponse<{ id: string }>>("/analytics/event", eventData);
-    return response.data.success;
-  } catch (error) {
-    // 분석 이벤트 실패는 사용자 경험에 영향을 주지 않도록 조용히 처리
-    console.warn("Analytics event failed:", error);
-    return false;
-  }
-};
 
 // QR 코드별 통계 조회
 export const getQRAnalytics = async (qrId: string, startDate?: string, endDate?: string): Promise<any> => {

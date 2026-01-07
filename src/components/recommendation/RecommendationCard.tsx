@@ -3,7 +3,7 @@
 import { Recommendation } from "@/types";
 import { MapPin, Clock, Star } from "lucide-react";
 import { formatDistance, formatWalkingTime, getCategoryLabel, getCategoryColor, isCurrentlyOpen } from "@/lib/utils";
-import { logRecommendationClick } from "@/lib/api";
+// import { logRecommendationClick } from "@/lib/api"; // 기존 시스템용 - 현재 비활성화
 import Button from "@/components/common/Button";
 import StoreImage from "@/components/store/StoreImage";
 
@@ -20,8 +20,8 @@ export default function RecommendationCard({ recommendation, onMapClick, onStore
   const isOpen = isCurrentlyOpen(toStore.businessHours);
 
   const handleStoreClick = () => {
-    // 추천 클릭 이벤트 로깅
-    logRecommendationClick(qrId, toStore._id, recommendation.category, index);
+    // 추천 클릭 이벤트 로깅 (기존 시스템용 - 현재 비활성화)
+    // logRecommendationClick(qrId, toStore._id, recommendation.category, index);
     onStoreClick(recommendation);
   };
 

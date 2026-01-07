@@ -2,18 +2,19 @@
 
 import { MapPin, Navigation, ExternalLink } from "lucide-react";
 import { Store } from "@/types";
-import { logMapClick } from "@/lib/api";
+import { logMapLinkClick } from "@/lib/api";
 import Button from "@/components/common/Button";
 
 interface MapButtonProps {
   store: Store;
   qrId?: string;
+  storeId?: string; // SpotLine용 storeId 추가
   variant?: "button" | "link";
   size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export default function MapButton({ store, qrId, variant = "button", size = "md", className }: MapButtonProps) {
+export default function MapButton({ store, qrId, storeId, variant = "button", size = "md", className }: MapButtonProps) {
   const [lng, lat] = store.location.coordinates.coordinates;
 
   // 카카오맵 URL 생성
@@ -41,9 +42,9 @@ export default function MapButton({ store, qrId, variant = "button", size = "md"
   };
 
   const handleMapClick = (mapType: "kakao" | "google" | "naver") => {
-    // 지도 클릭 이벤트 로깅
-    if (qrId) {
-      logMapClick(qrId, store._id);
+    // 지도 클릭 이벤트 로깅 (SpotLine 전용)
+    if (qrId && storeId) {
+      logMapLinkClick(qrId, storeId, store._id);
     }
 
     let url = "";
