@@ -69,17 +69,51 @@ export interface RecommendationResponse {
   data: Recommendation[];
 }
 
-// 분석 관련 타입
-export interface AnalyticsEvent {
+// SpotLine 전용 매장 타입 (간소화)
+export interface SpotlineStore {
+  id: string;
+  name: string;
+  shortDescription: string;
+  representativeImage: string;
+  location: {
+    address: string;
+    mapLink: string;
+  };
+  externalLinks: {
+    instagram?: string;
+    blog?: string;
+    website?: string;
+  };
+  spotlineStory: string;
+  qrCode: {
+    id: string;
+    isActive: boolean;
+  };
+}
+
+// SpotLine 전용 다음 Spot 타입
+export interface NextSpot {
+  id: string;
+  name: string;
+  shortDescription: string;
+  representativeImage: string;
+  mapLink: string;
+  category: string;
+  walkingTime: number;
+  distance: number;
+}
+
+// SpotLine 전용 분석 이벤트 타입 (개인 식별 데이터 최소화)
+export interface SpotlineAnalyticsEvent {
   qrCode: string;
-  store?: string;
-  eventType: "qr_scan" | "page_view" | "recommendation_click" | "map_click" | "store_visit";
+  store: string;
+  eventType: "page_enter" | "spot_click" | "map_link_click" | "page_exit" | "external_link_click";
   targetStore?: string;
-  sessionId: string;
+  sessionId: string; // 익명 세션만
   metadata?: {
-    category?: string;
-    position?: number;
-    duration?: number;
+    spotPosition?: number;
+    stayDuration?: number;
+    nextSpotId?: string;
   };
 }
 

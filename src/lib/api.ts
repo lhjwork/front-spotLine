@@ -1,5 +1,20 @@
 import axios from "axios";
-import { Store, Recommendation, AnalyticsEvent, FilterOptions, ApiResponse, NearbyStoreParams, GeocodeResponse, CoordinateValidation, StatsResponse, HealthCheckResponse, Coordinates } from "@/types";
+import {
+  Store,
+  Recommendation,
+  AnalyticsEvent,
+  FilterOptions,
+  ApiResponse,
+  NearbyStoreParams,
+  GeocodeResponse,
+  CoordinateValidation,
+  StatsResponse,
+  HealthCheckResponse,
+  Coordinates,
+  SpotlineStore,
+  NextSpot,
+  SpotlineAnalyticsEvent,
+} from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
 const getApiBaseUrl = (): string => {
@@ -72,6 +87,19 @@ export const getStoreByQR = async (qrId: string): Promise<Store> => {
   }
 };
 
+// SpotLine QR 스캔 전용 매장 조회
+export const getSpotlineStoreByQR = async (qrId: string): Promise<SpotlineStore> => {
+  try {
+    const response = await api.get(`/stores/spotline/${qrId}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "매장을 찾을 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "매장을 찾을 수 없습니다");
+  }
+};
+
 // 근처 매장 검색
 export const getNearbyStores = async (params: NearbyStoreParams): Promise<Store[]> => {
   try {
@@ -123,6 +151,19 @@ export const getRecommendationsByQR = async (qrId: string, options?: FilterOptio
     throw new Error(response.data.message || "추천 정보를 가져올 수 없습니다");
   } catch (error) {
     return handleApiError(error, "추천 정보를 가져올 수 없습니다");
+  }
+};
+
+// 다음으로 이어지는 Spot 조회 (SpotLine 전용)
+export const getNextSpots = async (storeId: string, limit: number = 4): Promise<NextSpot[]> => {
+  try {
+    const response = await api.get(`/recommendations/next-spots/${storeId}?limit=${limit}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "다음 Spot을 가져올 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "다음 Spot을 가져올 수 없습니다");
   }
 };
 
@@ -251,46 +292,62 @@ export const generateSessionId = (): string => {
 };
 
 // 이벤트 로깅 헬퍼 함수들
-export const logQRScan = (qrId: string, storeId?: string) => {
+// SpotLine 전용 이벤트 로깅 (개인 식별 데이터 최소화)
+export const logSpotlineEvent = async (eventData: SpotlineAnalyticsEvent): Promise<void> => {
+  try {
+    await api.post("/analytics/spotline-event", eventData);
+  } catch (error) {
+    // 분석 이벤트 실패는 사용자 경험에 영향을 주지 않도록 조용히 처리
+    console.warn("SpotLine 이벤트 로깅 실패:", error);
+  }
+};
+
+// 페이지 진입 이벤트 (SpotLine 전용)
+export const logPageEnter = (qrId: string, storeId: string) => {
   const sessionId = generateSessionId();
-  return logAnalyticsEvent({
+  return logSpotlineEvent({
     qrCode: qrId,
     store: storeId,
-    eventType: "qr_scan",
+    eventType: "page_enter",
     sessionId,
   });
 };
 
-export const logRecommendationClick = (qrId: string, targetStoreId: string, category?: string, position?: number) => {
+// Spot 클릭 이벤트 (SpotLine 전용)
+export const logSpotClick = (qrId: string, storeId: string, targetStoreId: string, position: number) => {
   const sessionId = generateSessionId();
-  return logAnalyticsEvent({
+  return logSpotlineEvent({
     qrCode: qrId,
-    eventType: "recommendation_click",
+    store: storeId,
+    eventType: "spot_click",
     targetStore: targetStoreId,
     sessionId,
     metadata: {
-      category,
-      position,
+      spotPosition: position,
+      nextSpotId: targetStoreId,
     },
   });
 };
 
-export const logMapClick = (qrId: string, targetStoreId: string) => {
+// 지도 링크 클릭 이벤트 (SpotLine 전용)
+export const logMapLinkClick = (qrId: string, storeId: string, targetStoreId: string) => {
   const sessionId = generateSessionId();
-  return logAnalyticsEvent({
+  return logSpotlineEvent({
     qrCode: qrId,
-    eventType: "map_click",
+    store: storeId,
+    eventType: "map_link_click",
     targetStore: targetStoreId,
     sessionId,
   });
 };
 
-export const logPageView = (qrId: string, storeId?: string) => {
+// 외부 링크 클릭 이벤트 (SpotLine 전용)
+export const logExternalLinkClick = (qrId: string, storeId: string) => {
   const sessionId = generateSessionId();
-  return logAnalyticsEvent({
+  return logSpotlineEvent({
     qrCode: qrId,
     store: storeId,
-    eventType: "page_view",
+    eventType: "external_link_click",
     sessionId,
   });
 };

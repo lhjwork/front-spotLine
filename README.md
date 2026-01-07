@@ -1,10 +1,19 @@
-# Spotline Frontend
+# SpotLine Frontend
 
-QR 코드 기반 로컬 연결 서비스 Spotline의 프론트엔드 애플리케이션입니다.
+QR 코드 기반으로 현재 장소에서 다음 경험을 자연스럽게 제안하는 SpotLine의 프론트엔드 애플리케이션입니다.
 
 ## 🚀 프로젝트 개요
 
-Spotline은 카페, 전시, 호텔 등 체류형 공간에서 "이제 어디 가지?"라는 순간적 니즈를 해결하는 웹 애플리케이션입니다. QR 코드를 스캔하면 현재 위치 기준으로 다음에 가기 좋은 장소들을 추천받을 수 있습니다.
+SpotLine은 **광고 플랫폼이 아닌**, **현재 장소를 기준으로 다음 경험을 자연스럽게 제안**하는 웹 애플리케이션입니다. QR 코드를 스캔하면 현재 위치와 자연스럽게 이어지는 다음 Spot들을 추천받을 수 있습니다.
+
+### 🎯 SpotLine 핵심 원칙
+
+- ❌ 광고 플랫폼이 아니다
+- ❌ 리뷰 서비스가 아니다
+- ❌ 사용자 참여형 커뮤니티가 아니다
+- ✅ 현재 장소를 기준으로 다음 경험을 자연스럽게 제안
+- ✅ 사용자 이동 흐름을 관찰
+- ✅ 큐레이션의 신뢰를 축적
 
 ## 🛠 기술 스택
 
@@ -64,23 +73,23 @@ pnpm start
 ```
 src/
 ├── app/                    # Next.js App Router 페이지
-│   ├── qr/[qrId]/         # QR 코드 페이지
+│   ├── spotline/[qrId]/   # SpotLine QR 페이지 (메인)
+│   ├── qr/[qrId]/         # 기존 QR 페이지 (리다이렉트)
 │   ├── globals.css        # 글로벌 스타일
 │   ├── layout.tsx         # 루트 레이아웃
 │   └── page.tsx           # 홈페이지
 ├── components/            # 재사용 가능한 컴포넌트
-│   ├── analytics/         # 분석 관련 컴포넌트
+│   ├── spotline/         # SpotLine 전용 컴포넌트
+│   │   ├── SpotlineStoreInfo.tsx    # 매장 정보 (간소화)
+│   │   ├── NextSpotCard.tsx         # 다음 Spot 카드
+│   │   └── NextSpotsList.tsx        # 다음 Spot 리스트
 │   ├── common/           # 공통 컴포넌트
-│   ├── layout/           # 레이아웃 컴포넌트
-│   ├── map/              # 지도 관련 컴포넌트
-│   ├── recommendation/   # 추천 관련 컴포넌트
-│   └── store/            # 매장 관련 컴포넌트
+│   └── layout/           # 레이아웃 컴포넌트
 ├── lib/                  # 유틸리티 함수
-│   ├── api.ts           # API 호출 함수
+│   ├── api.ts           # API 호출 함수 (SpotLine 전용 추가)
 │   └── utils.ts         # 공통 유틸리티
 ├── store/               # Zustand 상태 관리
-│   └── useSpotlineStore.ts
-└── types/               # TypeScript 타입 정의
+└── types/               # TypeScript 타입 정의 (SpotLine 타입 추가)
     └── index.ts
 ```
 
@@ -113,12 +122,13 @@ src/
 - 추천 클릭 이벤트 추적
 - 지도 클릭 이벤트 추적
 
-## 🎨 UI/UX 특징
+## 🎨 UI/UX 특징 (SpotLine 정체성 준수)
 
-- **모바일 퍼스트**: 스마트폰에서 QR 스캔 후 사용하는 시나리오에 최적화
-- **미니멀하고 직관적**: 빠른 의사결정을 돕는 깔끔한 인터페이스
-- **카드 기반 레이아웃**: 각 추천 매장을 카드 형태로 표시
-- **부드러운 애니메이션**: 페이지 전환 및 상호작용에 자연스러운 애니메이션
+- **광고성 요소 완전 제거**: 별점, 평점, 리뷰, 좋아요, 북마크 등 없음
+- **정보 최소화**: 매장명 + 한 문장 설명만 표시
+- **자연스러운 경험 흐름**: "다음으로 이어지는 Spot" 중심 설계
+- **모바일 퍼스트**: QR 스캔 후 사용하는 시나리오에 최적화
+- **미니멀 디자인**: 빠른 의사결정을 돕는 깔끔한 인터페이스
 
 ## 🔧 개발 스크립트
 
@@ -150,11 +160,11 @@ pnpm clean
 
 ## 🌐 API 연동
 
-백엔드 API와의 연동을 위해 다음 엔드포인트들을 사용합니다:
+SpotLine API Version001과 연동하여 다음 엔드포인트들을 사용합니다:
 
-- `GET /api/stores/qr/{qrId}` - QR 코드로 매장 정보 조회
-- `GET /api/recommendations/qr/{qrId}` - QR 기반 추천 조회
-- `POST /api/analytics/event` - 분석 이벤트 로깅
+- `GET /api/stores/spotline/{qrId}` - SpotLine QR 스캔 전용 매장 조회
+- `GET /api/recommendations/next-spots/{storeId}` - 다음으로 이어지는 Spot 조회
+- `POST /api/analytics/spotline-event` - SpotLine 전용 이벤트 로깅 (개인 식별 데이터 없이)
 
 ## 📱 반응형 디자인
 
