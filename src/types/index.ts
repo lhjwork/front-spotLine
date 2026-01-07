@@ -69,6 +69,44 @@ export interface RecommendationResponse {
   data: Recommendation[];
 }
 
+// SpotLine VERSION002 타입 정의
+
+// QR 코드 ID 타입 (의미있는 ID)
+export type QRCodeId = string;
+
+// Experience 관련 타입
+export interface ExperienceResult {
+  qrId: QRCodeId;
+  storeName: string;
+  storeId: string;
+  area: string;
+  configUsed: {
+    id: string;
+    name: string;
+    type: string;
+  };
+  redirectUrl: string;
+}
+
+export interface ExperienceSession {
+  id: string;
+  qrId: QRCodeId;
+  storeId: string;
+  startedAt: string;
+  completedAt?: string;
+  sessionId: string;
+}
+
+export interface ExperienceResponse {
+  success: boolean;
+  message: string;
+  data: {
+    experience: ExperienceSession;
+    store: SpotlineStore;
+    nextSpots: NextSpot[];
+  };
+}
+
 // SpotLine 전용 매장 타입 (간소화)
 export interface SpotlineStore {
   id: string;
@@ -103,17 +141,21 @@ export interface NextSpot {
   distance: number;
 }
 
-// SpotLine 전용 분석 이벤트 타입 (개인 식별 데이터 최소화)
+// SpotLine 전용 분석 이벤트 타입 (VERSION002 - 확장)
 export interface SpotlineAnalyticsEvent {
-  qrCode: string;
+  qrCode: QRCodeId;
   store: string;
-  eventType: "page_enter" | "spot_click" | "map_link_click" | "page_exit" | "external_link_click";
+  eventType: "page_enter" | "spot_click" | "map_link_click" | "page_exit" | "external_link_click" | "experience_start" | "experience_complete" | "story_expand" | "story_collapse";
   targetStore?: string;
   sessionId: string; // 익명 세션만
+  experienceId?: string; // Experience 세션 ID
   metadata?: {
     spotPosition?: number;
     stayDuration?: number;
     nextSpotId?: string;
+    completionTime?: number;
+    linkType?: string;
+    storySection?: string;
   };
 }
 

@@ -13,6 +13,9 @@ import {
   SpotlineStore,
   NextSpot,
   SpotlineAnalyticsEvent,
+  ExperienceResult,
+  ExperienceResponse,
+  QRCodeId,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -21,7 +24,7 @@ const getApiBaseUrl = (): string => {
 
   if (!baseUrl) {
     console.warn("NEXT_PUBLIC_API_BASE_URL 환경 변수가 설정되지 않았습니다. 기본값을 사용합니다.");
-    return "http://localhost:4000/api";
+    return "http://localhost:4000";
   }
 
   return baseUrl;
@@ -30,7 +33,7 @@ const getApiBaseUrl = (): string => {
 const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api`, // VERSION002: /api 경로 추가
   headers: {
     "Content-Type": "application/json",
   },
@@ -42,12 +45,72 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // 에러 처리 헬퍼 함수
-const handleApiError = (error: any, defaultMessage: string): never => {
+const handleApiError = (error: unknown, defaultMessage: string): never => {
   if (axios.isAxiosError(error)) {
     const errorMessage = error.response?.data?.message || defaultMessage;
     throw new Error(errorMessage);
   }
   throw new Error("네트워크 오류가 발생했습니다");
+};
+
+// ==================== SpotLine Experience API (VERSION002) ====================
+
+// SpotLine 체험하기 API (추천)
+export const getSpotlineExperience = async (): Promise<ExperienceResult> => {
+  try {
+    const response = await api.get<ApiResponse<ExperienceResult>>("/experience");
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "SpotLine 체험을 시작할 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "SpotLine 체험을 시작할 수 없습니다");
+  }
+};
+
+// Experience 세션 시작 (고급 기능)
+export const startExperienceSession = async (qrId: QRCodeId, area?: string): Promise<ExperienceResponse> => {
+  try {
+    const response = await api.post<ApiResponse<ExperienceResponse>>("/experience/start", {
+      qrId,
+      area,
+    });
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "Experience 세션을 시작할 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "Experience 세션을 시작할 수 없습니다");
+  }
+};
+
+// Experience 세션 조회
+export const getExperienceSession = async (experienceId: string): Promise<ExperienceResponse> => {
+  try {
+    const response = await api.get<ApiResponse<ExperienceResponse>>(`/experience/${experienceId}`);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "Experience 세션을 찾을 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "Experience 세션을 찾을 수 없습니다");
+  }
+};
+
+// Experience 세션 완료
+export const completeExperienceSession = async (experienceId: string): Promise<void> => {
+  try {
+    const response = await api.post<ApiResponse<void>>(`/experience/${experienceId}/complete`);
+
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Experience 세션을 완료할 수 없습니다");
+    }
+  } catch (error) {
+    return handleApiError(error, "Experience 세션을 완료할 수 없습니다");
+  }
 };
 
 // ==================== 매장 API ====================
@@ -200,15 +263,50 @@ export const getRecommendationStats = async (): Promise<StatsResponse> => {
 
 // ==================== 분석 API ====================
 
+// 분석 데이터 타입 정의
+interface QRAnalyticsData {
+  qrId: string;
+  totalScans: number;
+  uniqueVisitors: number;
+  averageStayTime: number;
+  topNextSpots: Array<{
+    spotId: string;
+    spotName: string;
+    clickCount: number;
+  }>;
+  dailyStats: Array<{
+    date: string;
+    scans: number;
+    visitors: number;
+  }>;
+}
+
+interface StoreAnalyticsData {
+  storeId: string;
+  storeName: string;
+  totalVisits: number;
+  averageStayTime: number;
+  conversionRate: number;
+  topSources: Array<{
+    source: string;
+    count: number;
+  }>;
+  periodStats: Array<{
+    period: string;
+    visits: number;
+    stayTime: number;
+  }>;
+}
+
 // QR 코드별 통계 조회
-export const getQRAnalytics = async (qrId: string, startDate?: string, endDate?: string): Promise<any> => {
+export const getQRAnalytics = async (qrId: string, startDate?: string, endDate?: string): Promise<QRAnalyticsData> => {
   try {
     const params = new URLSearchParams();
     if (startDate) params.append("startDate", startDate);
     if (endDate) params.append("endDate", endDate);
 
     const url = `/analytics/qr/${qrId}${params.toString() ? `?${params.toString()}` : ""}`;
-    const response = await api.get<ApiResponse<any>>(url);
+    const response = await api.get<ApiResponse<QRAnalyticsData>>(url);
 
     if (response.data.success && response.data.data) {
       return response.data.data;
@@ -220,13 +318,13 @@ export const getQRAnalytics = async (qrId: string, startDate?: string, endDate?:
 };
 
 // 매장별 통계 조회
-export const getStoreAnalytics = async (storeId: string, period?: "day" | "week" | "month"): Promise<any> => {
+export const getStoreAnalytics = async (storeId: string, period?: "day" | "week" | "month"): Promise<StoreAnalyticsData> => {
   try {
     const params = new URLSearchParams();
     if (period) params.append("period", period);
 
     const url = `/analytics/store/${storeId}${params.toString() ? `?${params.toString()}` : ""}`;
-    const response = await api.get<ApiResponse<any>>(url);
+    const response = await api.get<ApiResponse<StoreAnalyticsData>>(url);
 
     if (response.data.success && response.data.data) {
       return response.data.data;
@@ -273,9 +371,9 @@ export const healthCheck = async (): Promise<HealthCheckResponse> => {
 
 // ==================== 유틸리티 함수 ====================
 
-// 세션 ID 생성
+// 세션 ID 생성 (deprecated substr 제거)
 export const generateSessionId = (): string => {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 };
 
 // 이벤트 로깅 헬퍼 함수들
@@ -329,12 +427,70 @@ export const logMapLinkClick = (qrId: string, storeId: string, targetStoreId: st
 };
 
 // 외부 링크 클릭 이벤트 (SpotLine 전용)
-export const logExternalLinkClick = (qrId: string, storeId: string) => {
+export const logExternalLinkClick = (qrId: string, storeId: string, linkType?: string) => {
   const sessionId = generateSessionId();
   return logSpotlineEvent({
     qrCode: qrId,
     store: storeId,
     eventType: "external_link_click",
     sessionId,
+    metadata: {
+      linkType,
+    },
+  });
+};
+
+// Experience 시작 이벤트 (VERSION002)
+export const logExperienceStart = (qrId: QRCodeId, storeId: string, experienceId?: string) => {
+  const sessionId = generateSessionId();
+  return logSpotlineEvent({
+    qrCode: qrId,
+    store: storeId,
+    eventType: "experience_start",
+    sessionId,
+    experienceId,
+  });
+};
+
+// Experience 완료 이벤트 (VERSION002)
+export const logExperienceComplete = (qrId: QRCodeId, storeId: string, experienceId: string, completionTime: number) => {
+  const sessionId = generateSessionId();
+  return logSpotlineEvent({
+    qrCode: qrId,
+    store: storeId,
+    eventType: "experience_complete",
+    sessionId,
+    experienceId,
+    metadata: {
+      completionTime,
+    },
+  });
+};
+
+// SpotLine 스토리 확장 이벤트 (VERSION002)
+export const logStoryExpand = (qrId: QRCodeId, storeId: string, storySection?: string) => {
+  const sessionId = generateSessionId();
+  return logSpotlineEvent({
+    qrCode: qrId,
+    store: storeId,
+    eventType: "story_expand",
+    sessionId,
+    metadata: {
+      storySection,
+    },
+  });
+};
+
+// SpotLine 스토리 접기 이벤트 (VERSION002)
+export const logStoryCollapse = (qrId: QRCodeId, storeId: string, storySection?: string) => {
+  const sessionId = generateSessionId();
+  return logSpotlineEvent({
+    qrCode: qrId,
+    store: storeId,
+    eventType: "story_collapse",
+    sessionId,
+    metadata: {
+      storySection,
+    },
   });
 };

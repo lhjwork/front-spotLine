@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getSpotlineStoreByQR, getNextSpots, logPageEnter } from "@/lib/api";
-import { getSessionId } from "@/lib/utils";
-import { SpotlineStore, NextSpot } from "@/types";
+import { getSpotlineStoreByQR, getNextSpots, logPageEnter, logExperienceStart } from "@/lib/api";
+import { SpotlineStore, NextSpot, ExperienceSession } from "@/types";
 import SpotlineStoreInfo from "@/components/spotline/SpotlineStoreInfo";
 import NextSpotsList from "@/components/spotline/NextSpotsList";
 import { PageLoading } from "@/components/common/Loading";
@@ -19,9 +18,25 @@ export default function SpotlinePage() {
   const [nextSpots, setNextSpots] = useState<NextSpot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [experienceSession, setExperienceSession] = useState<ExperienceSession | null>(null);
 
   // 체류 시간 측정을 위한 시작 시간
   const [startTime] = useState(Date.now());
+
+  // Experience 세션 확인
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedExperience = localStorage.getItem("spotline_experience");
+      if (savedExperience) {
+        try {
+          const experience = JSON.parse(savedExperience) as ExperienceSession;
+          setExperienceSession(experience);
+        } catch (error) {
+          console.warn("Experience 세션 파싱 실패:", error);
+        }
+      }
+    }
+  }, []);
 
   // 데이터 로딩
   useEffect(() => {
@@ -39,7 +54,12 @@ export default function SpotlinePage() {
         // 2. 페이지 진입 이벤트 로깅
         await logPageEnter(qrId, storeData.id);
 
-        // 3. 다음 Spot 조회
+        // 3. Experience 시작 이벤트 로깅 (세션이 있는 경우)
+        if (experienceSession) {
+          await logExperienceStart(qrId, storeData.id, experienceSession.id);
+        }
+
+        // 4. 다음 Spot 조회
         const spotsData = await getNextSpots(storeData.id, 4);
         setNextSpots(spotsData);
       } catch (err) {
@@ -51,57 +71,69 @@ export default function SpotlinePage() {
     };
 
     loadSpotlineData();
-  }, [qrId]);
+  }, [qrId, experienceSession]);
 
   // 페이지 이탈 시 체류 시간 로깅
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (store) {
-        const stayDuration = Math.floor((Date.now() - startTime) / 1000);
-        // 페이지 이탈 이벤트는 navigator.sendBeacon 사용 (비동기)
-        const eventData = {
-          qrCode: qrId,
-          store: store.id,
-          eventType: "page_exit" as const,
-          sessionId: getSessionId(),
-          metadata: { stayDuration },
-        };
-
-        navigator.sendBeacon(`${process.env.NEXT_PUBLIC_API_BASE_URL}/analytics/spotline-event`, JSON.stringify(eventData));
+        const stayDuration = Date.now() - startTime;
+        // 비동기 로깅은 페이지 이탈 시 완료되지 않을 수 있으므로 navigator.sendBeacon 사용 권장
+        // 여기서는 간단히 로그만 남김
+        console.log(`SpotLine 체류 시간: ${stayDuration}ms`);
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [qrId, store, startTime]);
+  }, [store, startTime]);
 
-  // Spot 클릭 핸들러
-  const handleSpotClick = (spot: NextSpot) => {
-    // 다음 SpotLine 페이지로 이동 (QR ID가 있다고 가정)
-    router.push(`/spotline/${spot.id}`);
-  };
-
-  // 로딩 상태
   if (isLoading) {
-    return <PageLoading />;
+    return <PageLoading message="SpotLine 정보를 불러오는 중..." />;
   }
 
-  // 에러 상태
-  if (error || !store) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <ErrorMessage message={error || "매장을 찾을 수 없습니다"} onRetry={() => window.location.reload()} />
+        <ErrorMessage message={error} onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
+
+  if (!store) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <ErrorMessage message="매장 정보를 찾을 수 없습니다" onRetry={() => router.push("/")} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
+      {/* Experience 세션 표시 (개발 환경에서만) */}
+      {process.env.NODE_ENV === "development" && experienceSession && (
+        <div className="bg-blue-100 border-b border-blue-200 px-4 py-2 text-sm text-blue-800">
+          Experience 세션: {experienceSession.id} | 시작: {new Date(experienceSession.startedAt).toLocaleTimeString()}
+        </div>
+      )}
+
       {/* 매장 정보 섹션 */}
       <SpotlineStoreInfo store={store} qrId={qrId} />
 
       {/* 다음 Spot 섹션 */}
-      <NextSpotsList spots={nextSpots} qrId={qrId} storeId={store.id} isLoading={false} onSpotClick={handleSpotClick} />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store.id} />
+      </div>
+
+      {/* SpotLine 브랜딩 푸터 */}
+      <footer className="bg-white border-t border-gray-200 py-6 mt-12">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <p className="text-sm text-gray-500">
+            이 경험은 <span className="font-semibold text-blue-600">SpotLine</span>이 큐레이션했습니다
+          </p>
+          <p className="text-xs text-gray-400 mt-1">다음에 가기 좋은 곳을 찾는 새로운 방법</p>
+        </div>
+      </footer>
     </div>
   );
 }
