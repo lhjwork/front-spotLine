@@ -1,367 +1,134 @@
-# SpotLine 데모 시스템 API 명세서
+# SpotLine 데모 API 명세서 V2.0 (백엔드 연동 완료)
 
-## 📋 개요
+## ⚠️ 업데이트 알림
+**이 문서는 V2.0으로 업데이트되었습니다.**
+- 하드코딩 방식에서 백엔드 API 연동 방식으로 변경
+- 데이터 관리 구조 개선
+- 확장 가능한 아키텍처 적용
 
-SpotLine 데모 시스템은 업주에게 서비스를 소개하기 위한 별도의 시스템입니다. 실제 운영 데이터와 완전히 분리되어 있으며, 통계 수집을 하지 않습니다.
+**최신 문서**: `DEMO_API_SPECIFICATION_V2.md` 참조
 
-## 🎯 데모 접근 시나리오
+## 개요
+SpotLine 데모는 업주 소개용으로 제작된 영업용 데모 시스템입니다. V2.0에서는 백엔드 API와 연동하여 데이터를 별도로 관리하는 구조로 개선되었습니다.
 
-### 시나리오 1: 랜덤 데모 체험 (기본)
+## 개선된 데모 플로우
 
+### 1. 전체 플로우
 ```
-사용자 → /demo 페이지 → "데모 체험하기" 버튼 클릭 → 랜덤 데모 매장으로 이동
-```
-
-### 시나리오 2: 데모 매장 목록에서 선택
-
-```
-사용자 → /demo 페이지 → "데모 매장 목록 보기" → 특정 매장 선택 → 해당 데모 매장으로 이동
-```
-
-### 시나리오 3: 데모 QR 코드 스캔
-
-```
-사용자 → 데모 QR 스캔 → /qr/demo_cafe_001 → 데모 매장 페이지로 이동
+홈페이지 → [🎭 데모 버튼] → /qr/demo_cafe_001 → /spotline/demo-store?qr=demo_cafe_001
+                                                           ↓ API 호출
+                                                    /api/demo/store
 ```
 
----
+### 2. 아키텍처 변경사항
 
-## 🔧 필요한 백엔드 API
+#### V1.0 (하드코딩 방식)
+```
+프론트엔드 컴포넌트 내부에 데모 데이터 하드코딩
+→ 데이터 수정 시 프론트엔드 배포 필요
+→ 확장성 제한
+```
 
-### 1. 랜덤 데모 체험 API
+#### V2.0 (백엔드 API 연동)
+```
+프론트엔드 ← API 호출 ← 백엔드 API ← 데이터 레이어
+→ 데이터 중앙 관리
+→ 확장 가능한 구조
+→ 실제 운영 API와 일관된 구조
+```
 
+## 새로운 API 엔드포인트
+
+### 데모 매장 및 근처 Spot 조회
 ```http
-GET /api/demo/experience
+GET /api/demo/store
 ```
 
-**설명:** 랜덤하게 데모 매장을 선택하여 체험할 수 있도록 합니다.
-
-**응답:**
-
+**응답 구조**:
 ```json
 {
   "success": true,
-  "message": "데모 체험 매장 선택 성공",
   "data": {
-    "qrId": "demo_cafe_001",
-    "storeId": "675a1b2c3d4e5f6789012346",
-    "storeName": "카페 데모",
-    "area": "강남역",
-    "redirectUrl": "http://localhost:3000/spotline/675a1b2c3d4e5f6789012346",
-    "isDemoMode": true
+    "store": { /* SpotlineStore 객체 */ },
+    "nextSpots": [ /* NextSpot 배열 */ ]
+  },
+  "message": "데모 데이터를 성공적으로 가져왔습니다.",
+  "meta": {
+    "isDemo": true,
+    "scenario": "cafe",
+    "timestamp": "2024-01-08T10:30:00.000Z"
   }
 }
 ```
 
-**프론트엔드 사용:**
+## 데이터 관리 구조
 
-```javascript
-// DemoExperienceButton.tsx에서 사용
-const response = await fetch("/api/demo/experience");
-const data = await response.json();
-if (data.success) {
-  window.location.href = data.data.redirectUrl;
-}
+### 1. 데이터 레이어 분리
+```
+/src/data/demo.ts - 데모 데이터 정의
+/src/app/api/demo/store/route.ts - API 엔드포인트
+/src/app/spotline/demo-store/page.tsx - UI 렌더링
 ```
 
----
-
-### 2. 데모 매장 목록 조회 API
-
-```http
-GET /api/demo/stores
+### 2. 확장 가능한 구조
+```typescript
+// 다양한 데모 시나리오 지원
+export const DEMO_SCENARIOS = {
+  cafe: { store: CAFE_STORE, nextSpots: CAFE_SPOTS },
+  restaurant: { store: RESTAURANT_STORE, nextSpots: RESTAURANT_SPOTS }
+  // 향후 확장 가능
+};
 ```
 
-**설명:** 모든 데모 매장 목록을 반환합니다.
+## V1.0과 V2.0 비교
 
-**응답:**
+| 항목 | V1.0 (하드코딩) | V2.0 (API 연동) |
+|------|----------------|----------------|
+| 데이터 위치 | 프론트엔드 컴포넌트 내부 | 별도 데이터 레이어 |
+| 데이터 수정 | 프론트엔드 배포 필요 | 데이터만 수정 가능 |
+| 확장성 | 제한적 | 높음 |
+| 일관성 | 실제 API와 다른 구조 | 실제 API와 일관된 구조 |
+| 로딩 시뮬레이션 | 단순 setTimeout | 실제 API 호출 패턴 |
+| 에러 처리 | 기본적 | 완전한 에러 처리 |
 
-```json
-{
-  "success": true,
-  "message": "데모 매장 목록 조회 성공",
-  "data": [
-    {
-      "id": "675a1b2c3d4e5f6789012346",
-      "name": "카페 데모",
-      "shortDescription": "조용한 분위기에서 커피와 함께하는 시간",
-      "representativeImage": "https://images.unsplash.com/photo-1...",
-      "location": {
-        "address": "서울시 강남구 테헤란로 123 (데모용 주소)",
-        "mapLink": "https://map.naver.com/..."
-      },
-      "externalLinks": {
-        "instagram": "https://instagram.com/demo_cafe",
-        "website": "https://demo-cafe.spotline.com"
-      },
-      "spotlineStory": "이곳은 SpotLine 서비스를 소개하기 위한 데모 카페입니다...",
-      "qrCode": {
-        "id": "demo_cafe_001",
-        "isActive": true
-      },
-      "isDemoMode": true,
-      "demoNotice": "이것은 업주 소개용 데모 페이지입니다."
-    },
-    {
-      "id": "675a1b2c3d4e5f6789012347",
-      "name": "갤러리 데모",
-      "shortDescription": "현대 미술과 함께하는 문화 공간",
-      "representativeImage": "https://images.unsplash.com/photo-2...",
-      "location": {
-        "address": "서울시 홍대입구역 근처 (데모용 주소)",
-        "mapLink": "https://map.naver.com/..."
-      },
-      "externalLinks": {
-        "instagram": "https://instagram.com/demo_gallery"
-      },
-      "spotlineStory": "예술과 일상이 만나는 특별한 공간입니다...",
-      "qrCode": {
-        "id": "demo_gallery_001",
-        "isActive": true
-      },
-      "isDemoMode": true,
-      "demoNotice": "이것은 업주 소개용 데모 페이지입니다."
-    }
-  ]
-}
-```
+## 마이그레이션 가이드
 
-**프론트엔드 사용:**
+### 백엔드 개발자
+1. `BACKEND_DEMO_IMPLEMENTATION_PROMPT.md` 참조하여 API 구현
+2. `/api/demo/store` 엔드포인트 생성
+3. 데모 데이터 구조 정의
+4. 로딩 시뮬레이션 및 에러 처리 구현
 
-```javascript
-// demo/page.tsx에서 사용
-const stores = await getDemoStores();
-setDemoStores(stores);
-```
+### 프론트엔드 개발자
+1. 기존 하드코딩된 데이터 제거 (완료)
+2. API 호출 로직 구현 (완료)
+3. 에러 처리 UI 구현 (완료)
+4. 로딩 상태 관리 (완료)
 
----
+## 향후 확장 계획
 
-### 3. 데모 매장 상세 조회 API
+### 1. 다양한 데모 시나리오
+- 업종별 데모 (카페, 음식점, 소매점)
+- 지역별 데모 (강남, 홍대, 이태원)
+- 테마별 데모 (데이트, 비즈니스, 관광)
 
-```http
-GET /api/demo/stores/{qrId}
-```
+### 2. 개인화된 데모
+- 업주 맞춤형 데모 생성
+- 실제 매장 정보 기반 데모 제작
+- A/B 테스트용 다양한 데모 버전
 
-**설명:** 특정 데모 매장의 상세 정보를 조회합니다.
+### 3. 고급 기능
+- 데모 사용 패턴 분석
+- 업주 피드백 수집 시스템
+- 데모 효과성 측정 도구
 
-**예시:**
+## 결론
 
-```http
-GET /api/demo/stores/demo_cafe_001
-```
+V2.0 업데이트를 통해 SpotLine 데모 시스템은 다음과 같은 개선을 달성했습니다:
 
-**응답:**
+- **확장 가능한 아키텍처**: 다양한 데모 시나리오 지원 가능
+- **중앙 집중식 데이터 관리**: 데이터 수정 및 관리 용이성 향상
+- **실제 API와의 일관성**: 동일한 구조로 개발자 경험 향상
+- **완전한 에러 처리**: 안정적인 데모 체험 보장
 
-```json
-{
-  "success": true,
-  "message": "데모 매장 조회 성공",
-  "data": {
-    "id": "675a1b2c3d4e5f6789012346",
-    "name": "카페 데모",
-    "shortDescription": "조용한 분위기에서 커피와 함께하는 시간",
-    "representativeImage": "https://images.unsplash.com/photo-1...",
-    "location": {
-      "address": "서울시 강남구 테헤란로 123 (데모용 주소)",
-      "mapLink": "https://map.naver.com/..."
-    },
-    "externalLinks": {
-      "instagram": "https://instagram.com/demo_cafe",
-      "website": "https://demo-cafe.spotline.com"
-    },
-    "spotlineStory": "이곳은 SpotLine 서비스를 소개하기 위한 데모 카페입니다. 실제 서비스에서는 업주님의 매장 스토리가 이 자리에 표시됩니다. 고객들에게 매장의 특별한 이야기와 분위기를 전달할 수 있습니다.",
-    "qrCode": {
-      "id": "demo_cafe_001",
-      "isActive": true
-    },
-    "isDemoMode": true,
-    "demoNotice": "이것은 업주 소개용 데모 페이지입니다."
-  }
-}
-```
-
----
-
-### 4. 데모 다음 Spot 조회 API
-
-```http
-GET /api/demo/next-spots/{storeId}?limit=4
-```
-
-**설명:** 데모 매장의 다음 추천 Spot들을 조회합니다.
-
-**예시:**
-
-```http
-GET /api/demo/next-spots/675a1b2c3d4e5f6789012346?limit=4
-```
-
-**응답:**
-
-```json
-{
-  "success": true,
-  "message": "데모 다음 Spot 조회 성공",
-  "data": [
-    {
-      "id": "675a1b2c3d4e5f6789012347",
-      "name": "갤러리 데모",
-      "shortDescription": "현대 미술과 함께하는 문화 공간",
-      "representativeImage": "https://images.unsplash.com/photo-2...",
-      "mapLink": "https://map.naver.com/...",
-      "category": "culture",
-      "walkingTime": 5,
-      "distance": 250
-    },
-    {
-      "id": "675a1b2c3d4e5f6789012348",
-      "name": "레스토랑 데모",
-      "shortDescription": "신선한 재료로 만든 건강한 식사",
-      "representativeImage": "https://images.unsplash.com/photo-3...",
-      "mapLink": "https://map.naver.com/...",
-      "category": "restaurant",
-      "walkingTime": 8,
-      "distance": 400
-    },
-    {
-      "id": "675a1b2c3d4e5f6789012349",
-      "name": "북카페 데모",
-      "shortDescription": "책과 커피가 어우러진 조용한 공간",
-      "representativeImage": "https://images.unsplash.com/photo-4...",
-      "mapLink": "https://map.naver.com/...",
-      "category": "cafe",
-      "walkingTime": 3,
-      "distance": 150
-    }
-  ]
-}
-```
-
----
-
-## 🗄️ 데모 데이터베이스 구조
-
-### DemoStore Collection
-
-```javascript
-{
-  _id: ObjectId("675a1b2c3d4e5f6789012346"),
-  name: "카페 데모",
-  shortDescription: "조용한 분위기에서 커피와 함께하는 시간",
-  representativeImage: "https://images.unsplash.com/photo-1...",
-  location: {
-    address: "서울시 강남구 테헤란로 123 (데모용 주소)",
-    mapLink: "https://map.naver.com/..."
-  },
-  externalLinks: {
-    instagram: "https://instagram.com/demo_cafe",
-    website: "https://demo-cafe.spotline.com"
-  },
-  spotlineStory: "이곳은 SpotLine 서비스를 소개하기 위한 데모 카페입니다...",
-  qrCode: {
-    id: "demo_cafe_001",
-    isActive: true
-  },
-  isDemoMode: true,
-  demoNotice: "이것은 업주 소개용 데모 페이지입니다.",
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### DemoRecommendation Collection
-
-```javascript
-{
-  _id: ObjectId,
-  fromStoreId: ObjectId("675a1b2c3d4e5f6789012346"), // 출발 매장
-  toStoreId: ObjectId("675a1b2c3d4e5f6789012347"),   // 추천 매장
-  category: "culture",
-  priority: 1,
-  distance: 250,
-  walkingTime: 5,
-  description: "카페에서 갤러리로 이어지는 문화적 경험",
-  isActive: true,
-  createdAt: Date
-}
-```
-
----
-
-## 🎯 데모 데이터 예시
-
-### 데모 매장 4개
-
-1. **카페 데모** (`demo_cafe_001`)
-
-   - 조용한 분위기의 카페
-   - 다음 추천: 갤러리, 레스토랑, 북카페
-
-2. **갤러리 데모** (`demo_gallery_001`)
-
-   - 현대 미술 전시 공간
-   - 다음 추천: 북카페, 카페, 디저트샵
-
-3. **레스토랑 데모** (`demo_restaurant_001`)
-
-   - 건강한 식사 공간
-   - 다음 추천: 디저트샵, 카페, 갤러리
-
-4. **북카페 데모** (`demo_bookcafe_001`)
-   - 책과 커피가 어우러진 공간
-   - 다음 추천: 카페, 갤러리, 레스토랑
-
----
-
-## 🚨 중요 사항
-
-### 1. 데모 시스템 특징
-
-- ✅ **통계 수집 없음**: 데모 시스템은 분석 데이터를 수집하지 않습니다
-- ✅ **별도 데이터베이스**: 실제 운영 데이터와 완전히 분리
-- ✅ **데모 표시**: 모든 페이지에 데모임을 명확히 표시
-- ✅ **QR 코드 구분**: `demo_*` 형태의 QR 코드 ID 사용
-
-### 2. 에러 처리
-
-```json
-{
-  "success": false,
-  "message": "데모 매장을 찾을 수 없습니다",
-  "error": "DEMO_STORE_NOT_FOUND"
-}
-```
-
-### 3. 프론트엔드 환경변수
-
-```bash
-# .env.local
-NEXT_PUBLIC_DEMO_API_URL=http://localhost:4000/api/demo
-NEXT_PUBLIC_DEMO_ENABLED=true
-```
-
----
-
-## 📝 구현 체크리스트
-
-### 백엔드 구현 필요사항
-
-- [ ] `GET /api/demo/experience` - 랜덤 데모 체험
-- [ ] `GET /api/demo/stores` - 데모 매장 목록
-- [ ] `GET /api/demo/stores/{qrId}` - 데모 매장 상세
-- [ ] `GET /api/demo/next-spots/{storeId}` - 데모 다음 Spot
-- [ ] DemoStore 스키마 생성
-- [ ] DemoRecommendation 스키마 생성
-- [ ] 데모 데이터 시드 스크립트
-- [ ] 통계 수집 제외 로직
-
-### 프론트엔드 (완료)
-
-- [x] `getDemoExperience()` API 함수
-- [x] `getDemoStores()` API 함수
-- [x] `getDemoStoreByQR()` API 함수
-- [x] `getDemoNextSpots()` API 함수
-- [x] 데모 페이지 매장 목록 UI
-- [x] 데모 모드 표시 UI
-
-이 명세서를 바탕으로 백엔드에서 데모 시스템을 구현하면 프론트엔드와 완벽하게 연동됩니다!
+이를 통해 업주들에게 더욱 완성도 높은 데모 경험을 제공하고, SpotLine의 가치를 효과적으로 전달할 수 있게 되었습니다.

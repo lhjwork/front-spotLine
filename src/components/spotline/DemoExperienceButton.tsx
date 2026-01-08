@@ -22,7 +22,7 @@ const DemoViewButton: React.FC<DemoViewButtonProps> = ({ size = "lg", variant = 
   const handleClick = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      // 데모 매장으로 직접 이동 (프론트엔드 라우트)
+      // 데모 QR 페이지로 직접 이동 (기존 방식 유지)
       window.location.href = '/qr/demo_cafe_001';
     } catch (error) {
       console.error("데모 오류:", error);

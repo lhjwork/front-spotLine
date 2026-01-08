@@ -3,6 +3,7 @@
 import { NextSpot } from "@/types";
 import { MapPin, Clock } from "lucide-react";
 import { logSpotClick, logMapLinkClick } from "@/lib/api";
+import OptimizedImage from "@/components/common/OptimizedImage";
 
 interface NextSpotCardProps {
   spot: NextSpot;
@@ -32,23 +33,23 @@ export default function NextSpotCard({ spot, qrId, storeId, position, onSpotClic
     } else {
       console.log(`데모 지도 클릭: ${spot.name} (통계 수집하지 않음)`);
     }
-    window.open(spot.mapLink, "_blank", "noopener,noreferrer");
+    
+    // 데모 모드에서는 지도 링크가 없을 수 있으므로 기본 지도 검색으로 대체
+    const mapUrl = spot.mapLink || `https://map.kakao.com/link/search/${encodeURIComponent(spot.name)}`;
+    window.open(mapUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
     <div onClick={handleSpotClick} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer">
       {/* 매장 이미지 */}
       <div className="relative h-48">
-        {spot.representativeImage ? (
-          <img src={spot.representativeImage} alt={spot.name} className="w-full h-full object-cover rounded-t-lg" />
-        ) : (
-          <div className="w-full h-full bg-gray-100 rounded-t-lg flex items-center justify-center">
-            <div className="text-center text-gray-400">
-              <MapPin className="w-12 h-12 mx-auto mb-2" />
-              <p className="text-sm">이미지가 없습니다</p>
-            </div>
-          </div>
-        )}
+        <OptimizedImage
+          src={spot.representativeImage}
+          alt={spot.name}
+          fill
+          type="spot"
+          className="rounded-t-lg"
+        />
       </div>
 
       <div className="p-4">

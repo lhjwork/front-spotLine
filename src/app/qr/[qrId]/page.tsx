@@ -15,10 +15,15 @@ export default function QRPage() {
       if (!qrId) return;
 
       try {
-        // QR 코드로 매장 ID 조회
-        const { storeId } = await getStoreIdByQR(qrId);
+        // 데모 QR 코드인지 확인
+        if (qrId === "demo_cafe_001") {
+          // 데모 전용 페이지로 리다이렉트
+          router.replace(`/spotline/demo-store?qr=${qrId}`);
+          return;
+        }
 
-        // 매장 ID 기반 SpotLine 페이지로 리다이렉트
+        // 실제 QR 코드 처리
+        const { storeId } = await getStoreIdByQR(qrId);
         router.replace(`/spotline/${storeId}?qr=${qrId}`);
       } catch (err) {
         console.error("QR 코드 처리 실패:", err);

@@ -123,17 +123,23 @@ export interface SpotlineStore {
   name: string;
   shortDescription: string;
   representativeImage: string;
+  category?: string;
   location: {
     address: string;
-    mapLink: string;
+    mapLink?: string;
+    coordinates?: [number, number]; // 데모용 좌표 (선택적)
   };
-  externalLinks: {
-    instagram?: string;
-    blog?: string;
-    website?: string;
+  externalLinks?: Array<{
+    type: string;
+    url: string;
+    title: string;
+  }>;
+  spotlineStory?: string | {
+    title: string;
+    content: string;
+    tags?: string[];
   };
-  spotlineStory: string;
-  qrCode: {
+  qrCode?: {
     id: string;
     isActive: boolean;
   };
@@ -148,10 +154,14 @@ export interface NextSpot {
   name: string;
   shortDescription: string;
   representativeImage: string;
-  mapLink: string;
   category: string;
   walkingTime: number;
   distance: number;
+  mapLink?: string;
+  spotlineStory?: {
+    title: string;
+    content: string;
+  };
 }
 
 // SpotLine 전용 분석 이벤트 타입 (VERSION002 - 확장)

@@ -1,696 +1,316 @@
-# SpotLine 데모 시스템 백엔드 구현 가이드
+# SpotLine 데모 백엔드 구현 가이드 (개선된 플로우)
 
-## 📋 개요
+## 개요
+SpotLine 데모 시스템의 백엔드 구현을 위한 상세 가이드입니다. 
+새로운 플로우에서는 별도의 데모 전용 라우트를 사용하여 실제 운영과 완전히 분리합니다.
 
-이 문서는 백엔드 개발자가 SpotLine 데모 시스템을 구현하기 위한 상세한 가이드입니다.
+## 개선된 아키텍처
 
----
+### 1. 라우트 분리 구조
+```
+실제 운영: /spotline/[qrId] → 동적 라우트, DB 조회
+데모 전용: /spotline/demo-store → 정적 라우트, 하드코딩 데이터
+```
 
-## 🗄️ 데이터베이스 스키마
+### 2. QR 처리 로직
+```typescript
+// QR 페이지에서 데모/실제 구분
+if (qrId === "demo_cafe_001") {
+  // 데모 전용 페이지로 리다이렉트
+  router.replace(`/spotline/demo-store?qr=${qrId}`);
+} else {
+  // 실제 QR 코드 처리
+  const { storeId } = await getStoreIdByQR(qrId);
+  router.replace(`/spotline/${storeId}?qr=${qrId}`);
+}
+```
 
-### 1. DemoStore 스키마 (MongoDB)
+### 3. 데모 데이터 구조
+```typescript
+// 데모 매장 데이터 (하드코딩)
+const DEMO_STORE: SpotlineStore = {
+  id: "demo-store",
+  name: "아늑한 카페 스토리",
+  shortDescription: "따뜻한 분위기의 동네 카페",
+  representativeImage: "/demo/cafe-001.jpg",
+  category: "cafe",
+  location: {
+    address: "서울시 강남구 테헤란로 123",
+    coordinates: [127.0276, 37.4979]
+  },
+  qrCode: {
+    id: "demo_cafe_001",
+    isActive: true
+  },
+  spotlineStory: {
+    title: "커피 한 잔의 여유",
+    content: "바쁜 일상 속에서 잠시 멈춰 서서 향긋한 커피 한 잔과 함께하는 소중한 시간을 선사합니다.",
+    tags: ["커피", "휴식", "분위기", "수제디저트"]
+  },
+  externalLinks: [
+    {
+      type: "instagram",
+      url: "https://instagram.com/demo_cafe",
+      title: "인스타그램"
+    }
+  ],
+  demoNotice: "이것은 SpotLine 서비스 소개용 데모입니다."
+};
 
-```javascript
-// models/DemoStore.js
-const mongoose = require("mongoose");
-
-const demoStoreSchema = new mongoose.Schema(
+// 데모 근처 Spot들 (4개)
+const DEMO_NEXT_SPOTS: NextSpot[] = [
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    shortDescription: {
-      type: String,
-      required: true,
-      maxLength: 100,
-    },
-    representativeImage: {
-      type: String,
-      required: true,
-      validate: {
-        validator: function (v) {
-          return /^https?:\/\/.+/.test(v);
-        },
-        message: "representativeImage must be a valid URL",
-      },
-    },
-    location: {
-      address: {
-        type: String,
-        required: true,
-      },
-      mapLink: {
-        type: String,
-        required: true,
-        validate: {
-          validator: function (v) {
-            return /^https?:\/\/.+/.test(v);
-          },
-          message: "mapLink must be a valid URL",
-        },
-      },
-    },
-    externalLinks: {
-      instagram: {
-        type: String,
-        validate: {
-          validator: function (v) {
-            return !v || /^https?:\/\/.+/.test(v);
-          },
-          message: "instagram must be a valid URL",
-        },
-      },
-      website: {
-        type: String,
-        validate: {
-          validator: function (v) {
-            return !v || /^https?:\/\/.+/.test(v);
-          },
-          message: "website must be a valid URL",
-        },
-      },
-      blog: {
-        type: String,
-        validate: {
-          validator: function (v) {
-            return !v || /^https?:\/\/.+/.test(v);
-          },
-          message: "blog must be a valid URL",
-        },
-      },
-    },
+    id: "demo_bakery_001",
+    name: "달콤한 베이커리",
+    shortDescription: "갓 구운 빵의 향기",
+    representativeImage: "/demo/bakery-001.jpg",
+    category: "bakery",
+    distance: 150,
+    walkingTime: 2,
     spotlineStory: {
-      type: String,
-      required: true,
-      minLength: 50,
-      maxLength: 1000,
-    },
-    qrCode: {
-      id: {
-        type: String,
-        required: true,
-        unique: true,
-        match: /^demo_[a-z]+_\d{3}$/,
-      },
-      isActive: {
-        type: Boolean,
-        default: true,
-      },
-    },
-    isDemoMode: {
-      type: Boolean,
-      default: true,
-      immutable: true,
-    },
-    demoNotice: {
-      type: String,
-      default: "이것은 업주 소개용 데모 페이지입니다.",
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+      title: "갓 구운 빵의 행복",
+      content: "매일 새벽부터 정성스럽게 구워내는 빵들이 여러분을 기다립니다."
+    }
   },
   {
-    timestamps: true,
-  }
-);
-
-// 인덱스 설정
-demoStoreSchema.index({ "qrCode.id": 1 });
-demoStoreSchema.index({ isActive: 1 });
-
-module.exports = mongoose.model("DemoStore", demoStoreSchema);
-```
-
-### 2. DemoRecommendation 스키마
-
-```javascript
-// models/DemoRecommendation.js
-const mongoose = require("mongoose");
-
-const demoRecommendationSchema = new mongoose.Schema(
-  {
-    fromStoreId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "DemoStore",
-      required: true,
-    },
-    toStoreId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "DemoStore",
-      required: true,
-    },
-    category: {
-      type: String,
-      enum: ["cafe", "restaurant", "culture", "gallery", "dessert", "bookstore"],
-      required: true,
-    },
-    priority: {
-      type: Number,
-      min: 1,
-      max: 10,
-      default: 5,
-    },
-    distance: {
-      type: Number, // 미터 단위
-      min: 0,
-      required: true,
-    },
-    walkingTime: {
-      type: Number, // 분 단위
-      min: 1,
-      required: true,
-    },
-    description: {
-      type: String,
-      maxLength: 200,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    id: "demo_bookstore_001", 
+    name: "조용한 서점",
+    shortDescription: "책과 함께하는 시간",
+    representativeImage: "/demo/bookstore-001.jpg",
+    category: "bookstore",
+    distance: 200,
+    walkingTime: 3,
+    spotlineStory: {
+      title: "책 속 여행",
+      content: "좋은 책과 함께 떠나는 마음의 여행을 시작해보세요."
+    }
   },
   {
-    timestamps: true,
+    id: "demo_flower_001",
+    name: "꽃향기 플라워샵",
+    shortDescription: "싱싱한 꽃과 식물",
+    representativeImage: "/demo/flower-001.jpg",
+    category: "flower",
+    distance: 300,
+    walkingTime: 4,
+    spotlineStory: {
+      title: "자연의 선물",
+      content: "아름다운 꽃과 식물로 일상에 생기를 더해보세요."
+    }
+  },
+  {
+    id: "demo_art_001",
+    name: "작은 갤러리",
+    shortDescription: "예술과의 만남",
+    representativeImage: "/demo/art-001.jpg",
+    category: "art",
+    distance: 250,
+    walkingTime: 3,
+    spotlineStory: {
+      title: "예술이 있는 공간",
+      content: "지역 작가들의 작품을 감상하며 영감을 얻어보세요."
+    }
   }
-);
+];
+```
+## 프론트엔드 연동
 
-// 인덱스 설정
-demoRecommendationSchema.index({ fromStoreId: 1, priority: -1 });
-demoRecommendationSchema.index({ isActive: 1 });
-
-module.exports = mongoose.model("DemoRecommendation", demoRecommendationSchema);
+### 1. 홈페이지 데모 버튼
+```typescript
+// src/app/page.tsx
+<button 
+  onClick={() => window.location.href = '/qr/demo_cafe_001'}
+  className="text-purple-600 hover:text-purple-700 underline font-medium"
+>
+  🎭 데모보기로 먼저 체험해보기
+</button>
 ```
 
----
-
-## 🔧 API 컨트롤러 구현
-
-### 1. 랜덤 데모 체험 API
-
-```javascript
-// controllers/demoController.js
-const DemoStore = require("../models/DemoStore");
-
-/**
- * GET /api/demo/experience
- * 랜덤 데모 매장 선택
- */
-exports.getDemoExperience = async (req, res) => {
-  try {
-    // 활성화된 데모 매장 중 랜덤 선택
-    const demoStores = await DemoStore.find({
-      isActive: true,
-      "qrCode.isActive": true,
-    });
-
-    if (demoStores.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "사용 가능한 데모 매장이 없습니다",
-        error: "NO_DEMO_STORES_AVAILABLE",
-      });
+### 2. QR 페이지 데모 처리
+```typescript
+// src/app/qr/[qrId]/page.tsx
+useEffect(() => {
+  const handleQRScan = async () => {
+    if (qrId === "demo_cafe_001") {
+      // 데모 전용 페이지로 리다이렉트
+      router.replace(`/spotline/demo-store?qr=${qrId}`);
+      return;
     }
-
-    // 랜덤 선택
-    const randomIndex = Math.floor(Math.random() * demoStores.length);
-    const selectedStore = demoStores[randomIndex];
-
-    // 프론트엔드 URL 생성
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-    const redirectUrl = `${frontendUrl}/spotline/${selectedStore._id}`;
-
-    res.json({
-      success: true,
-      message: "데모 체험 매장 선택 성공",
-      data: {
-        qrId: selectedStore.qrCode.id,
-        storeId: selectedStore._id.toString(),
-        storeName: selectedStore.name,
-        area: "데모 지역", // 데모용 고정값
-        redirectUrl,
-        isDemoMode: true,
-      },
-    });
-  } catch (error) {
-    console.error("데모 체험 오류:", error);
-    res.status(500).json({
-      success: false,
-      message: "데모 체험 중 오류가 발생했습니다",
-      error: "INTERNAL_SERVER_ERROR",
-    });
-  }
-};
+    
+    // 실제 QR 코드 처리
+    const { storeId } = await getStoreIdByQR(qrId);
+    router.replace(`/spotline/${storeId}?qr=${qrId}`);
+  };
+  
+  handleQRScan();
+}, [qrId, router]);
 ```
 
-### 2. 데모 매장 목록 조회 API
-
-```javascript
-/**
- * GET /api/demo/stores
- * 모든 데모 매장 목록 조회
- */
-exports.getDemoStores = async (req, res) => {
-  try {
-    const demoStores = await DemoStore.find({
-      isActive: true,
-      "qrCode.isActive": true,
-    }).sort({ createdAt: 1 });
-
-    const formattedStores = demoStores.map((store) => ({
-      id: store._id.toString(),
-      name: store.name,
-      shortDescription: store.shortDescription,
-      representativeImage: store.representativeImage,
-      location: store.location,
-      externalLinks: store.externalLinks,
-      spotlineStory: store.spotlineStory,
-      qrCode: store.qrCode,
-      isDemoMode: store.isDemoMode,
-      demoNotice: store.demoNotice,
-    }));
-
-    res.json({
-      success: true,
-      message: "데모 매장 목록 조회 성공",
-      data: formattedStores,
-    });
-  } catch (error) {
-    console.error("데모 매장 목록 조회 오류:", error);
-    res.status(500).json({
-      success: false,
-      message: "데모 매장 목록을 불러올 수 없습니다",
-      error: "INTERNAL_SERVER_ERROR",
-    });
-  }
-};
-```
-
-### 3. 데모 매장 상세 조회 API
-
-```javascript
-/**
- * GET /api/demo/stores/:qrId
- * 특정 데모 매장 상세 정보 조회
- */
-exports.getDemoStoreByQR = async (req, res) => {
-  try {
-    const { qrId } = req.params;
-
-    // QR ID 형식 검증
-    if (!qrId.startsWith("demo_")) {
-      return res.status(400).json({
-        success: false,
-        message: "유효하지 않은 데모 QR 코드입니다",
-        error: "INVALID_DEMO_QR_FORMAT",
-      });
-    }
-
-    const demoStore = await DemoStore.findOne({
-      "qrCode.id": qrId,
-      isActive: true,
-      "qrCode.isActive": true,
-    });
-
-    if (!demoStore) {
-      return res.status(404).json({
-        success: false,
-        message: "데모 매장을 찾을 수 없습니다",
-        error: "DEMO_STORE_NOT_FOUND",
-      });
-    }
-
-    const formattedStore = {
-      id: demoStore._id.toString(),
-      name: demoStore.name,
-      shortDescription: demoStore.shortDescription,
-      representativeImage: demoStore.representativeImage,
-      location: demoStore.location,
-      externalLinks: demoStore.externalLinks,
-      spotlineStory: demoStore.spotlineStory,
-      qrCode: demoStore.qrCode,
-      isDemoMode: demoStore.isDemoMode,
-      demoNotice: demoStore.demoNotice,
+### 3. 데모 전용 SpotLine 페이지
+```typescript
+// src/app/spotline/demo-store/page.tsx
+export default function DemoStorePage() {
+  const searchParams = useSearchParams();
+  const qrId = searchParams.get("qr") || "demo_cafe_001";
+  
+  const [store, setStore] = useState<SpotlineStore | null>(null);
+  const [nextSpots, setNextSpots] = useState<NextSpot[]>([]);
+  
+  useEffect(() => {
+    const loadDemoData = async () => {
+      setIsLoading(true);
+      
+      // 로딩 시뮬레이션
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setStore(DEMO_STORE);
+      setNextSpots(DEMO_NEXT_SPOTS);
+      setIsLoading(false);
+      
+      console.log("데모 모드: 통계 수집하지 않음");
     };
 
-    res.json({
-      success: true,
-      message: "데모 매장 조회 성공",
-      data: formattedStore,
-    });
-  } catch (error) {
-    console.error("데모 매장 조회 오류:", error);
-    res.status(500).json({
-      success: false,
-      message: "데모 매장 정보를 불러올 수 없습니다",
-      error: "INTERNAL_SERVER_ERROR",
-    });
-  }
-};
-```
-
-### 4. 데모 다음 Spot 조회 API
-
-```javascript
-const DemoRecommendation = require("../models/DemoRecommendation");
-
-/**
- * GET /api/demo/next-spots/:storeId
- * 데모 매장의 다음 추천 Spot 조회
- */
-exports.getDemoNextSpots = async (req, res) => {
-  try {
-    const { storeId } = req.params;
-    const limit = parseInt(req.query.limit) || 4;
-
-    // 매장 ID 유효성 검증
-    if (!mongoose.Types.ObjectId.isValid(storeId)) {
-      return res.status(400).json({
-        success: false,
-        message: "유효하지 않은 매장 ID입니다",
-        error: "INVALID_STORE_ID",
-      });
-    }
-
-    // 추천 매장 조회
-    const recommendations = await DemoRecommendation.find({
-      fromStoreId: storeId,
-      isActive: true,
-    })
-      .populate("toStoreId")
-      .sort({ priority: -1, createdAt: 1 })
-      .limit(limit);
-
-    const nextSpots = recommendations
-      .filter((rec) => rec.toStoreId && rec.toStoreId.isActive)
-      .map((rec) => ({
-        id: rec.toStoreId._id.toString(),
-        name: rec.toStoreId.name,
-        shortDescription: rec.toStoreId.shortDescription,
-        representativeImage: rec.toStoreId.representativeImage,
-        mapLink: rec.toStoreId.location.mapLink,
-        category: rec.category,
-        walkingTime: rec.walkingTime,
-        distance: rec.distance,
-      }));
-
-    res.json({
-      success: true,
-      message: "데모 다음 Spot 조회 성공",
-      data: nextSpots,
-    });
-  } catch (error) {
-    console.error("데모 다음 Spot 조회 오류:", error);
-    res.status(500).json({
-      success: false,
-      message: "데모 다음 Spot을 불러올 수 없습니다",
-      error: "INTERNAL_SERVER_ERROR",
-    });
-  }
-};
-```
-
----
-
-## 🛣️ 라우터 설정
-
-```javascript
-// routes/demo.js
-const express = require("express");
-const router = express.Router();
-const demoController = require("../controllers/demoController");
-
-// 데모 체험 관련 라우트
-router.get("/experience", demoController.getDemoExperience);
-router.get("/stores", demoController.getDemoStores);
-router.get("/stores/:qrId", demoController.getDemoStoreByQR);
-router.get("/next-spots/:storeId", demoController.getDemoNextSpots);
-
-module.exports = router;
-```
-
-```javascript
-// app.js에서 라우터 등록
-const demoRoutes = require("./routes/demo");
-app.use("/api/demo", demoRoutes);
-```
-
----
-
-## 🌱 데모 데이터 시드 스크립트
-
-```javascript
-// scripts/seedDemoData.js
-const mongoose = require("mongoose");
-const DemoStore = require("../models/DemoStore");
-const DemoRecommendation = require("../models/DemoRecommendation");
-
-const demoStoresData = [
-  {
-    name: "카페 데모",
-    shortDescription: "조용한 분위기에서 커피와 함께하는 시간",
-    representativeImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb",
-    location: {
-      address: "서울시 강남구 테헤란로 123 (데모용 주소)",
-      mapLink: "https://map.naver.com/p/search/강남역%20카페",
-    },
-    externalLinks: {
-      instagram: "https://instagram.com/demo_cafe",
-      website: "https://demo-cafe.spotline.com",
-    },
-    spotlineStory:
-      "이곳은 SpotLine 서비스를 소개하기 위한 데모 카페입니다. 실제 서비스에서는 업주님의 매장 스토리가 이 자리에 표시됩니다. 고객들에게 매장의 특별한 이야기와 분위기를 전달할 수 있습니다.",
-    qrCode: {
-      id: "demo_cafe_001",
-      isActive: true,
-    },
-  },
-  {
-    name: "갤러리 데모",
-    shortDescription: "현대 미술과 함께하는 문화 공간",
-    representativeImage: "https://images.unsplash.com/photo-1541961017774-22349e4a1262",
-    location: {
-      address: "서울시 홍대입구역 근처 (데모용 주소)",
-      mapLink: "https://map.naver.com/p/search/홍대%20갤러리",
-    },
-    externalLinks: {
-      instagram: "https://instagram.com/demo_gallery",
-    },
-    spotlineStory: "예술과 일상이 만나는 특별한 공간입니다. 매월 새로운 작가의 작품을 만나볼 수 있으며, 커피와 함께 여유로운 시간을 보낼 수 있습니다.",
-    qrCode: {
-      id: "demo_gallery_001",
-      isActive: true,
-    },
-  },
-  {
-    name: "레스토랑 데모",
-    shortDescription: "신선한 재료로 만든 건강한 식사",
-    representativeImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
-    location: {
-      address: "서울시 이태원동 (데모용 주소)",
-      mapLink: "https://map.naver.com/p/search/이태원%20레스토랑",
-    },
-    externalLinks: {
-      website: "https://demo-restaurant.spotline.com",
-    },
-    spotlineStory: "건강하고 맛있는 식사를 제공하는 레스토랑입니다. 신선한 재료와 정성스러운 요리로 고객들에게 특별한 식사 경험을 선사합니다.",
-    qrCode: {
-      id: "demo_restaurant_001",
-      isActive: true,
-    },
-  },
-  {
-    name: "북카페 데모",
-    shortDescription: "책과 커피가 어우러진 조용한 공간",
-    representativeImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570",
-    location: {
-      address: "서울시 성수동 (데모용 주소)",
-      mapLink: "https://map.naver.com/p/search/성수동%20북카페",
-    },
-    externalLinks: {
-      instagram: "https://instagram.com/demo_bookcafe",
-      blog: "https://blog.naver.com/demo_bookcafe",
-    },
-    spotlineStory: "책과 커피의 완벽한 조화를 경험할 수 있는 공간입니다. 조용한 분위기에서 독서와 함께 여유로운 시간을 보내세요.",
-    qrCode: {
-      id: "demo_bookcafe_001",
-      isActive: true,
-    },
-  },
-];
-
-async function seedDemoData() {
-  try {
-    // 기존 데모 데이터 삭제
-    await DemoStore.deleteMany({});
-    await DemoRecommendation.deleteMany({});
-
-    // 데모 매장 생성
-    const createdStores = await DemoStore.insertMany(demoStoresData);
-    console.log(`${createdStores.length}개의 데모 매장이 생성되었습니다.`);
-
-    // 추천 관계 생성
-    const recommendations = [];
-
-    // 카페 → 갤러리, 레스토랑, 북카페
-    recommendations.push(
-      {
-        fromStoreId: createdStores[0]._id,
-        toStoreId: createdStores[1]._id,
-        category: "culture",
-        priority: 8,
-        distance: 250,
-        walkingTime: 5,
-        description: "카페에서 갤러리로 이어지는 문화적 경험",
-      },
-      {
-        fromStoreId: createdStores[0]._id,
-        toStoreId: createdStores[2]._id,
-        category: "restaurant",
-        priority: 7,
-        distance: 400,
-        walkingTime: 8,
-        description: "커피 후 건강한 식사",
-      },
-      {
-        fromStoreId: createdStores[0]._id,
-        toStoreId: createdStores[3]._id,
-        category: "cafe",
-        priority: 6,
-        distance: 150,
-        walkingTime: 3,
-        description: "카페에서 북카페로 이어지는 독서 시간",
-      }
-    );
-
-    // 갤러리 → 북카페, 카페, 레스토랑
-    recommendations.push(
-      {
-        fromStoreId: createdStores[1]._id,
-        toStoreId: createdStores[3]._id,
-        category: "cafe",
-        priority: 9,
-        distance: 300,
-        walkingTime: 6,
-        description: "예술 감상 후 독서와 함께하는 시간",
-      },
-      {
-        fromStoreId: createdStores[1]._id,
-        toStoreId: createdStores[0]._id,
-        category: "cafe",
-        priority: 7,
-        distance: 250,
-        walkingTime: 5,
-        description: "갤러리에서 카페로 여유로운 시간",
-      },
-      {
-        fromStoreId: createdStores[1]._id,
-        toStoreId: createdStores[2]._id,
-        category: "restaurant",
-        priority: 6,
-        distance: 500,
-        walkingTime: 10,
-        description: "문화 활동 후 맛있는 식사",
-      }
-    );
-
-    await DemoRecommendation.insertMany(recommendations);
-    console.log(`${recommendations.length}개의 데모 추천 관계가 생성되었습니다.`);
-
-    console.log("데모 데이터 시드 완료!");
-  } catch (error) {
-    console.error("데모 데이터 시드 오류:", error);
-  }
-}
-
-module.exports = seedDemoData;
-
-// 직접 실행 시
-if (require.main === module) {
-  mongoose
-    .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/spotline")
-    .then(() => {
-      console.log("MongoDB 연결 성공");
-      return seedDemoData();
-    })
-    .then(() => {
-      mongoose.disconnect();
-    })
-    .catch((error) => {
-      console.error("오류:", error);
-      mongoose.disconnect();
-    });
+    loadDemoData();
+  }, []);
+  
+  // ... 렌더링 로직
 }
 ```
 
----
+## 라우트 구조 설계
 
-## 🔒 환경변수 설정
-
-```bash
-# .env
-MONGODB_URI=mongodb://localhost:27017/spotline
-FRONTEND_URL=http://localhost:3000
-NODE_ENV=development
+### 1. 실제 운영 라우트
+```
+/spotline/[qrId] → 동적 라우트
+- 매장별 고유 ID 사용
+- 데이터베이스에서 실시간 조회
+- 통계 수집 및 분석
+- 예: /spotline/695f96c2825a4a7c28bb6ce9
 ```
 
----
-
-## 🧪 테스트 스크립트
-
-```javascript
-// tests/demo.test.js
-const request = require("supertest");
-const app = require("../app");
-
-describe("Demo API Tests", () => {
-  test("GET /api/demo/experience - 랜덤 데모 체험", async () => {
-    const response = await request(app).get("/api/demo/experience").expect(200);
-
-    expect(response.body.success).toBe(true);
-    expect(response.body.data).toHaveProperty("qrId");
-    expect(response.body.data).toHaveProperty("storeId");
-    expect(response.body.data).toHaveProperty("redirectUrl");
-    expect(response.body.data.isDemoMode).toBe(true);
-  });
-
-  test("GET /api/demo/stores - 데모 매장 목록", async () => {
-    const response = await request(app).get("/api/demo/stores").expect(200);
-
-    expect(response.body.success).toBe(true);
-    expect(Array.isArray(response.body.data)).toBe(true);
-    expect(response.body.data.length).toBeGreaterThan(0);
-  });
-
-  test("GET /api/demo/stores/demo_cafe_001 - 데모 매장 상세", async () => {
-    const response = await request(app).get("/api/demo/stores/demo_cafe_001").expect(200);
-
-    expect(response.body.success).toBe(true);
-    expect(response.body.data).toHaveProperty("name");
-    expect(response.body.data.isDemoMode).toBe(true);
-  });
-});
+### 2. 데모 전용 라우트
+```
+/spotline/demo-store → 정적 라우트
+- 고정된 데모 데이터 사용
+- API 호출 없이 하드코딩 데이터
+- 통계 수집 없음
+- 예: /spotline/demo-store?qr=demo_cafe_001
 ```
 
----
+### 3. 라우트 분리의 장점
+- **완전한 분리**: 실제 운영에 영향 없음
+- **성능 최적화**: 데모는 빠른 응답, 실제는 정확한 데이터
+- **유지보수성**: 각각 독립적으로 관리 가능
+- **확장성**: 데모 기능 추가 시 실제 서비스에 영향 없음
 
-## 🚀 배포 명령어
+## 데이터베이스 설계 (실제 운영용)
 
-```bash
-# 데모 데이터 시드
-npm run seed:demo
+### 1. 데모 플래그 추가
+```sql
+-- stores 테이블에 is_demo 컬럼 추가
+ALTER TABLE stores ADD COLUMN is_demo BOOLEAN DEFAULT FALSE;
 
-# 또는
-node scripts/seedDemoData.js
-
-# 테스트 실행
-npm test -- tests/demo.test.js
-
-# 서버 시작
-npm start
+-- 데모 매장 데이터 삽입
+INSERT INTO stores (id, name, is_demo, ...) 
+VALUES ('demo_cafe_001', '아늑한 카페 스토리', TRUE, ...);
 ```
 
-이 가이드를 따라 구현하면 프론트엔드와 완벽하게 연동되는 데모 시스템을 구축할 수 있습니다!
+### 2. 통계 수집 제외
+```sql
+-- 통계 테이블에서 데모 데이터 제외
+SELECT * FROM analytics 
+WHERE store_id NOT LIKE 'demo_%';
+```
+
+## 배포 및 운영
+
+### 1. 환경별 설정
+```env
+# 개발 환경
+DEMO_MODE=true
+DEMO_API_TIMEOUT=3000
+
+# 운영 환경  
+DEMO_MODE=true
+DEMO_API_TIMEOUT=5000
+```
+
+### 2. 모니터링
+- 데모 페이지 접근 빈도 모니터링
+- 데모 API 응답 시간 측정
+- 에러율 추적 (실제 서비스와 분리)
+
+### 3. 성능 최적화
+- 데모 데이터 캐싱
+- CDN을 통한 데모 이미지 제공
+- 데모 API 응답 시간 최소화
+
+## 보안 고려사항
+
+### 1. 데모 데이터 보호
+- 실제 매장 정보와 완전 분리
+- 가상의 주소, 연락처 사용
+- 실제 SNS 계정과 연결 금지
+
+### 2. 접근 제한
+- 데모 API 호출 빈도 제한
+- 봇 접근 차단
+- 악용 방지를 위한 모니터링
+
+## 업주 소개용 커스터마이징
+
+### 1. 업종별 데모 데이터
+```typescript
+const DEMO_STORES_BY_CATEGORY = {
+  cafe: [/* 카페 데모 데이터 */],
+  restaurant: [/* 음식점 데모 데이터 */],
+  retail: [/* 소매점 데모 데이터 */]
+};
+```
+
+### 2. 지역별 데모 데이터
+```typescript
+const DEMO_STORES_BY_REGION = {
+  gangnam: [/* 강남 지역 데모 */],
+  hongdae: [/* 홍대 지역 데모 */],
+  itaewon: [/* 이태원 지역 데모 */]
+};
+```
+
+### 3. 동적 데모 생성
+```typescript
+const generateDemoStore = (category: string, region: string) => {
+  return {
+    id: `demo_${category}_${region}_001`,
+    name: `${region} ${category} 데모`,
+    // ... 동적 생성 로직
+  };
+};
+```
+
+## 테스트 시나리오
+
+### 1. 기본 플로우 테스트
+1. 데모 버튼 클릭
+2. QR 페이지 로딩 확인
+3. SpotLine 페이지 이동 확인
+4. 데모 데이터 표시 확인
+
+### 2. 에러 처리 테스트
+1. 잘못된 데모 ID 접근
+2. API 타임아웃 시뮬레이션
+3. 네트워크 오류 상황
+
+### 3. 성능 테스트
+1. 동시 접속자 처리
+2. 응답 시간 측정
+3. 메모리 사용량 확인
+
+## 마이그레이션 가이드
+
+### 기존 시스템에서 데모 모드 추가
+1. 데모 데이터 준비
+2. API 엔드포인트 추가
+3. 프론트엔드 데모 모드 로직 구현
+4. 통계 수집 로직 수정
+5. 테스트 및 배포

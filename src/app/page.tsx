@@ -119,9 +119,12 @@ export default function Home() {
 
               <div className="text-sm text-gray-500">
                 또는{" "}
-                <a href="/demo" className="text-blue-600 hover:text-blue-700 underline">
-                  데모보기로 먼저 체험해보기
-                </a>
+                <button 
+                  onClick={() => window.location.href = '/qr/demo_cafe_001'}
+                  className="text-purple-600 hover:text-purple-700 underline font-medium"
+                >
+                  🎭 데모보기로 먼저 체험해보기
+                </button>
               </div>
             </div>
           </div>

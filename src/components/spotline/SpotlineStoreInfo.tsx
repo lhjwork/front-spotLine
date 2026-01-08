@@ -58,37 +58,19 @@ export default function SpotlineStoreInfo({ store, qrId, isDemoMode = false }: S
         <p className="text-gray-700 leading-relaxed mb-4">{store.shortDescription}</p>
 
         {/* 외부 링크 */}
-        {(store.externalLinks.instagram || store.externalLinks.website || store.externalLinks.blog) && (
+        {store.externalLinks && store.externalLinks.length > 0 && (
           <div className="flex flex-wrap gap-3 mb-4">
-            {store.externalLinks.instagram && (
+            {store.externalLinks.map((link, index) => (
               <button
-                onClick={() => handleExternalLinkClick("instagram", store.externalLinks.instagram!)}
+                key={index}
+                onClick={() => handleExternalLinkClick(link.type, link.url)}
                 className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border rounded-md hover:bg-gray-50 transition-colors"
               >
-                <Instagram className="h-4 w-4" />
-                <span>Instagram</span>
+                {link.type === "instagram" && <Instagram className="h-4 w-4" />}
+                {(link.type === "website" || link.type === "blog") && <Globe className="h-4 w-4" />}
+                <span>{link.title}</span>
               </button>
-            )}
-
-            {store.externalLinks.website && (
-              <button
-                onClick={() => handleExternalLinkClick("website", store.externalLinks.website!)}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border rounded-md hover:bg-gray-50 transition-colors"
-              >
-                <Globe className="h-4 w-4" />
-                <span>웹사이트</span>
-              </button>
-            )}
-
-            {store.externalLinks.blog && (
-              <button
-                onClick={() => handleExternalLinkClick("blog", store.externalLinks.blog!)}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border rounded-md hover:bg-gray-50 transition-colors"
-              >
-                <Globe className="h-4 w-4" />
-                <span>블로그</span>
-              </button>
-            )}
+            ))}
           </div>
         )}
 
@@ -96,11 +78,33 @@ export default function SpotlineStoreInfo({ store, qrId, isDemoMode = false }: S
         {store.spotlineStory && (
           <div className="border-t pt-4">
             <button onClick={handleStoryToggle} className="flex items-center justify-between w-full text-left mb-2">
-              <h3 className="font-medium text-gray-900">SpotLine의 관점</h3>
+              <h3 className="font-medium text-gray-900">
+                {typeof store.spotlineStory === 'object' && store.spotlineStory.title 
+                  ? store.spotlineStory.title 
+                  : "SpotLine의 관점"}
+              </h3>
               {isStoryExpanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
             </button>
 
-            {isStoryExpanded && <div className="text-gray-700 leading-relaxed">{store.spotlineStory}</div>}
+            {isStoryExpanded && (
+              <div className="text-gray-700 leading-relaxed">
+                {typeof store.spotlineStory === 'string' 
+                  ? store.spotlineStory 
+                  : store.spotlineStory.content}
+                {typeof store.spotlineStory === 'object' && store.spotlineStory.tags && store.spotlineStory.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {store.spotlineStory.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
