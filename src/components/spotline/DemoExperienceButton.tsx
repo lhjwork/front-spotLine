@@ -22,27 +22,10 @@ const DemoViewButton: React.FC<DemoViewButtonProps> = ({ size = "lg", variant = 
   const handleClick = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL;
-      if (!demoApiUrl) {
-        throw new Error("데모 API URL이 설정되지 않았습니다.");
-      }
-
-      const response = await fetch(`${demoApiUrl}/experience`);
-      const data = await response.json();
-
-      if (data.success) {
-        const result = data.data as DemoExperienceResult;
-        // 업주 소개용 데모 매장으로 이동 (통계 수집 없음)
-        window.location.href = result.redirectUrl;
-      } else {
-        throw new Error(data.message || "데모를 시작할 수 없습니다.");
-      }
+      // 데모 매장으로 직접 이동 (프론트엔드 라우트)
+      window.location.href = '/qr/demo_cafe_001';
     } catch (error) {
       console.error("데모 오류:", error);
-
-      // 폴백: 기본 데모 매장으로 이동
-      const fallbackUrl = `${process.env.NEXT_PUBLIC_DEMO_API_URL}/stores/demo_cafe_001`;
-      window.location.href = fallbackUrl;
 
       if (onError) {
         const errorObj = error instanceof Error ? error : new Error("데모 중 오류가 발생했습니다.");

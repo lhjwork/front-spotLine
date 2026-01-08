@@ -80,13 +80,24 @@ export const getDemoExperience = async (): Promise<DemoExperienceResult> => {
       throw new Error("데모 API URL이 설정되지 않았습니다.");
     }
 
-    const response = await axios.get<ApiResponse<DemoExperienceResult>>(`${demoApiUrl}/experience`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+
+    const response = await axios.get<ApiResponse<DemoExperienceResult>>(`${demoApiUrl}/experience`, {
+      signal: controller.signal,
+      timeout: 10000
+    });
+
+    clearTimeout(timeoutId);
 
     if (response.data.success && response.data.data) {
       return response.data.data;
     }
     throw new Error(response.data.message || "데모 체험을 시작할 수 없습니다");
   } catch (error) {
+    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
+      throw new Error("데모 서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.");
+    }
     return handleApiError(error, "데모 체험을 시작할 수 없습니다");
   }
 };
@@ -99,13 +110,24 @@ export const getDemoStoreByQR = async (qrId: string): Promise<SpotlineStore> => 
       throw new Error("데모 API URL이 설정되지 않았습니다.");
     }
 
-    const response = await axios.get<ApiResponse<SpotlineStore>>(`${demoApiUrl}/stores/${qrId}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3초로 단축
+
+    const response = await axios.get<ApiResponse<SpotlineStore>>(`${demoApiUrl}/stores/${qrId}`, {
+      signal: controller.signal,
+      timeout: 3000
+    });
+
+    clearTimeout(timeoutId);
 
     if (response.data.success && response.data.data) {
       return response.data.data;
     }
     throw new Error(response.data.message || "데모 매장을 찾을 수 없습니다");
   } catch (error) {
+    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
+      throw new Error("데모 서버 응답이 지연되고 있습니다. 로컬 데이터를 사용합니다.");
+    }
     return handleApiError(error, "데모 매장을 찾을 수 없습니다");
   }
 };
@@ -118,13 +140,24 @@ export const getDemoNextSpots = async (storeId: string, limit: number = 4): Prom
       throw new Error("데모 API URL이 설정되지 않았습니다.");
     }
 
-    const response = await axios.get<ApiResponse<NextSpot[]>>(`${demoApiUrl}/next-spots/${storeId}?limit=${limit}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3초로 단축
+
+    const response = await axios.get<ApiResponse<NextSpot[]>>(`${demoApiUrl}/next-spots/${storeId}?limit=${limit}`, {
+      signal: controller.signal,
+      timeout: 3000
+    });
+
+    clearTimeout(timeoutId);
 
     if (response.data.success && response.data.data) {
       return response.data.data;
     }
     throw new Error(response.data.message || "데모 다음 Spot을 가져올 수 없습니다");
   } catch (error) {
+    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
+      throw new Error("데모 서버 응답이 지연되고 있습니다. 로컬 데이터를 사용합니다.");
+    }
     return handleApiError(error, "데모 다음 Spot을 가져올 수 없습니다");
   }
 };
@@ -453,10 +486,22 @@ export const generateSessionId = (): string => {
 // SpotLine 전용 이벤트 로깅 (개인 식별 데이터 최소화)
 export const logSpotlineEvent = async (eventData: SpotlineAnalyticsEvent): Promise<void> => {
   try {
-    await api.post("/analytics/spotline-event", eventData);
+    // 타임아웃 설정 (5초)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    await api.post("/analytics/spotline-event", eventData, {
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
   } catch (error) {
     // 분석 이벤트 실패는 사용자 경험에 영향을 주지 않도록 조용히 처리
-    console.warn("SpotLine 이벤트 로깅 실패:", error);
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn("SpotLine 이벤트 로깅 타임아웃:", error);
+    } else {
+      console.warn("SpotLine 이벤트 로깅 실패:", error);
+    }
   }
 };
 

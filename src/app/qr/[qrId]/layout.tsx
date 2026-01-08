@@ -3,9 +3,9 @@ import { Metadata } from 'next';
 export async function generateMetadata({ 
   params 
 }: { 
-  params: { qrId: string } 
+  params: Promise<{ qrId: string }> 
 }): Promise<Metadata> {
-  const qrId = params.qrId;
+  const { qrId } = await params;
   
   return {
     title: `매장 정보 - QR ${qrId}`,
