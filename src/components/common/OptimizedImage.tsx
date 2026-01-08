@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { IMAGE_CONFIG, FALLBACK_IMAGES, isExternalImage } from "@/constants/demoImages";
 
 interface OptimizedImageProps {
@@ -25,11 +25,6 @@ export default function OptimizedImage({
   type = 'store',
   fill = false
 }: OptimizedImageProps) {
-  const [imgSrc, setImgSrc] = useState(src);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-
   // Picsum 이미지 URL 정규화 (캐싱 개선을 위해)
   const normalizeImageUrl = (url: string) => {
     if (url.includes('picsum.photos')) {
@@ -43,13 +38,23 @@ export default function OptimizedImage({
     return url;
   };
 
-  // 이미지 URL이 변경되면 상태 초기화
-  useEffect(() => {
-    setImgSrc(normalizeImageUrl(src));
+  // src가 변경될 때마다 정규화된 URL 계산
+  const normalizedSrc = useMemo(() => normalizeImageUrl(src), [src]);
+  
+  const [imgSrc, setImgSrc] = useState(normalizedSrc);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentSrc, setCurrentSrc] = useState(src);
+
+  // src가 변경되었을 때 상태 초기화 (useEffect 없이)
+  if (currentSrc !== src) {
+    setCurrentSrc(src);
+    setImgSrc(normalizedSrc);
     setIsLoading(true);
     setHasError(false);
     setRetryCount(0);
-  }, [src]);
+  }
 
   const handleError = () => {
     console.log(`이미지 로딩 실패: ${imgSrc}, 재시도 횟수: ${retryCount}`);
