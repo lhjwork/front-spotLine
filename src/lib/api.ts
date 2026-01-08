@@ -85,7 +85,7 @@ export const getDemoExperience = async (): Promise<DemoExperienceResult> => {
 
     const response = await axios.get<ApiResponse<DemoExperienceResult>>(`${demoApiUrl}/experience`, {
       signal: controller.signal,
-      timeout: 10000
+      timeout: 10000,
     });
 
     clearTimeout(timeoutId);
@@ -95,7 +95,7 @@ export const getDemoExperience = async (): Promise<DemoExperienceResult> => {
     }
     throw new Error(response.data.message || "데모 체험을 시작할 수 없습니다");
   } catch (error) {
-    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
+    if (error instanceof Error && (error.name === "AbortError" || error.message.includes("timeout"))) {
       throw new Error("데모 서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.");
     }
     return handleApiError(error, "데모 체험을 시작할 수 없습니다");
@@ -115,7 +115,7 @@ export const getDemoStoreByQR = async (qrId: string): Promise<SpotlineStore> => 
 
     const response = await axios.get<ApiResponse<SpotlineStore>>(`${demoApiUrl}/stores/${qrId}`, {
       signal: controller.signal,
-      timeout: 3000
+      timeout: 3000,
     });
 
     clearTimeout(timeoutId);
@@ -125,7 +125,7 @@ export const getDemoStoreByQR = async (qrId: string): Promise<SpotlineStore> => 
     }
     throw new Error(response.data.message || "데모 매장을 찾을 수 없습니다");
   } catch (error) {
-    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
+    if (error instanceof Error && (error.name === "AbortError" || error.message.includes("timeout"))) {
       throw new Error("데모 서버 응답이 지연되고 있습니다. 로컬 데이터를 사용합니다.");
     }
     return handleApiError(error, "데모 매장을 찾을 수 없습니다");
@@ -145,7 +145,7 @@ export const getDemoNextSpots = async (storeId: string, limit: number = 4): Prom
 
     const response = await axios.get<ApiResponse<NextSpot[]>>(`${demoApiUrl}/next-spots/${storeId}?limit=${limit}`, {
       signal: controller.signal,
-      timeout: 3000
+      timeout: 3000,
     });
 
     clearTimeout(timeoutId);
@@ -155,10 +155,62 @@ export const getDemoNextSpots = async (storeId: string, limit: number = 4): Prom
     }
     throw new Error(response.data.message || "데모 다음 Spot을 가져올 수 없습니다");
   } catch (error) {
-    if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('timeout'))) {
+    if (error instanceof Error && (error.name === "AbortError" || error.message.includes("timeout"))) {
       throw new Error("데모 서버 응답이 지연되고 있습니다. 로컬 데이터를 사용합니다.");
     }
     return handleApiError(error, "데모 다음 Spot을 가져올 수 없습니다");
+  }
+};
+
+// 데모 매장 목록 조회 (새로운 API 구조)
+export const getDemoStores = async (): Promise<SpotlineStore[]> => {
+  try {
+    const demoApiUrl = process.env.NEXT_PUBLIC_DEMO_API_URL;
+    if (!demoApiUrl) {
+      throw new Error("데모 API URL이 설정되지 않았습니다.");
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await axios.get<ApiResponse<SpotlineStore[]>>(`${demoApiUrl}/stores`, {
+      signal: controller.signal,
+      timeout: 5000,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "데모 매장 목록을 가져올 수 없습니다");
+  } catch (error) {
+    if (error instanceof Error && (error.name === "AbortError" || error.message.includes("timeout"))) {
+      throw new Error("데모 서버 응답이 지연되고 있습니다.");
+    }
+    return handleApiError(error, "데모 매장 목록을 가져올 수 없습니다");
+  }
+};
+
+// QR ID 또는 매장 ID로 매장 정보 조회하는 통합 함수 (새로운 API 구조)
+export const getStoreInfo = async (identifier: string, isStoreId: boolean = false): Promise<{ data: SpotlineStore; isDemo?: boolean }> => {
+  try {
+    if (isStoreId) {
+      // 매장 ID로 직접 조회
+      const storeData = await getSpotlineStoreById(identifier);
+      return { data: storeData };
+    } else {
+      // QR ID로 2단계 조회
+      const qrData = await getStoreIdByQR(identifier);
+      const storeData = await getSpotlineStoreById(qrData.storeId);
+      return {
+        data: storeData,
+        isDemo: qrData.isDemo,
+      };
+    }
+  } catch (error) {
+    console.error("매장 정보 조회 오류:", error);
+    throw error;
   }
 };
 
@@ -242,10 +294,10 @@ export const getStoreByQR = async (qrId: string): Promise<Store> => {
   }
 };
 
-// SpotLine QR 스캔 전용 매장 조회 (매장 ID 기반)
+// SpotLine QR 스캔 전용 매장 조회 (매장 ID 기반) - 새로운 API 구조
 export const getSpotlineStoreById = async (storeId: string): Promise<SpotlineStore> => {
   try {
-    const response = await api.get(`/stores/spotline/${storeId}`);
+    const response = await api.get(`/stores/spotline/store/${storeId}`);
     if (response.data.success && response.data.data) {
       return response.data.data;
     }
@@ -255,8 +307,8 @@ export const getSpotlineStoreById = async (storeId: string): Promise<SpotlineSto
   }
 };
 
-// QR 코드로 매장 ID 조회 (QR → Store ID 매핑)
-export const getStoreIdByQR = async (qrId: string): Promise<{ storeId: string; qrId: string }> => {
+// QR 코드로 매장 ID 조회 (QR → Store ID 매핑) - 새로운 API 구조
+export const getStoreIdByQR = async (qrId: string): Promise<{ storeId: string; qrId: string; storeName?: string; isDemo?: boolean }> => {
   try {
     const response = await api.get(`/qr/${qrId}/store`);
     if (response.data.success && response.data.data) {
@@ -491,13 +543,13 @@ export const logSpotlineEvent = async (eventData: SpotlineAnalyticsEvent): Promi
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     await api.post("/analytics/spotline-event", eventData, {
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeoutId);
   } catch (error) {
     // 분석 이벤트 실패는 사용자 경험에 영향을 주지 않도록 조용히 처리
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof Error && error.name === "AbortError") {
       console.warn("SpotLine 이벤트 로깅 타임아웃:", error);
     } else {
       console.warn("SpotLine 이벤트 로깅 실패:", error);

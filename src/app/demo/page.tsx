@@ -1,10 +1,44 @@
 "use client";
 
 import { QrCode, Smartphone, Users, Target } from "lucide-react";
+import { useState } from "react";
+import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import DemoExperienceButton from "@/components/spotline/DemoExperienceButton";
+import { getDemoStores } from "@/lib/api";
+import { SpotlineStore } from "@/types";
 
 export default function DemoPage() {
+  const [demoStores, setDemoStores] = useState<SpotlineStore[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showStoreList, setShowStoreList] = useState(false);
+
+  // 데모 매장 목록 로드
+  const loadDemoStores = async () => {
+    if (demoStores.length > 0) {
+      setShowStoreList(!showStoreList);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const stores = await getDemoStores();
+      setDemoStores(stores);
+      setShowStoreList(true);
+    } catch (error) {
+      console.error("데모 매장 목록 로드 실패:", error);
+      alert("데모 매장 목록을 불러올 수 없습니다. 기본 데모를 체험해보세요.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 데모 매장 직접 보기
+  const handleDemoStoreView = (storeId: string) => {
+    // 매장 ID를 사용하여 SpotLine 페이지로 이동
+    window.location.href = `/spotline/${storeId}`;
+  };
+
   return (
     <Layout showFooter>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,9 +74,36 @@ export default function DemoPage() {
 
             <p className="text-lg text-gray-500 mb-8">업주님을 위한 데모 체험으로 SpotLine의 가능성을 확인해보세요</p>
 
-            <div className="mb-12">
+            <div className="mb-8 space-y-4">
               <DemoExperienceButton size="lg" className="px-8 py-4 text-lg" showArrow />
+
+              <div className="text-sm text-gray-500">또는</div>
+
+              <button onClick={loadDemoStores} disabled={isLoading} className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border transition-colors disabled:opacity-50">
+                {isLoading ? "로딩 중..." : showStoreList ? "매장 목록 숨기기" : "데모 매장 목록 보기"}
+              </button>
             </div>
+
+            {/* 데모 매장 목록 */}
+            {showStoreList && demoStores.length > 0 && (
+              <div className="bg-white rounded-xl border p-6 mb-8">
+                <h3 className="font-semibold text-gray-900 mb-4">데모 매장 목록</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {demoStores.map((store) => (
+                    <div key={store.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="relative w-full h-32 mb-3">
+                        <Image src={store.representativeImage} alt={store.name} fill className="object-cover rounded-md" />
+                      </div>
+                      <h4 className="font-medium text-gray-900 mb-2">{store.name}</h4>
+                      <p className="text-sm text-gray-600 mb-3">{store.shortDescription}</p>
+                      <button onClick={() => handleDemoStoreView(store.id)} className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+                        데모 보기
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-left">
               <h3 className="font-semibold text-amber-900 mb-4 text-center">💡 데모에서 체험할 수 있는 기능</h3>
