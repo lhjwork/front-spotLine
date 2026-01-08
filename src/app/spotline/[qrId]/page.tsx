@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { getSpotlineStoreByQR, getDemoStoreByQR, getNextSpots, getDemoNextSpots, logPageEnter, logExperienceStart } from "@/lib/api";
+import { useParams, useSearchParams } from "next/navigation";
+import { getSpotlineStoreById, getDemoStoreByQR, getNextSpots, getDemoNextSpots, logPageEnter, logExperienceStart } from "@/lib/api";
 import { SpotlineStore, NextSpot, ExperienceSession } from "@/types";
 import Layout from "@/components/layout/Layout";
 import StoreImage from "@/components/store/StoreImage";
@@ -12,10 +11,13 @@ import NextSpotsList from "@/components/spotline/NextSpotsList";
 import MapButton from "@/components/map/MapButton";
 import { PageLoading } from "@/components/common/Loading";
 import { ErrorMessage } from "@/components/common/ErrorBoundary";
+import Link from "next/link";
 
 export default function SpotlinePage() {
   const params = useParams();
-  const qrId = params.qrId as string;
+  const searchParams = useSearchParams();
+  const storeId = params.qrId as string; // URL에서는 storeId를 받음
+  const qrId = searchParams.get("qr"); // QR 코드 ID는 쿼리 파라미터로
 
   const [store, setStore] = useState<SpotlineStore | null>(null);
   const [nextSpots, setNextSpots] = useState<NextSpot[]>([]);
@@ -27,12 +29,12 @@ export default function SpotlinePage() {
   // 체류 시간 측정을 위한 시작 시간
   const [startTime] = useState(Date.now());
 
-  // 데모 모드 확인 (QR ID로 판단)
+  // 데모 모드 확인 (Store ID로 판단)
   useEffect(() => {
-    if (qrId && qrId.startsWith("demo_")) {
+    if (storeId && storeId.startsWith("demo_")) {
       setIsDemoMode(true);
     }
-  }, [qrId]);
+  }, [storeId]);
 
   // Experience 세션 확인 (실제 운영 모드에서만)
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function SpotlinePage() {
   // 데이터 로딩
   useEffect(() => {
     const loadSpotlineData = async () => {
-      if (!qrId) return;
+      if (!storeId) return;
 
       try {
         setIsLoading(true);
@@ -63,19 +65,19 @@ export default function SpotlinePage() {
 
         if (isDemoMode) {
           // 데모 모드: 데모 API 사용, 통계 수집 없음
-          storeData = await getDemoStoreByQR(qrId);
+          storeData = await getDemoStoreByQR(storeId);
           spotsData = await getDemoNextSpots(storeData.id, 4);
           console.log("데모 모드: 통계 수집하지 않음");
         } else {
           // 실제 운영 모드: 실제 API 사용, 통계 수집
-          storeData = await getSpotlineStoreByQR(qrId);
+          storeData = await getSpotlineStoreById(storeId);
 
           // 페이지 진입 이벤트 로깅
-          await logPageEnter(qrId, storeData.id);
+          await logPageEnter(storeId, qrId || undefined);
 
           // Experience 시작 이벤트 로깅 (세션이 있는 경우)
           if (experienceSession) {
-            await logExperienceStart(qrId, storeData.id, experienceSession.id);
+            await logExperienceStart(qrId || storeId, storeData.id, experienceSession.id);
           }
 
           spotsData = await getNextSpots(storeData.id, 4);
@@ -92,7 +94,7 @@ export default function SpotlinePage() {
     };
 
     loadSpotlineData();
-  }, [qrId, experienceSession, isDemoMode]);
+  }, [storeId, qrId, experienceSession, isDemoMode]);
 
   // 페이지 이탈 시 체류 시간 로깅 (실제 운영 모드에서만)
   useEffect(() => {
@@ -145,6 +147,22 @@ export default function SpotlinePage() {
             </div>
           )}
 
+          {/* QR 스캔 안내 (QR로 접근한 경우) */}
+          {qrId && !isDemoMode && (
+            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+              <div className="flex items-center">
+                <div className="shrink-0">
+                  <span className="text-green-600 text-lg">📍</span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-green-800">
+                    <strong>현재 방문 중인 매장</strong> - QR 코드를 통해 접속하셨습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Experience 세션 표시 (개발 환경에서만, 실제 운영 모드에서만) */}
           {process.env.NODE_ENV === "development" && !isDemoMode && experienceSession && (
             <div className="bg-blue-100 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
@@ -159,7 +177,7 @@ export default function SpotlinePage() {
               <StoreImage images={store.representativeImage ? [store.representativeImage] : []} storeName={store.name} className="h-64 md:h-80" />
 
               {/* 매장 상세 정보 */}
-              <SpotlineStoreInfo store={store} qrId={qrId} isDemoMode={isDemoMode} />
+              <SpotlineStoreInfo store={store} qrId={qrId || storeId} isDemoMode={isDemoMode} />
 
               {/* 지도 버튼 */}
               <div className="bg-white rounded-lg shadow-sm border p-4">
@@ -176,14 +194,14 @@ export default function SpotlinePage() {
                       },
                     },
                     qrCode: {
-                      id: store.qrCode?.id || qrId,
+                      id: store.qrCode?.id || storeId,
                       isActive: store.qrCode?.isActive || true,
                     },
                     isActive: true,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                   }}
-                  qrId={qrId}
+                  qrId={qrId || storeId}
                   storeId={store.id}
                 />
               </div>
@@ -191,7 +209,7 @@ export default function SpotlinePage() {
           )}
 
           {/* 추천 목록 섹션 */}
-          <NextSpotsList nextSpots={nextSpots} currentQrId={qrId} currentStoreId={store?.id || ""} isLoading={false} isDemoMode={isDemoMode} />
+          <NextSpotsList nextSpots={nextSpots} currentQrId={qrId || storeId} currentStoreId={store?.id || ""} isLoading={false} isDemoMode={isDemoMode} />
 
           {/* 데모 모드 푸터 안내 */}
           {isDemoMode && (

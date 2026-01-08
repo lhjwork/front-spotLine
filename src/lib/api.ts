@@ -209,16 +209,29 @@ export const getStoreByQR = async (qrId: string): Promise<Store> => {
   }
 };
 
-// SpotLine QR 스캔 전용 매장 조회
-export const getSpotlineStoreByQR = async (qrId: string): Promise<SpotlineStore> => {
+// SpotLine QR 스캔 전용 매장 조회 (매장 ID 기반)
+export const getSpotlineStoreById = async (storeId: string): Promise<SpotlineStore> => {
   try {
-    const response = await api.get(`/stores/spotline/${qrId}`);
+    const response = await api.get(`/stores/spotline/${storeId}`);
     if (response.data.success && response.data.data) {
       return response.data.data;
     }
     throw new Error(response.data.message || "매장을 찾을 수 없습니다");
   } catch (error) {
     return handleApiError(error, "매장을 찾을 수 없습니다");
+  }
+};
+
+// QR 코드로 매장 ID 조회 (QR → Store ID 매핑)
+export const getStoreIdByQR = async (qrId: string): Promise<{ storeId: string; qrId: string }> => {
+  try {
+    const response = await api.get(`/qr/${qrId}/store`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    }
+    throw new Error(response.data.message || "QR 코드를 찾을 수 없습니다");
+  } catch (error) {
+    return handleApiError(error, "QR 코드를 찾을 수 없습니다");
   }
 };
 
@@ -447,11 +460,11 @@ export const logSpotlineEvent = async (eventData: SpotlineAnalyticsEvent): Promi
   }
 };
 
-// 페이지 진입 이벤트 (SpotLine 전용)
-export const logPageEnter = (qrId: string, storeId: string) => {
+// 페이지 진입 이벤트 (SpotLine 전용) - 매장 ID 기반
+export const logPageEnter = (storeId: string, qrId?: string) => {
   const sessionId = generateSessionId();
   return logSpotlineEvent({
-    qrCode: qrId,
+    qrCode: qrId || storeId,
     store: storeId,
     eventType: "page_enter",
     sessionId,
