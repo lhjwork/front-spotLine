@@ -1,6 +1,6 @@
 "use client";
 
-import { QrCode, MapPin, ArrowRight, Smartphone } from "lucide-react";
+import { QrCode, MapPin, ArrowRight, Smartphone, Coffee, Palette, Route } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import SpotlineStartButton from "@/components/spotline/SpotlineExperienceButton";
 
@@ -28,22 +28,28 @@ export default function Home() {
               <SpotlineStartButton size="lg" className="px-8 py-4 text-lg" showArrow />
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 text-left">
-              <h3 className="font-semibold text-gray-900 mb-4 text-center">이런 순간에 SpotLine을 사용해보세요</h3>
-              <ul className="text-gray-700 space-y-2 text-sm">
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  {` 카페에서 작업을 마친 후 "이제 어디 가지?" 하는 순간`}
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  전시를 관람한 후 여운을 이어갈 다음 공간을 찾을 때
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  무작정 검색하지 않고 의도된 동선으로 움직이고 싶을 때
-                </li>
-              </ul>
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+              <h3 className="font-bold text-gray-900 mb-6 text-center text-lg">이런 순간에 SpotLine을 사용해보세요</h3>
+              <div className="grid gap-4">
+                <div className="flex items-center gap-4 rounded-xl bg-amber-50 p-4">
+                  <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-xl shrink-0">
+                    <Coffee className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <p className="text-gray-700 text-sm">{`카페에서 작업을 마친 후 "이제 어디 가지?" 하는 순간`}</p>
+                </div>
+                <div className="flex items-center gap-4 rounded-xl bg-purple-50 p-4">
+                  <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-xl shrink-0">
+                    <Palette className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <p className="text-gray-700 text-sm">전시를 관람한 후 여운을 이어갈 다음 공간을 찾을 때</p>
+                </div>
+                <div className="flex items-center gap-4 rounded-xl bg-blue-50 p-4">
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-xl shrink-0">
+                    <Route className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <p className="text-gray-700 text-sm">무작정 검색하지 않고 의도된 동선으로 움직이고 싶을 때</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
