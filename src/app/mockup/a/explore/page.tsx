@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   MapPin,
   Clock,
@@ -46,8 +47,18 @@ const SOURCE_FILTERS: { key: SourceFilter; label: string }[] = [
 
 const SORT_OPTIONS = ["가까운 순", "평점 높은 순", "최신 등록 순"];
 
-export default function MockupAExplore() {
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+export default function MockupAExplorePage() {
+  return (
+    <Suspense>
+      <MockupAExplore />
+    </Suspense>
+  );
+}
+
+function MockupAExplore() {
+  const searchParams = useSearchParams();
+  const initialView = searchParams.get("view") === "map" ? "map" : "list";
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSource, setSelectedSource] = useState<SourceFilter>("all");
   const [sortBy, setSortBy] = useState("가까운 순");

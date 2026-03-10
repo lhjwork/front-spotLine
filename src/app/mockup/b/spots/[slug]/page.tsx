@@ -9,17 +9,14 @@ import {
   Star,
   Heart,
   Share2,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
   Navigation,
-  Instagram,
-  Globe,
   User,
   Eye,
   TrendingUp,
   Zap,
-  Calendar,
+  Compass,
   MessageCircle,
 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
@@ -108,22 +105,6 @@ export default function MockupBSpotDetail() {
   const nextSpots = MOCK_SPOTS.filter(
     (s) => s.id !== spot.id && (s.area === spot.area || s.category === spot.category)
   ).slice(0, 3);
-
-  const openKakaoMap = () => {
-    window.open(
-      `https://map.kakao.com/link/search/${encodeURIComponent(spot.name + " " + spot.address)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
-  const openNaverMap = () => {
-    window.open(
-      `https://map.naver.com/v5/search/${encodeURIComponent(spot.name + " " + spot.address)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
 
   return (
     <Layout showFooter={false} showHeader={false}>
@@ -294,24 +275,15 @@ export default function MockupBSpotDetail() {
           </div>
         </div>
 
-        {/* 외부 링크 + 지도 */}
-        <div className="px-4 py-3 flex flex-wrap gap-2 border-b border-gray-100">
-          <button
-            onClick={openKakaoMap}
-            className="flex items-center gap-1.5 px-3 py-2 bg-yellow-50 rounded-lg text-sm text-yellow-700 hover:bg-yellow-100 transition-colors"
+        {/* 지도 링크 */}
+        <div className="px-4 py-3 border-b border-gray-100">
+          <Link
+            href="/mockup/a/explore?view=map"
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 rounded-xl text-sm text-blue-700 hover:bg-blue-100 transition-colors w-fit"
           >
-            <Navigation className="h-4 w-4" />
-            카카오맵
-            <ExternalLink className="h-3 w-3 text-yellow-400" />
-          </button>
-          <button
-            onClick={openNaverMap}
-            className="flex items-center gap-1.5 px-3 py-2 bg-green-50 rounded-lg text-sm text-green-700 hover:bg-green-100 transition-colors"
-          >
-            <Navigation className="h-4 w-4" />
-            네이버지도
-            <ExternalLink className="h-3 w-3 text-green-400" />
-          </button>
+            <Compass className="h-4 w-4" />
+            SpotLine 지도에서 보기
+          </Link>
         </div>
 
         {/* SpotLine Story */}
@@ -500,20 +472,20 @@ export default function MockupBSpotDetail() {
 
         {/* 하단 고정 바 */}
         <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3">
-          <button
-            onClick={openKakaoMap}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-yellow-500 text-white rounded-xl font-medium hover:bg-yellow-600 transition-colors"
+          <Link
+            href="/mockup/a/explore?view=map"
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+          >
+            <Compass className="h-4 w-4" />
+            SpotLine 지도
+          </Link>
+          <Link
+            href={`/mockup/b/spots?${queryString}`}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
           >
             <Navigation className="h-4 w-4" />
-            카카오맵
-          </button>
-          <button
-            onClick={openNaverMap}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
-          >
-            <Navigation className="h-4 w-4" />
-            네이버지도
-          </button>
+            목록 보기
+          </Link>
           <button className="flex items-center justify-center gap-2 py-3 px-5 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
             <Share2 className="h-4 w-4" />
             공유
