@@ -13,115 +13,112 @@ import {
   ChevronDown,
   ChevronUp,
   Navigation,
-  Instagram,
-  Globe,
   User,
-  Calendar,
+  Eye,
+  ThumbsUp,
+  MessageCircle,
+  Zap,
 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { MOCK_SPOTS, getActivitiesForSpot } from "@/data/mockup";
+import type { MockupSpot, UserSpotActivity } from "@/types";
 
-// 상세 목업 데이터
-const SPOT_DETAILS: Record<string, {
-  name: string;
-  category: string;
-  area: string;
-  address: string;
-  description: string;
-  image: string;
-  images: string[];
-  rating: number;
-  tags: string[];
-  author: string;
-  date: string;
-  story: { title: string; content: string };
-  externalLinks: { type: string; url: string; title: string }[];
-  nextSpots: {
-    id: string;
-    name: string;
-    category: string;
-    description: string;
-    image: string;
-    distance: number;
-    walkingTime: number;
-    rating: number;
-    reason: string;
-  }[];
-}> = {
-  "ondo-coffee": {
-    name: "온도 커피",
-    category: "카페",
-    area: "성수",
-    address: "서울 성동구 성수이로 12길 21",
-    description: "핸드드립 전문 카페. 조용한 분위기에서 원두의 풍미를 즐길 수 있는 곳.",
-    image: "https://picsum.photos/seed/cafe1/800/600",
-    images: [
-      "https://picsum.photos/seed/cafe1-1/400/300",
-      "https://picsum.photos/seed/cafe1-2/400/300",
-      "https://picsum.photos/seed/cafe1-3/400/300",
-    ],
-    rating: 4.8,
-    tags: ["핸드드립", "디저트", "작업하기 좋은", "조용한"],
-    author: "크루 민지",
-    date: "2026.03.05",
-    story: {
-      title: "성수에서 찾은 조용한 커피 한 잔",
-      content:
-        "성수동의 번화한 거리에서 조금 벗어난 골목에 위치한 온도 커피. 입구는 소박하지만, 문을 열고 들어서면 따뜻한 조명과 원목 인테리어가 맞아줍니다.\n\n이곳의 시그니처는 단연 핸드드립 커피. 바리스타가 직접 선별한 싱글 오리진 원두로, 주문이 들어오면 한 잔 한 잔 정성스럽게 내려줍니다. 에티오피아 예가체프의 꽃향기와 과일 같은 산미가 특히 인상적이었습니다.\n\n2층에는 조용한 작업 공간이 마련되어 있어, 노트북을 가져와 작업하기에도 좋습니다. 다만 점심시간에는 꽤 붐비니 오전이나 오후 늦게 방문하는 것을 추천드립니다.\n\n수제 디저트도 빼놓을 수 없는데, 특히 당근 케이크와 스콘이 커피와 완벽한 궁합을 이룹니다.",
-    },
-    externalLinks: [
-      { type: "instagram", url: "#", title: "@ondo_coffee" },
-      { type: "website", url: "#", title: "홈페이지" },
-    ],
-    nextSpots: [
-      {
-        id: "eulji-gallery",
-        name: "을지 갤러리",
-        category: "전시",
-        description: "현대미술 기획전이 열리는 소규모 갤러리",
-        image: "https://picsum.photos/seed/gallery1/400/300",
-        distance: 280,
-        walkingTime: 4,
-        rating: 4.6,
-        reason: "커피 후 가볍게 문화생활",
-      },
-      {
-        id: "moment-shop",
-        name: "소품샵 모먼트",
-        category: "쇼핑",
-        description: "감성적인 소품과 문구를 큐레이션하는 작은 가게",
-        image: "https://picsum.photos/seed/shop1/400/300",
-        distance: 150,
-        walkingTime: 2,
-        rating: 4.5,
-        reason: "바로 옆 골목의 숨겨진 소품샵",
-      },
-      {
-        id: "mido-restaurant",
-        name: "미도식당",
-        category: "맛집",
-        description: "40년 전통의 수제 돈까스",
-        image: "https://picsum.photos/seed/restaurant1/400/300",
-        distance: 200,
-        walkingTime: 3,
-        rating: 4.9,
-        reason: "근처에서 점심 먹기 좋은 곳",
-      },
-    ],
-  },
-};
+// Generate a story object from spot description
+function generateStory(spot: MockupSpot): { title: string; content: string } {
+  const areaName = spot.area;
+  const categoryLabel = spot.categoryLabel;
 
-// 기본 데이터 (slug가 없을 때)
-const DEFAULT_SPOT = SPOT_DETAILS["ondo-coffee"];
+  if (spot.source === "spotline") {
+    return {
+      title: `${areaName}에서 만나는 ${spot.name}`,
+      content: `${spot.description}\n\n${spot.name}은(는) ${areaName} 지역의 ${categoryLabel} 중에서도 특별한 매력을 가진 곳입니다. SpotLine 크루가 직접 방문하고 엄선한 이 장소는 방문자들에게 잊지 못할 경험을 선사합니다.\n\n${spot.tags.map((t) => `#${t}`).join(" ")} 등의 키워드로 사랑받고 있으며, 지금까지 ${spot.userStats.visitCount}명이 방문했습니다.\n\n${spot.address}에 위치해 있으니, 가까운 곳에 계시다면 꼭 한번 들러보세요.`,
+    };
+  }
+
+  return {
+    title: `유저가 발견한 숨은 명소, ${spot.name}`,
+    content: `${spot.description}\n\n${spot.recommendedBy?.nickname || "유저"}님이 직접 추천한 이 장소는 ${areaName} 지역에서 ${categoryLabel}을(를) 찾는 분들에게 딱 맞는 곳입니다.\n\n${spot.tags.map((t) => `#${t}`).join(" ")} 같은 매력 포인트를 가지고 있어, 이미 ${spot.userStats.likeCount}명이 좋아요를 눌렀습니다.\n\n실제 방문자들의 생생한 후기와 함께, 이 장소의 진짜 매력을 느껴보세요.`,
+  };
+}
+
+// Get recommended next spots (same area or same category, excluding current)
+function getNextSpots(current: MockupSpot): MockupSpot[] {
+  const sameArea = MOCK_SPOTS.filter(
+    (s) => s.id !== current.id && s.area === current.area
+  );
+  const sameCategory = MOCK_SPOTS.filter(
+    (s) =>
+      s.id !== current.id &&
+      s.category === current.category &&
+      !sameArea.some((a) => a.id === s.id)
+  );
+  return [...sameArea, ...sameCategory].slice(0, 3);
+}
+
+// Activity type label
+function activityTypeLabel(type: UserSpotActivity["type"]): string {
+  switch (type) {
+    case "visit":
+      return "방문";
+    case "like":
+      return "좋아요";
+    case "recommend":
+      return "추천";
+    default:
+      return "";
+  }
+}
+
+// Format relative time
+function formatRelativeTime(dateStr: string): string {
+  const now = new Date("2026-03-10T12:00:00");
+  const date = new Date(dateStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) return "방금 전";
+  if (diffHours < 24) return `${diffHours}시간 전`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}일 전`;
+  return `${Math.floor(diffDays / 7)}주 전`;
+}
 
 export default function SpotDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const spot = SPOT_DETAILS[slug] || DEFAULT_SPOT;
+  const spot = MOCK_SPOTS.find((s) => s.slug === slug);
 
   const [liked, setLiked] = useState(false);
   const [storyExpanded, setStoryExpanded] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  if (!spot) {
+    return (
+      <Layout showFooter={false} showHeader={false}>
+        <div className="max-w-2xl mx-auto bg-white min-h-screen flex flex-col items-center justify-center p-8">
+          <h1 className="text-xl font-bold text-gray-900 mb-2">
+            장소를 찾을 수 없습니다
+          </h1>
+          <p className="text-sm text-gray-500 mb-6">
+            요청하신 Spot 정보가 존재하지 않습니다.
+          </p>
+          <Link
+            href="/mockup/a/explore"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            탐색으로 돌아가기
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  const story = generateStory(spot);
+  const nextSpots = getNextSpots(spot);
+  const activities = getActivitiesForSpot(spot.id);
+  const images = spot.images || [spot.image];
 
   return (
     <Layout showFooter={false} showHeader={false}>
@@ -149,9 +146,10 @@ export default function SpotDetailPage() {
                 className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow"
               >
                 <Heart
-                  className={`h-5 w-5 ${
+                  className={cn(
+                    "h-5 w-5",
                     liked ? "text-red-500 fill-red-500" : "text-gray-700"
-                  }`}
+                  )}
                 />
               </button>
               <button className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow">
@@ -160,11 +158,26 @@ export default function SpotDetailPage() {
             </div>
           </div>
 
+          {/* 소스 배지 */}
+          <div className="absolute top-16 left-4">
+            {spot.source === "spotline" ? (
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-blue-600 text-white px-2.5 py-1 rounded-full shadow">
+                <Zap className="h-3 w-3" />
+                SpotLine 제휴
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-xs font-medium bg-purple-600 text-white px-2.5 py-1 rounded-full shadow">
+                <User className="h-3 w-3" />
+                유저 추천
+              </span>
+            )}
+          </div>
+
           {/* 하단 기본 정보 오버레이 */}
           <div className="absolute bottom-0 left-0 right-0 p-5">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">
-                {spot.category}
+                {spot.categoryLabel}
               </span>
               <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
                 {spot.area}
@@ -178,19 +191,28 @@ export default function SpotDetailPage() {
         </div>
 
         {/* 이미지 갤러리 */}
-        <div className="px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
-          {spot.images.map((img, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedImage(i)}
-              className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                selectedImage === i ? "border-blue-600" : "border-transparent"
-              }`}
-            >
-              <img src={img} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
+        {images.length > 1 && (
+          <div className="px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                onClick={() => setSelectedImage(i)}
+                className={cn(
+                  "shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors",
+                  selectedImage === i
+                    ? "border-blue-600"
+                    : "border-transparent"
+                )}
+              >
+                <img
+                  src={img}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* 메타 정보 */}
         <div className="px-4 py-4 border-b border-gray-100">
@@ -210,11 +232,11 @@ export default function SpotDetailPage() {
           <div className="flex items-center gap-3 text-xs text-gray-500">
             <span className="flex items-center gap-1">
               <User className="h-3.5 w-3.5" />
-              {spot.author}
+              {spot.author || spot.recommendedBy?.nickname || "익명"}
             </span>
             <span className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
-              {spot.date}
+              <MapPin className="h-3.5 w-3.5" />
+              {spot.distance}m · 도보 {spot.walkingTime}분
             </span>
           </div>
 
@@ -231,22 +253,190 @@ export default function SpotDetailPage() {
           </div>
         </div>
 
-        {/* 외부 링크 */}
-        <div className="px-4 py-3 flex gap-2 border-b border-gray-100">
-          {spot.externalLinks.map((link) => (
-            <button
-              key={link.type}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+        {/* 유저 활동 섹션 */}
+        <div className="px-4 py-5 border-b border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-3">유저 활동</h2>
+
+          {/* 통계 */}
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-1.5 text-sm text-gray-600">
+              <Eye className="h-4 w-4 text-blue-500" />
+              <span>
+                방문{" "}
+                <span className="font-bold text-gray-900">
+                  {spot.userStats.visitCount}
+                </span>
+              </span>
+            </div>
+            <span className="text-gray-300">·</span>
+            <div className="flex items-center gap-1.5 text-sm text-gray-600">
+              <ThumbsUp className="h-4 w-4 text-red-500" />
+              <span>
+                좋아요{" "}
+                <span className="font-bold text-gray-900">
+                  {spot.userStats.likeCount}
+                </span>
+              </span>
+            </div>
+            <span className="text-gray-300">·</span>
+            <div className="flex items-center gap-1.5 text-sm text-gray-600">
+              <MessageCircle className="h-4 w-4 text-green-500" />
+              <span>
+                추천{" "}
+                <span className="font-bold text-gray-900">
+                  {spot.userStats.recommendCount}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          {/* 최근 방문자 */}
+          {spot.userStats.recentVisitors.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 mb-2">최근 방문자</p>
+              <div className="flex items-center gap-3">
+                {spot.userStats.recentVisitors.map((visitor) => (
+                  <div
+                    key={visitor.id}
+                    className="flex items-center gap-1.5"
+                  >
+                    <img
+                      src={visitor.avatar}
+                      alt={visitor.nickname}
+                      className="w-7 h-7 rounded-full object-cover border border-gray-200"
+                    />
+                    <span className="text-xs text-gray-600">
+                      {visitor.nickname}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 최근 활동 피드 */}
+          {activities.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">최근 활동</p>
+              <div className="space-y-2">
+                {activities.slice(0, 3).map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-2.5 p-2.5 bg-gray-50 rounded-lg"
+                  >
+                    <img
+                      src={activity.user.avatar}
+                      alt={activity.user.nickname}
+                      className="w-7 h-7 rounded-full object-cover shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-medium text-gray-900">
+                          {activity.user.nickname}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
+                            activity.type === "visit" &&
+                              "bg-blue-100 text-blue-700",
+                            activity.type === "like" &&
+                              "bg-red-100 text-red-700",
+                            activity.type === "recommend" &&
+                              "bg-green-100 text-green-700"
+                          )}
+                        >
+                          {activityTypeLabel(activity.type)}
+                        </span>
+                        <span className="text-[10px] text-gray-400">
+                          {formatRelativeTime(activity.createdAt)}
+                        </span>
+                      </div>
+                      {activity.review && (
+                        <p className="text-xs text-gray-600 line-clamp-2">
+                          {activity.review}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* SpotLine 정보 (제휴 Spot) */}
+        {spot.source === "spotline" && spot.spotlineAffiliation && (
+          <div className="px-4 py-5 border-b border-gray-100">
+            <h2 className="text-lg font-bold text-gray-900 mb-3">
+              SpotLine 정보
+            </h2>
+            <div
+              className="rounded-xl border p-4"
+              style={{
+                borderColor: spot.spotlineAffiliation.spotlineColor + "40",
+                backgroundColor:
+                  spot.spotlineAffiliation.spotlineColor + "08",
+              }}
             >
-              {link.type === "instagram" ? (
-                <Instagram className="h-4 w-4" />
-              ) : (
-                <Globe className="h-4 w-4" />
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                  style={{
+                    backgroundColor:
+                      spot.spotlineAffiliation.spotlineColor,
+                  }}
+                >
+                  SL
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold text-gray-900">
+                    {spot.spotlineAffiliation.spotlineName}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    큐레이터: {spot.spotlineAffiliation.curatorName}
+                  </p>
+                </div>
+                {spot.spotlineAffiliation.isPartner && (
+                  <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                    공식 파트너
+                  </span>
+                )}
+              </div>
+              {spot.spotlineAffiliation.partnerSince && (
+                <p className="text-[10px] text-gray-400 mt-2 ml-13">
+                  제휴 시작: {spot.spotlineAffiliation.partnerSince}
+                </p>
               )}
-              {link.title}
-              <ExternalLink className="h-3 w-3 text-gray-400" />
-            </button>
-          ))}
+            </div>
+          </div>
+        )}
+
+        {/* 추천한 유저 (유저 Spot) */}
+        {spot.source === "user" && spot.recommendedBy && (
+          <div className="px-4 py-5 border-b border-gray-100">
+            <h2 className="text-lg font-bold text-gray-900 mb-3">
+              추천한 유저
+            </h2>
+            <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <img
+                src={spot.recommendedBy.avatar}
+                alt={spot.recommendedBy.nickname}
+                className="w-12 h-12 rounded-full object-cover border-2 border-purple-200"
+              />
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">
+                  {spot.recommendedBy.nickname}
+                </h3>
+                <p className="text-xs text-gray-500">
+                  이 장소를 추천했습니다
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 외부 링크 */}
+        <div className="px-4 py-3 flex gap-2 flex-wrap border-b border-gray-100">
           <button
             onClick={() =>
               window.open(
@@ -285,7 +475,7 @@ export default function SpotDetailPage() {
           >
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-bold text-gray-900">
-                {spot.story.title}
+                {story.title}
               </h2>
               {storyExpanded ? (
                 <ChevronUp className="h-5 w-5 text-gray-400" />
@@ -296,11 +486,12 @@ export default function SpotDetailPage() {
           </button>
 
           <div
-            className={`text-sm text-gray-700 leading-relaxed whitespace-pre-line transition-all ${
-              storyExpanded ? "" : "line-clamp-4"
-            }`}
+            className={cn(
+              "text-sm text-gray-700 leading-relaxed whitespace-pre-line transition-all",
+              !storyExpanded && "line-clamp-4"
+            )}
           >
-            {spot.story.content}
+            {story.content}
           </div>
 
           {!storyExpanded && (
@@ -326,10 +517,10 @@ export default function SpotDetailPage() {
           </p>
 
           <div className="space-y-3">
-            {spot.nextSpots.map((next) => (
+            {nextSpots.map((next) => (
               <Link
                 key={next.id}
-                href={`/mockup/a/spots/${next.id}`}
+                href={`/mockup/a/spots/${next.slug}`}
                 className="block bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="flex">
@@ -340,6 +531,20 @@ export default function SpotDetailPage() {
                       alt={next.name}
                       className="w-full h-full object-cover"
                     />
+                    {/* 소스 인디케이터 */}
+                    <div className="absolute top-1.5 left-1.5">
+                      {next.source === "spotline" ? (
+                        <span className="inline-flex items-center gap-0.5 text-[9px] font-medium bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
+                          <Zap className="h-2.5 w-2.5" />
+                          제휴
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-0.5 text-[9px] font-medium bg-purple-600 text-white px-1.5 py-0.5 rounded-full">
+                          <User className="h-2.5 w-2.5" />
+                          유저
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* 정보 */}
@@ -347,7 +552,7 @@ export default function SpotDetailPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs text-blue-600 font-medium bg-blue-50 px-1.5 py-0.5 rounded">
-                          {next.category}
+                          {next.categoryLabel}
                         </span>
                         <div className="flex items-center gap-0.5">
                           <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
@@ -376,13 +581,6 @@ export default function SpotDetailPage() {
                         </span>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* 추천 이유 */}
-                <div className="px-3 pb-3">
-                  <div className="text-xs text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg inline-block">
-                    {next.reason}
                   </div>
                 </div>
               </Link>

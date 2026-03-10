@@ -239,3 +239,105 @@ export interface HealthCheckResponse {
   status: string;
   message: string;
 }
+
+// ============================================================
+// Mockup V2: SpotLine 제휴 Spot + 유저 생태계 타입
+// ============================================================
+
+// 유저 프로필
+export interface UserProfile {
+  id: string;
+  nickname: string;
+  avatar: string;
+  bio?: string;
+  joinedAt: string;
+  stats: {
+    visited: number;
+    liked: number;
+    recommended: number;
+    spotlines: number; // 참여 중인 SpotLine 수
+  };
+}
+
+// Spot 소스: SpotLine 제휴 vs 유저 추천
+export type SpotSource = "spotline" | "user";
+
+// 유저 활동 타입
+export type UserActivityType = "visit" | "like" | "recommend";
+
+export interface UserSpotActivity {
+  id: string;
+  user: UserProfile;
+  spotId: string;
+  type: UserActivityType;
+  createdAt: string;
+  review?: string;
+  photos?: string[];
+  helpfulCount?: number;
+}
+
+// SpotLine 제휴 정보
+export interface SpotLineAffiliation {
+  spotlineId: string;
+  spotlineName: string;
+  spotlineColor: string; // 브랜딩 컬러
+  isPartner: boolean; // 공식 파트너 여부
+  partnerSince?: string;
+  qrCodeId?: string;
+  curatorName?: string; // SpotLine 운영 크루
+}
+
+// Mockup V2 용 Spot 타입 (지도 + 유저 활동 통합)
+export interface MockupSpot {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  categoryLabel: string;
+  description: string;
+  image: string;
+  images?: string[];
+  distance: number;
+  walkingTime: number;
+  rating: number;
+  tags: string[];
+  area: string;
+  address: string;
+  lat: number;
+  lng: number;
+
+  // 소스 구분
+  source: SpotSource;
+
+  // SpotLine 제휴 정보 (source === "spotline" 일 때)
+  spotlineAffiliation?: SpotLineAffiliation;
+
+  // 유저 활동 집계
+  userStats: {
+    visitCount: number;
+    likeCount: number;
+    recommendCount: number;
+    recentVisitors: Pick<UserProfile, "id" | "nickname" | "avatar">[];
+  };
+
+  // 유저가 추천한 Spot (source === "user" 일 때)
+  recommendedBy?: Pick<UserProfile, "id" | "nickname" | "avatar">;
+
+  // 크루 정보 (source === "spotline" 일 때)
+  author?: string;
+}
+
+// SpotLine 요약 (목록 표시용)
+export interface SpotLineSummary {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  curatorName: string;
+  curatorAvatar: string;
+  spotCount: number;
+  totalLikes: number;
+  totalVisits: number;
+  area: string;
+  coverImage: string;
+}

@@ -123,14 +123,24 @@ export default function Home() {
             <div className="space-y-4">
               <SpotlineStartButton size="lg" className="px-8 py-4" showArrow />
 
-              <div className="text-sm text-gray-500">
-                또는{" "}
-                <button 
-                  onClick={() => window.location.href = '/qr/demo_cafe_001'}
-                  className="text-purple-600 hover:text-purple-700 underline font-medium"
-                >
-                  🎭 데모보기로 먼저 체험해보기
-                </button>
+              <div className="text-sm text-gray-500 space-y-2">
+                <div>
+                  또는{" "}
+                  <button
+                    onClick={() => window.location.href = '/qr/demo_cafe_001'}
+                    className="text-purple-600 hover:text-purple-700 underline font-medium"
+                  >
+                    🎭 데모보기로 먼저 체험해보기
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => window.location.href = '/mockup'}
+                    className="text-blue-600 hover:text-blue-700 underline font-medium"
+                  >
+                    목업 페이지 보기
+                  </button>
+                </div>
               </div>
             </div>
           </div>
