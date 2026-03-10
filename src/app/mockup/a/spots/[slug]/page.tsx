@@ -436,13 +436,20 @@ export default function SpotDetailPage() {
         )}
 
         {/* 지도 링크 */}
-        <div className="px-4 py-3 border-b border-gray-100">
+        <div className="px-4 py-3 border-b border-gray-100 flex gap-2">
           <Link
-            href="/mockup/a/explore?view=map"
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 rounded-xl text-sm text-blue-700 hover:bg-blue-100 transition-colors w-fit"
+            href="/mockup/a/explore?view=kakao"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#FEE500]/20 rounded-xl text-sm text-yellow-800 hover:bg-[#FEE500]/30 transition-colors"
           >
             <Compass className="h-4 w-4" />
-            SpotLine 지도에서 보기
+            카카오 스타일
+          </Link>
+          <Link
+            href="/mockup/a/explore?view=naver"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#03c75a]/10 rounded-xl text-sm text-green-700 hover:bg-[#03c75a]/20 transition-colors"
+          >
+            <Compass className="h-4 w-4" />
+            네이버 스타일
           </Link>
         </div>
 
@@ -568,24 +575,30 @@ export default function SpotDetailPage() {
         </div>
 
         {/* 하단 고정 바 */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3">
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2">
           <Link
-            href="/mockup/a/explore?view=map"
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+            href="/mockup/a/explore?view=kakao"
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-[#FEE500] text-black rounded-xl text-sm font-medium hover:bg-[#FEE500]/80 transition-colors"
           >
             <Compass className="h-4 w-4" />
-            SpotLine 지도
+            카카오
+          </Link>
+          <Link
+            href="/mockup/a/explore?view=naver"
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-[#03c75a] text-white rounded-xl text-sm font-medium hover:bg-[#03c75a]/80 transition-colors"
+          >
+            <Compass className="h-4 w-4" />
+            네이버
           </Link>
           <Link
             href="/mockup/a/explore"
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
           >
             <Navigation className="h-4 w-4" />
             주변 탐색
           </Link>
-          <button className="flex items-center justify-center gap-2 py-3 px-5 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+          <button className="flex items-center justify-center gap-1.5 py-3 px-4 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
             <Share2 className="h-4 w-4" />
-            공유
           </button>
         </div>
       </div>

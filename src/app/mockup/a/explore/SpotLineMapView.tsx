@@ -57,11 +57,61 @@ const MOCK_MAP_POSITIONS: Record<string, { x: number; y: number }> = {
   "photo-studio-seongsu": { x: 40, y: 65 },
 };
 
+type MapStyle = "kakao" | "naver";
+
+const MAP_THEMES: Record<MapStyle, {
+  bg: string;
+  building: string;
+  buildingStroke: string;
+  roadMain: string;
+  roadMainCenter: string;
+  park: string;
+  parkTree: string;
+  label: string;
+  labelColor: string;
+  accentColor: string;
+  locationDot: string;
+  brandLabel: string;
+  selectedBg: string;
+}> = {
+  kakao: {
+    bg: "#f0ede6",
+    building: "#ddd8ce",
+    buildingStroke: "#ccc6ba",
+    roadMain: "#f5d86e",
+    roadMainCenter: "#fce76b",
+    park: "#b8d8b0",
+    parkTree: "#9ac590",
+    label: "#888",
+    labelColor: "Kakao",
+    accentColor: "#FEE500",
+    locationDot: "bg-blue-600",
+    brandLabel: "카카오 스타일",
+    selectedBg: "bg-[#FEE500]",
+  },
+  naver: {
+    bg: "#f5f6f4",
+    building: "#e8e8e8",
+    buildingStroke: "#d4d4d4",
+    roadMain: "#fde68a",
+    roadMainCenter: "#fcd34d",
+    park: "#c7e6c7",
+    parkTree: "#a8d5a8",
+    label: "#666",
+    labelColor: "Naver",
+    accentColor: "#03c75a",
+    locationDot: "bg-[#03c75a]",
+    brandLabel: "네이버 스타일",
+    selectedBg: "bg-[#03c75a]",
+  },
+};
+
 interface SpotLineMapViewProps {
   selectedCategory: string;
   selectedSource: "all" | "spotline" | "user";
   onCategoryChange: (cat: string) => void;
   onSourceChange: (src: "all" | "spotline" | "user") => void;
+  mapStyle?: MapStyle;
 }
 
 export default function SpotLineMapView({
@@ -69,7 +119,9 @@ export default function SpotLineMapView({
   selectedSource,
   onCategoryChange,
   onSourceChange,
+  mapStyle = "kakao",
 }: SpotLineMapViewProps) {
+  const theme = MAP_THEMES[mapStyle];
   const [selectedSpot, setSelectedSpot] = useState<MockupSpot | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -277,33 +329,37 @@ export default function SpotLineMapView({
       </button>
 
       {/* ===== 우측 지도 영역 ===== */}
-      <div className="flex-1 relative bg-[#f0ede6] overflow-hidden">
+      <div className="flex-1 relative overflow-hidden" style={{ backgroundColor: theme.bg }}>
         {/* SVG 지도 */}
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="#f0ede6" />
+          <rect width="100%" height="100%" fill={theme.bg} />
           {/* 건물 블록 */}
-          <rect x="5%" y="5%" width="20%" height="10%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="5%" y="18%" width="12%" height="7%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="30%" y="3%" width="16%" height="9%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="55%" y="6%" width="10%" height="7%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="70%" y="3%" width="22%" height="12%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="50%" y="55%" width="12%" height="10%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="72%" y="35%" width="10%" height="16%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="3%" y="48%" width="16%" height="8%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="28%" y="58%" width="18%" height="12%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="58%" y="70%" width="14%" height="8%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="3%" y="72%" width="18%" height="10%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="78%" y="58%" width="14%" height="12%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
-          <rect x="85%" y="78%" width="10%" height="8%" rx="2" fill="#ddd8ce" stroke="#ccc6ba" strokeWidth="0.5" />
+          {[
+            { x: "5%", y: "5%", w: "20%", h: "10%" },
+            { x: "5%", y: "18%", w: "12%", h: "7%" },
+            { x: "30%", y: "3%", w: "16%", h: "9%" },
+            { x: "55%", y: "6%", w: "10%", h: "7%" },
+            { x: "70%", y: "3%", w: "22%", h: "12%" },
+            { x: "50%", y: "55%", w: "12%", h: "10%" },
+            { x: "72%", y: "35%", w: "10%", h: "16%" },
+            { x: "3%", y: "48%", w: "16%", h: "8%" },
+            { x: "28%", y: "58%", w: "18%", h: "12%" },
+            { x: "58%", y: "70%", w: "14%", h: "8%" },
+            { x: "3%", y: "72%", w: "18%", h: "10%" },
+            { x: "78%", y: "58%", w: "14%", h: "12%" },
+            { x: "85%", y: "78%", w: "10%", h: "8%" },
+          ].map((b, i) => (
+            <rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx="2" fill={theme.building} stroke={theme.buildingStroke} strokeWidth="0.5" />
+          ))}
           {/* 공원 */}
-          <rect x="80%" y="82%" width="16%" height="10%" rx="4" fill="#b8d8b0" stroke="#9ac590" strokeWidth="0.5" />
-          <circle cx="84%" cy="86%" r="2%" fill="#9ac590" opacity="0.5" />
-          <circle cx="90%" cy="88%" r="1.5%" fill="#9ac590" opacity="0.5" />
+          <rect x="80%" y="82%" width="16%" height="10%" rx="4" fill={theme.park} stroke={theme.parkTree} strokeWidth="0.5" />
+          <circle cx="84%" cy="86%" r="2%" fill={theme.parkTree} opacity="0.5" />
+          <circle cx="90%" cy="88%" r="1.5%" fill={theme.parkTree} opacity="0.5" />
           {/* 주요 도로 */}
-          <line x1="0" y1="44%" x2="100%" y2="44%" stroke="#e8e3d8" strokeWidth="12" />
-          <line x1="0" y1="44%" x2="100%" y2="44%" stroke="#f5f0e5" strokeWidth="8" />
-          <line x1="48%" y1="0" x2="48%" y2="100%" stroke="#e8e3d8" strokeWidth="12" />
-          <line x1="48%" y1="0" x2="48%" y2="100%" stroke="#f5f0e5" strokeWidth="8" />
+          <line x1="0" y1="44%" x2="100%" y2="44%" stroke={theme.roadMain} strokeWidth="12" />
+          <line x1="0" y1="44%" x2="100%" y2="44%" stroke={theme.roadMainCenter} strokeWidth="8" />
+          <line x1="48%" y1="0" x2="48%" y2="100%" stroke={theme.roadMain} strokeWidth="12" />
+          <line x1="48%" y1="0" x2="48%" y2="100%" stroke={theme.roadMainCenter} strokeWidth="8" />
           {/* 보조 도로 */}
           <line x1="0" y1="16%" x2="70%" y2="16%" stroke="#ffffff" strokeWidth="5" />
           <line x1="25%" y1="0" x2="25%" y2="56%" stroke="#ffffff" strokeWidth="5" />
@@ -313,11 +369,11 @@ export default function SpotLineMapView({
           <line x1="54%" y1="26%" x2="88%" y2="26%" stroke="#ffffff" strokeWidth="4" />
           <line x1="38%" y1="72%" x2="38%" y2="95%" stroke="#ffffff" strokeWidth="4" />
           {/* 지역 라벨 */}
-          <text x="36%" y="9%" fontSize="11" fill="#999" fontWeight="500" fontFamily="sans-serif">성수동2가</text>
-          <text x="62%" y="38%" fontSize="11" fill="#999" fontWeight="500" fontFamily="sans-serif">을지로3가</text>
-          <text x="6%" y="38%" fontSize="11" fill="#999" fontWeight="500" fontFamily="sans-serif">연남동</text>
-          <text x="6%" y="68%" fontSize="11" fill="#999" fontWeight="500" fontFamily="sans-serif">망원동</text>
-          <text x="30%" y="82%" fontSize="10" fill="#999" fontWeight="400" fontFamily="sans-serif">합정역</text>
+          <text x="36%" y="9%" fontSize="11" fill={theme.label} fontWeight="500" fontFamily="sans-serif">성수동2가</text>
+          <text x="62%" y="38%" fontSize="11" fill={theme.label} fontWeight="500" fontFamily="sans-serif">을지로3가</text>
+          <text x="6%" y="38%" fontSize="11" fill={theme.label} fontWeight="500" fontFamily="sans-serif">연남동</text>
+          <text x="6%" y="68%" fontSize="11" fill={theme.label} fontWeight="500" fontFamily="sans-serif">망원동</text>
+          <text x="30%" y="82%" fontSize="10" fill={theme.label} fontWeight="400" fontFamily="sans-serif">합정역</text>
         </svg>
 
         {/* 현재 위치 마커 */}
@@ -326,8 +382,8 @@ export default function SpotLineMapView({
           style={{ left: "48%", top: "44%", transform: "translate(-50%, -50%)" }}
         >
           <div className="relative">
-            <div className="w-5 h-5 bg-blue-600 rounded-full border-[3px] border-white shadow-lg" />
-            <div className="absolute inset-0 w-5 h-5 bg-blue-600 rounded-full animate-ping opacity-25" />
+            <div className={`w-5 h-5 ${theme.locationDot} rounded-full border-[3px] border-white shadow-lg`} />
+            <div className={`absolute inset-0 w-5 h-5 ${theme.locationDot} rounded-full animate-ping opacity-25`} />
           </div>
         </div>
 
@@ -358,15 +414,15 @@ export default function SpotLineMapView({
                 <div
                   className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-bold shadow-md transition-all ${
                     isSelected
-                      ? "bg-blue-600 text-white scale-100 opacity-100"
+                      ? "text-white scale-100 opacity-100"
                       : "bg-white text-gray-800 scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 border border-gray-200"
                   }`}
+                  style={isSelected ? { backgroundColor: theme.accentColor, color: mapStyle === "kakao" ? "#000" : "#fff" } : undefined}
                 >
                   {isSpotline ? "⚡" : "👤"} {spot.name}
                   <div
-                    className={`absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-transparent ${
-                      isSelected ? "border-t-blue-600" : "border-t-white"
-                    }`}
+                    className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-transparent"
+                    style={isSelected ? { borderTopColor: theme.accentColor } : { borderTopColor: "white" }}
                   />
                 </div>
                 {/* 핀 마커 */}
@@ -374,13 +430,15 @@ export default function SpotLineMapView({
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-[3px] ${
                       isSelected
-                        ? "bg-blue-600 border-blue-600"
+                        ? ""
                         : isSpotline
                         ? "border-blue-400"
                         : "border-purple-400"
                     }`}
                     style={
-                      !isSelected ? { backgroundColor: catColor } : undefined
+                      isSelected
+                        ? { backgroundColor: theme.accentColor, borderColor: theme.accentColor }
+                        : { backgroundColor: catColor }
                     }
                   >
                     <MapPin className="h-3.5 w-3.5 text-white" />
@@ -388,7 +446,7 @@ export default function SpotLineMapView({
                   <div
                     className="w-1.5 h-1.5 rotate-45 -mt-1 shadow"
                     style={{
-                      backgroundColor: isSelected ? "#2563eb" : catColor,
+                      backgroundColor: isSelected ? theme.accentColor : catColor,
                     }}
                   />
                 </div>
@@ -400,9 +458,11 @@ export default function SpotLineMapView({
         {/* SpotLine 브랜드 라벨 */}
         <div className="absolute top-3 left-3 z-30">
           <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl shadow-sm border border-gray-200">
-            <Compass className="h-4 w-4 text-blue-600" />
+            <Compass className="h-4 w-4" style={{ color: theme.accentColor }} />
             <span className="text-sm font-bold text-gray-900">SpotLine</span>
-            <span className="text-[10px] text-gray-400 font-medium">Map</span>
+            <span className="text-[10px] font-medium" style={{ color: theme.accentColor }}>
+              {theme.brandLabel}
+            </span>
           </div>
         </div>
 
@@ -430,7 +490,7 @@ export default function SpotLineMapView({
 
           {/* 내 위치 */}
           <button className="flex items-center justify-center w-8 h-8 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50">
-            <Navigation className="h-4 w-4 text-blue-600" />
+            <Navigation className="h-4 w-4" style={{ color: theme.accentColor }} />
           </button>
         </div>
 

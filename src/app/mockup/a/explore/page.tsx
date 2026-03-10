@@ -17,7 +17,6 @@ import {
   Heart,
   User,
   List,
-  Map,
   Eye,
   BookOpen,
 } from "lucide-react";
@@ -27,7 +26,7 @@ import SpotLineMapView from "./SpotLineMapView";
 import { MOCK_SPOTS } from "@/data/mockup";
 import type { MockupSpot } from "@/types";
 
-type ViewMode = "list" | "map";
+type ViewMode = "list" | "kakao" | "naver";
 type SourceFilter = "all" | "spotline" | "user";
 
 const CATEGORIES = [
@@ -57,7 +56,8 @@ export default function MockupAExplorePage() {
 
 function MockupAExplore() {
   const searchParams = useSearchParams();
-  const initialView = searchParams.get("view") === "map" ? "map" : "list";
+  const viewParam = searchParams.get("view");
+  const initialView: ViewMode = viewParam === "kakao" ? "kakao" : viewParam === "naver" ? "naver" : viewParam === "map" ? "kakao" : "list";
   const [viewMode, setViewMode] = useState<ViewMode>(initialView);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSource, setSelectedSource] = useState<SourceFilter>("all");
@@ -98,7 +98,7 @@ function MockupAExplore() {
   };
 
   // 지도 모드: 전체 화면, 헤더만 최소한으로
-  if (viewMode === "map") {
+  if (viewMode === "kakao" || viewMode === "naver") {
     return (
       <Layout showFooter={false} showHeader={false}>
         <div className="max-w-5xl mx-auto">
@@ -117,13 +117,38 @@ function MockupAExplore() {
               </span>
               <span className="text-xs text-gray-400">성수동 부근</span>
             </div>
-            <button
-              onClick={() => setViewMode("list")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-600 hover:bg-gray-200 transition-colors"
-            >
-              <List className="h-4 w-4" />
-              <span className="text-xs font-medium">리스트</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              {/* 카카오/네이버 스타일 토글 */}
+              <div className="flex bg-gray-100 rounded-lg p-0.5">
+                <button
+                  onClick={() => setViewMode("kakao")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    viewMode === "kakao"
+                      ? "bg-[#FEE500] text-black shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  카카오
+                </button>
+                <button
+                  onClick={() => setViewMode("naver")}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                    viewMode === "naver"
+                      ? "bg-[#03c75a] text-white shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  네이버
+                </button>
+              </div>
+              <button
+                onClick={() => setViewMode("list")}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg text-sm text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                <List className="h-4 w-4" />
+                <span className="text-xs font-medium">리스트</span>
+              </button>
+            </div>
           </div>
 
           {/* SpotLine 지도 뷰 */}
@@ -132,6 +157,7 @@ function MockupAExplore() {
             selectedSource={selectedSource}
             onCategoryChange={setSelectedCategory}
             onSourceChange={setSelectedSource}
+            mapStyle={viewMode}
           />
         </div>
       </Layout>
@@ -168,11 +194,18 @@ function MockupAExplore() {
                 <List className="h-4 w-4" />
               </button>
               <button
-                onClick={() => setViewMode("map")}
-                className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 transition-colors"
-                title="SpotLine 지도"
+                onClick={() => setViewMode("kakao")}
+                className="px-2 py-1 rounded-md text-[10px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
+                title="카카오 스타일 지도"
               >
-                <Map className="h-4 w-4" />
+                🗺️ K
+              </button>
+              <button
+                onClick={() => setViewMode("naver")}
+                className="px-2 py-1 rounded-md text-[10px] font-medium text-gray-400 hover:text-gray-600 transition-colors"
+                title="네이버 스타일 지도"
+              >
+                🗺️ N
               </button>
             </div>
           </div>
