@@ -451,6 +451,24 @@ export default function SpotDetailPage() {
             <Compass className="h-4 w-4" />
             네이버 스타일
           </Link>
+          <a
+            href={`https://map.kakao.com/link/search/${encodeURIComponent(spot.name + " " + spot.address)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#FEE500] rounded-xl text-sm text-yellow-900 font-medium hover:bg-[#FEE500]/80 transition-colors"
+          >
+            <MapPin className="h-4 w-4" />
+            실제 카카오맵
+          </a>
+          <a
+            href={`https://map.naver.com/v5/search/${encodeURIComponent(spot.name + " " + spot.address)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#03c75a] rounded-xl text-sm text-white font-medium hover:bg-[#03c75a]/80 transition-colors"
+          >
+            <MapPin className="h-4 w-4" />
+            실제 네이버지도
+          </a>
         </div>
 
         {/* SpotLine Story (확장 가능) */}
@@ -575,31 +593,55 @@ export default function SpotDetailPage() {
         </div>
 
         {/* 하단 고정 바 */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2">
-          <Link
-            href="/mockup/a/explore?view=kakao"
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-[#FEE500] text-black rounded-xl text-sm font-medium hover:bg-[#FEE500]/80 transition-colors"
-          >
-            <Compass className="h-4 w-4" />
-            카카오
-          </Link>
-          <Link
-            href="/mockup/a/explore?view=naver"
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-[#03c75a] text-white rounded-xl text-sm font-medium hover:bg-[#03c75a]/80 transition-colors"
-          >
-            <Compass className="h-4 w-4" />
-            네이버
-          </Link>
-          <Link
-            href="/mockup/a/explore"
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
-          >
-            <Navigation className="h-4 w-4" />
-            주변 탐색
-          </Link>
-          <button className="flex items-center justify-center gap-1.5 py-3 px-4 border border-gray-200 rounded-xl text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
-            <Share2 className="h-4 w-4" />
-          </button>
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
+          {/* 실제 외부 지도 앱 */}
+          <div className="flex gap-2 mb-2">
+            <a
+              href={`https://map.kakao.com/link/search/${encodeURIComponent(spot.name + " " + spot.address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-[#FEE500] text-yellow-900 rounded-xl text-sm font-bold hover:bg-[#FEE500]/80 transition-colors shadow-sm"
+            >
+              <MapPin className="h-4 w-4" />
+              카카오맵으로 보기
+            </a>
+            <a
+              href={`https://map.naver.com/v5/search/${encodeURIComponent(spot.name + " " + spot.address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-[#03c75a] text-white rounded-xl text-sm font-bold hover:bg-[#03c75a]/80 transition-colors shadow-sm"
+            >
+              <MapPin className="h-4 w-4" />
+              네이버지도로 보기
+            </a>
+          </div>
+          {/* SpotLine 내부 탐색 */}
+          <div className="flex gap-2">
+            <Link
+              href="/mockup/a/explore?view=kakao"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-yellow-300 text-yellow-800 rounded-xl text-xs font-medium hover:bg-yellow-50 transition-colors"
+            >
+              <Compass className="h-3.5 w-3.5" />
+              카카오 스타일
+            </Link>
+            <Link
+              href="/mockup/a/explore?view=naver"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 border border-green-300 text-green-700 rounded-xl text-xs font-medium hover:bg-green-50 transition-colors"
+            >
+              <Compass className="h-3.5 w-3.5" />
+              네이버 스타일
+            </Link>
+            <Link
+              href="/mockup/a/explore"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-medium hover:bg-gray-800 transition-colors"
+            >
+              <Navigation className="h-3.5 w-3.5" />
+              목록
+            </Link>
+            <button className="flex items-center justify-center py-2.5 px-3 border border-gray-200 rounded-xl text-gray-700 text-xs hover:bg-gray-50 transition-colors">
+              <Share2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </Layout>

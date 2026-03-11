@@ -9,6 +9,7 @@ import StoreImage from "@/components/store/StoreImage";
 import SpotlineStoreInfo from "@/components/spotline/SpotlineStoreInfo";
 import NextSpotsList from "@/components/spotline/NextSpotsList";
 import MapButton from "@/components/map/MapButton";
+import ExternalMapButtons from "@/components/map/ExternalMapButtons";
 import { PageLoading } from "@/components/common/Loading";
 import { ErrorMessage } from "@/components/common/ErrorBoundary";
 import Link from "next/link";
@@ -203,6 +204,14 @@ export default function SpotlinePage() {
                   }}
                   qrId={qrId || storeId}
                   storeId={store.id}
+                />
+              </div>
+
+              {/* 외부 지도 앱 바로가기 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <ExternalMapButtons
+                  storeName={store.name}
+                  address={store.location.address}
                 />
               </div>
             </>
