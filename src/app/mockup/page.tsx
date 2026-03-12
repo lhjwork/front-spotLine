@@ -11,6 +11,7 @@ import {
   Route,
   Gamepad2,
   Sparkles,
+  Navigation,
 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Link from "next/link";
@@ -146,6 +147,25 @@ const DIRECTIONS = [
       { label: "⭐ NEW", color: "bg-yellow-50 text-yellow-700" },
     ],
   },
+  {
+    id: "h",
+    href: "/mockup/h",
+    label: "방향 H",
+    labelColor: "text-emerald-600 bg-emerald-50",
+    borderHover: "hover:border-emerald-400",
+    iconBg: "bg-emerald-100",
+    icon: Navigation,
+    iconColor: "text-emerald-600",
+    title: "내 위치 기반 네이버 지도 탐색",
+    description:
+      "실제 네이버 지도 위에 내 현재 위치를 중심으로 근처 카페·맛집을 커스텀 마커로 표시. 동적 지도에서 실시간 탐색하는 네이버맵 스타일 UI",
+    tags: [
+      { label: "🗺️ 네이버 지도", color: "bg-emerald-50 text-emerald-700" },
+      { label: "위치 기반", color: "bg-blue-50 text-blue-700" },
+      { label: "카페/맛집", color: "bg-amber-50 text-amber-700" },
+      { label: "⭐ NEW", color: "bg-yellow-50 text-yellow-700" },
+    ],
+  },
 ];
 
 export default function MockupIndex() {
@@ -161,7 +181,7 @@ export default function MockupIndex() {
             SpotLine 제휴 Spot과 유저들이 방문·좋아요·소개하는 Spot이
           </p>
           <p className="text-gray-600">
-            지도 위에서 함께 보이는 7가지 접근 방식
+            지도 위에서 함께 보이는 8가지 접근 방식
           </p>
         </div>
 
