@@ -197,6 +197,62 @@ async function searchNaver(
   }
 }
 
+// 네이버 이미지 검색 API — 장소 썸네일 가져오기
+async function searchNaverImage(query: string): Promise<string> {
+  const clientId = process.env.NAVER_SEARCH_CLIENT_ID;
+  const clientSecret = process.env.NAVER_SEARCH_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) return "";
+
+  const params = new URLSearchParams({
+    query,
+    display: "1",
+    sort: "sim",
+  });
+
+  try {
+    const res = await fetch(
+      `https://openapi.naver.com/v1/search/image?${params}`,
+      {
+        headers: {
+          "X-Naver-Client-Id": clientId,
+          "X-Naver-Client-Secret": clientSecret,
+        },
+      }
+    );
+    if (!res.ok) return "";
+    const data = await res.json();
+    const items = data.items || [];
+    return items[0]?.thumbnail || "";
+  } catch {
+    return "";
+  }
+}
+
+// 스팟 목록에 썸네일 일괄 추가
+async function enrichWithThumbnails(
+  spots: SpotResult[],
+  maxCount: number = 15
+): Promise<void> {
+  const targets = spots.slice(0, maxCount);
+  const BATCH_SIZE = 5;
+
+  for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+    const batch = targets.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map((spot) =>
+        searchNaverImage(`${spot.name} ${spot.category === "cafe" ? "카페" : "음식점"}`)
+      )
+    );
+    batch.forEach((spot, idx) => {
+      spot.thumUrl = results[idx];
+    });
+    if (i + BATCH_SIZE < targets.length) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }
+}
+
 // Overpass API — boundary 기반, 확장된 태그
 async function searchOverpassByBoundary(
   minLat: number,
@@ -368,7 +424,7 @@ export async function GET(request: NextRequest) {
       .filter((s) => isInBoundary(s.lat, s.lng, boundary));
 
     // 4) OSM 결과 → SpotResult 변환
-    const osmSpots: SpotResult[] = osmResults.map((el, idx) => {
+    const osmSpots: SpotResult[] = osmResults.map((el) => {
       const distance = Math.round(calcDistance(lat, lng, el.lat, el.lon));
       const amenity = el.tags.amenity || el.tags.shop || "";
       const cat: "cafe" | "restaurant" =
@@ -463,6 +519,9 @@ export async function GET(request: NextRequest) {
 
     // ID 재정렬
     filtered.forEach((s, i) => { s.id = `spot-${i}`; });
+
+    // 썸네일 이미지 추가
+    await enrichWithThumbnails(filtered, 15);
 
     return NextResponse.json({
       success: true,

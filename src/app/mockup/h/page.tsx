@@ -438,7 +438,7 @@ export default function MockupHPage() {
     setShowSearchHere(false);
   }, [selectedCategory, doFetchSpots, isMapLoaded]);
 
-  // 마커 배치 (애니메이션 포함)
+  // 마커 배치 (spots/카테고리 변경 시에만 실행)
   useEffect(() => {
     if (!naverMapRef.current || !isMapLoaded || spots.length === 0) return;
 
@@ -459,21 +459,25 @@ export default function MockupHPage() {
           position: new naver.maps.LatLng(spot.lat, spot.lng),
           map: naverMapRef.current,
           icon: {
-            content: createMarkerIcon(spot, selectedSpotId === spot.id),
+            content: createMarkerIcon(spot, false),
             size: new naver.maps.Size(100, 70),
             anchor: new naver.maps.Point(50, 70),
           },
-          zIndex: selectedSpotId === spot.id ? 50 : 10,
+          zIndex: 10,
         });
 
         naver.maps.Event.addListener(marker, "click", () => {
-          handleSpotSelect(selectedSpotId === spot.id ? null : spot);
+          // 클릭 시점의 최신 선택 상태를 URL에서 읽음
+          const params = new URLSearchParams(window.location.search);
+          const currentSpot = params.get("spot");
+          handleSpotSelect(currentSpot === spot.id ? null : spot);
         });
 
         markersRef.current.push(marker);
       }, index * 80);
     });
-  }, [isMapLoaded, spots, selectedCategory, createMarkerIcon, selectedSpotId, handleSpotSelect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMapLoaded, spots, selectedCategory]);
 
   // 선택된 스팟 변경 시 마커 아이콘 업데이트
   useEffect(() => {
@@ -778,90 +782,96 @@ function SidebarSpotItem({
   onClick: () => void;
 }) {
   const style = CATEGORY_STYLES[spot.category];
-  const categoryIcon = spot.category === "cafe" ? "☕" : "🍽️";
+  const categoryLabel = spot.category === "cafe" ? "카페" : "음식점";
+  const [imgError, setImgError] = useState(false);
+  const hasImage = spot.thumUrl && !imgError;
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left px-4 py-3 border-b border-gray-50 transition-colors hover:bg-gray-50",
-        isSelected && "bg-green-50 border-l-2 border-l-[#03c75a]"
+        "w-full text-left border-b border-gray-100 transition-colors hover:bg-gray-50",
+        isSelected && "bg-green-50/70"
       )}
     >
-      <div className="flex items-start gap-3">
-        {/* 썸네일 또는 번호 */}
-        {spot.thumUrl ? (
-          <img
-            src={spot.thumUrl}
-            alt={spot.name}
-            className="w-12 h-12 rounded-lg object-cover shrink-0 mt-0.5"
-          />
-        ) : (
-          <div
-            className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5",
-              isSelected
-                ? "bg-[#03c75a] text-white"
+      {/* 매장 정보 */}
+      <div className="px-4 pt-4 pb-2">
+        <div className="flex items-center gap-1.5 mb-1">
+          <span className={cn("text-[11px] font-medium px-1.5 py-0.5 rounded", style.badge)}>
+            {spot.naverCategory || categoryLabel}
+          </span>
+          {spot.businessStatus && (
+            <span className={cn(
+              "text-[11px] font-medium px-1.5 py-0.5 rounded",
+              spot.businessStatus === "영업중"
+                ? "bg-green-50 text-green-600"
                 : "bg-gray-100 text-gray-500"
-            )}
-          >
-            {index}
-          </div>
-        )}
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="text-sm">{categoryIcon}</span>
-            <span
-              className={cn(
-                "text-[10px] font-bold px-1.5 py-0.5 rounded-full border",
-                style.badge
-              )}
-            >
-              {spot.category === "cafe" ? "카페" : "음식점"}
+            )}>
+              {spot.businessStatus}
             </span>
-            {spot.businessStatus && (
-              <span className={cn(
-                "text-[10px] px-1.5 py-0.5 rounded-full",
-                spot.businessStatus === "영업중"
-                  ? "bg-green-50 text-green-600"
-                  : "bg-gray-50 text-gray-500"
-              )}>
-                {spot.businessStatus}
-              </span>
-            )}
-          </div>
-          <h4 className="text-sm font-bold text-gray-900 truncate">
-            {spot.name}
-          </h4>
-          {spot.menuInfo && (
-            <p className="text-xs text-gray-600 truncate mt-0.5">
-              {spot.menuInfo}
-            </p>
           )}
-          <p className="text-xs text-gray-500 truncate mt-0.5">
-            {spot.address}
-          </p>
-          <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
-            <span className="flex items-center gap-0.5">
+        </div>
+
+        <h4 className={cn(
+          "text-[15px] font-bold leading-tight",
+          isSelected ? "text-[#03c75a]" : "text-gray-900"
+        )}>
+          {spot.name}
+        </h4>
+
+        <div className="flex items-center gap-1.5 mt-0.5 text-[12px] text-gray-500">
+          {spot.reviewCount > 0 && (
+            <>
+              <span className="flex items-center gap-0.5">
+                <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
+                리뷰 {spot.reviewCount}
+              </span>
+              <span className="text-gray-300">·</span>
+            </>
+          )}
+          <span className="truncate">{spot.address}</span>
+        </div>
+      </div>
+
+      {/* 이미지 영역 */}
+      {hasImage ? (
+        <div className="px-4 pb-3">
+          <div className="relative w-full h-[130px] rounded-lg overflow-hidden bg-gray-100">
+            <img
+              src={spot.thumUrl}
+              alt={spot.name}
+              className="w-full h-full object-cover"
+              onError={() => setImgError(true)}
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent h-10" />
+            <div className="absolute bottom-2 left-2.5 flex items-center gap-2 text-white text-[11px]">
+              <span className="flex items-center gap-0.5">
+                <MapPin className="h-3 w-3" />
+                {spot.distance >= 1000
+                  ? `${(spot.distance / 1000).toFixed(1)}km`
+                  : `${spot.distance}m`}
+              </span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="px-4 pb-3">
+          <div className="flex items-center gap-2.5 text-[11px] text-gray-400">
+            <span className="flex items-center gap-0.5 text-[#03c75a] font-semibold">
               <MapPin className="h-3 w-3" />
               {spot.distance >= 1000
                 ? `${(spot.distance / 1000).toFixed(1)}km`
                 : `${spot.distance}m`}
             </span>
-            <span className="flex items-center gap-0.5">
-              <Clock className="h-3 w-3" />
-              도보 {spot.walkingTime}분
-            </span>
-            {spot.reviewCount > 0 && (
+            {spot.telephone && (
               <span className="flex items-center gap-0.5">
-                <Star className="h-3 w-3" />
-                리뷰 {spot.reviewCount}
+                <Phone className="h-3 w-3" />
+                {spot.telephone}
               </span>
             )}
           </div>
         </div>
-      </div>
+      )}
     </button>
   );
 }
@@ -889,33 +899,17 @@ function SpotDetailCard({
       </button>
 
       <div className="flex">
-        {/* 썸네일 또는 기본 아이콘 */}
-        {spot.thumUrl ? (
-          <div className="relative w-28 h-28 shrink-0">
-            <img
-              src={spot.thumUrl}
-              alt={spot.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute top-2 left-2">
-              <span className="bg-[#03c75a] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                place+
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="relative w-28 h-28 shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center">
-            <span className="text-4xl mb-1">{categoryIcon}</span>
-            <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", style.badge)}>
-              {spot.category === "cafe" ? "카페" : "음식점"}
+        <div className="relative w-28 h-28 shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center">
+          <span className="text-4xl mb-1">{categoryIcon}</span>
+          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full", style.badge)}>
+            {spot.category === "cafe" ? "카페" : "음식점"}
+          </span>
+          <div className="absolute top-2 left-2">
+            <span className="bg-[#03c75a] text-white text-[10px] font-bold px-2 py-0.5 rounded">
+              place+
             </span>
-            <div className="absolute top-2 left-2">
-              <span className="bg-[#03c75a] text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                place+
-              </span>
-            </div>
           </div>
-        )}
+        </div>
 
         <div className="flex-1 p-3 flex flex-col justify-between min-w-0">
           <div>
@@ -946,10 +940,6 @@ function SpotDetailCard({
               {spot.distance >= 1000
                 ? `${(spot.distance / 1000).toFixed(1)}km`
                 : `${spot.distance}m`}
-            </span>
-            <span className="flex items-center gap-0.5">
-              <Clock className="h-3 w-3" />
-              도보 {spot.walkingTime}분
             </span>
             {spot.telephone && (
               <span className="flex items-center gap-0.5">
