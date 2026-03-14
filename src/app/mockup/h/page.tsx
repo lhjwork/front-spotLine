@@ -19,6 +19,11 @@ import {
   ExternalLink,
   List,
   Star,
+  ArrowLeft,
+  Car,
+  Bus,
+  Footprints,
+  Bike,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +52,24 @@ interface NearbySpot {
 // ============================================================
 // 카테고리 설정
 // ============================================================
+type DirectionsTab = "transit" | "car" | "walk" | "bicycle";
+
+interface DrivingData {
+  distance: number;
+  duration: number;
+  tollFare: number;
+  fuelPrice: number;
+  taxiFare: number;
+  path: [number, number][];
+}
+
+const DIRECTIONS_TABS: { id: DirectionsTab; label: string; icon: typeof Bus }[] = [
+  { id: "transit", label: "대중교통", icon: Bus },
+  { id: "car", label: "자동차", icon: Car },
+  { id: "walk", label: "도보", icon: Footprints },
+  { id: "bicycle", label: "자전거", icon: Bike },
+];
+
 const CATEGORIES = [
   { id: "cafe", label: "카페", icon: Coffee },
   { id: "restaurant", label: "음식점", icon: UtensilsCrossed },
@@ -81,6 +104,8 @@ declare global {
         };
         Size: new (w: number, h: number) => unknown;
         Point: new (x: number, y: number) => unknown;
+        Polyline: new (opts: Record<string, unknown>) => NaverPolyline;
+        LatLngBounds: new (sw: NaverLatLng, ne: NaverLatLng) => NaverLatLngBounds;
       };
     };
   }
@@ -105,12 +130,18 @@ interface NaverMap {
   getZoom: () => number;
   getBounds: () => NaverLatLngBounds;
   panTo: (latlng: NaverLatLng, opts?: Record<string, unknown>) => void;
+  fitBounds: (bounds: NaverLatLngBounds, padding?: Record<string, number>) => void;
 }
 
 interface NaverMarker {
   setMap: (map: NaverMap | null) => void;
   getPosition: () => NaverLatLng;
   setIcon: (icon: unknown) => void;
+}
+
+interface NaverPolyline {
+  setMap: (map: NaverMap | null) => void;
+  getPath: () => NaverLatLng[];
 }
 
 interface NaverInfoWindow {
@@ -169,6 +200,16 @@ export default function MockupHPage() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showSearchHere, setShowSearchHere] = useState(false);
+
+  // 길찾기 상태
+  const [directionsMode, setDirectionsMode] = useState(false);
+  const [directionsTab, setDirectionsTab] = useState<DirectionsTab>("walk");
+  const [directionsLoading, setDirectionsLoading] = useState(false);
+  const [drivingData, setDrivingData] = useState<DrivingData | null>(null);
+  const [directionsError, setDirectionsError] = useState<string | null>(null);
+  const routePolylineRef = useRef<NaverPolyline | null>(null);
+  const routeMarkersRef = useRef<NaverMarker[]>([]);
+  const directionsAbortRef = useRef<AbortController | null>(null);
 
   // 쿼리 파라미터에서 위치 파생
   const userLocation = qpLat && qpLng
@@ -306,6 +347,193 @@ export default function MockupHPage() {
     const currentZoom = naverMapRef.current.getZoom();
     naverMapRef.current.setZoom(currentZoom + delta);
   }, []);
+
+  // 경로 오버레이 모두 제거
+  const clearRouteOverlay = useCallback(() => {
+    routePolylineRef.current?.setMap(null);
+    routePolylineRef.current = null;
+    routeMarkersRef.current.forEach((m) => m.setMap(null));
+    routeMarkersRef.current = [];
+  }, []);
+
+  // 경로 폴리라인 + 출발/도착 마커 그리기
+  const drawRouteOnMap = useCallback((
+    startLat: number, startLng: number,
+    endLat: number, endLng: number,
+    path?: [number, number][],
+    mode: "car" | "walk" | "bicycle" = "walk"
+  ) => {
+    const map = naverMapRef.current;
+    if (!map || !window.naver?.maps) return;
+    const { naver } = window;
+
+    clearRouteOverlay();
+
+    // 경로가 있을 때만 폴리라인 그리기 (없으면 출발/도착 마커만)
+    if (path && path.length > 1) {
+      const naverPath = path.map(([lng, lat]) => new naver.maps.LatLng(lat, lng));
+      const isDriving = mode === "car";
+
+      const polyline = new naver.maps.Polyline({
+        map,
+        path: naverPath,
+        strokeColor: isDriving ? "#4A89DC" : "#5B8FF9",
+        strokeWeight: isDriving ? 6 : 5,
+        strokeOpacity: isDriving ? 0.9 : 0.8,
+        strokeLineCap: "round",
+        strokeLineJoin: "round",
+        strokeStyle: isDriving ? "solid" : "shortdash",
+      });
+      routePolylineRef.current = polyline;
+    }
+
+    // 출발 마커 (초록)
+    const startMarker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(startLat, startLng),
+      map,
+      icon: {
+        content: `
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="background:#03c75a;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">출발</div>
+            <div style="width:14px;height:14px;background:#03c75a;border:3px solid white;border-radius:50%;margin-top:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>
+          </div>
+        `,
+        size: new naver.maps.Size(40, 40),
+        anchor: new naver.maps.Point(20, 40),
+      },
+      zIndex: 200,
+    });
+
+    // 도착 마커 (빨강)
+    const endMarker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(endLat, endLng),
+      map,
+      icon: {
+        content: `
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="background:#EF4444;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">도착</div>
+            <div style="width:14px;height:14px;background:#EF4444;border:3px solid white;border-radius:50%;margin-top:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>
+          </div>
+        `,
+        size: new naver.maps.Size(40, 40),
+        anchor: new naver.maps.Point(20, 40),
+      },
+      zIndex: 200,
+    });
+
+    routeMarkersRef.current = [startMarker, endMarker];
+
+    // 경로가 보이도록 map bounds 조정
+    let minLat = Math.min(startLat, endLat);
+    let maxLat = Math.max(startLat, endLat);
+    let minLng = Math.min(startLng, endLng);
+    let maxLng = Math.max(startLng, endLng);
+    if (path) {
+      for (const [lng, lat] of path) {
+        minLat = Math.min(minLat, lat);
+        maxLat = Math.max(maxLat, lat);
+        minLng = Math.min(minLng, lng);
+        maxLng = Math.max(maxLng, lng);
+      }
+    }
+    const bounds = new naver.maps.LatLngBounds(
+      new naver.maps.LatLng(minLat, minLng),
+      new naver.maps.LatLng(maxLat, maxLng)
+    );
+    map.fitBounds(bounds, { top: 80, right: 80, bottom: 80, left: 420 });
+  }, [clearRouteOverlay]);
+
+  // 경로 API 호출 (모든 모드 지원)
+  const fetchDirections = useCallback(async (
+    startLat: number, startLng: number, endLat: number, endLng: number,
+    profile: "car" | "walk" | "bicycle" = "car"
+  ) => {
+    if (directionsAbortRef.current) directionsAbortRef.current.abort();
+    const abort = new AbortController();
+    directionsAbortRef.current = abort;
+
+    setDirectionsLoading(true);
+    setDirectionsError(null);
+
+    try {
+      const res = await fetch(
+        `/api/directions?startLat=${startLat}&startLng=${startLng}&endLat=${endLat}&endLng=${endLng}&profile=${profile}`,
+        { signal: abort.signal }
+      );
+      const data = await res.json();
+      if (abort.signal.aborted) return;
+
+      if (data.success && data.data) {
+        if (profile === "car") setDrivingData(data.data);
+        if (data.data.path) {
+          drawRouteOnMap(startLat, startLng, endLat, endLng, data.data.path, profile);
+        }
+      } else {
+        setDirectionsError(data.error || "경로를 찾을 수 없습니다.");
+        // 경로 없음 — 출발/도착 마커만 표시
+        drawRouteOnMap(startLat, startLng, endLat, endLng);
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setDirectionsError("네트워크 오류가 발생했습니다.");
+      // 경로 없음 — 출발/도착 마커만 표시
+      drawRouteOnMap(startLat, startLng, endLat, endLng);
+    } finally {
+      if (!abort.signal.aborted) setDirectionsLoading(false);
+    }
+  }, [drawRouteOnMap]);
+
+  // 길찾기 모드 진입
+  const handleOpenDirections = useCallback(() => {
+    setDirectionsMode(true);
+    setDirectionsTab("walk");
+    setDrivingData(null);
+    setDirectionsError(null);
+    setShowSidebar(true);
+
+    // 도보 경로 API 호출
+    if (userLocation && selectedSpot) {
+      fetchDirections(userLocation.lat, userLocation.lng, selectedSpot.lat, selectedSpot.lng, "walk");
+    }
+  }, [userLocation, selectedSpot, fetchDirections]);
+
+  // 길찾기 모드 종료
+  const handleCloseDirections = useCallback(() => {
+    setDirectionsMode(false);
+    setDrivingData(null);
+    setDirectionsError(null);
+    clearRouteOverlay();
+    if (directionsAbortRef.current) directionsAbortRef.current.abort();
+  }, [clearRouteOverlay]);
+
+  // 길찾기 탭 변경
+  const handleDirectionsTabChange = useCallback((tab: DirectionsTab) => {
+    setDirectionsTab(tab);
+    setDirectionsError(null);
+    if (tab !== "car") setDrivingData(null);
+
+    if (!userLocation || !selectedSpot) return;
+
+    const profileMap: Record<DirectionsTab, "car" | "walk" | "bicycle"> = {
+      car: "car",
+      walk: "walk",
+      bicycle: "bicycle",
+      transit: "walk", // 대중교통은 도보 경로로 대체 표시
+    };
+    fetchDirections(userLocation.lat, userLocation.lng, selectedSpot.lat, selectedSpot.lng, profileMap[tab]);
+  }, [userLocation, selectedSpot, fetchDirections]);
+
+  // 네이버 지도 길찾기 외부 링크 생성
+  const getNaverDirectionsUrl = useCallback((spot: NearbySpot, mode: DirectionsTab) => {
+    if (!userLocation) return "#";
+    const modeMap: Record<DirectionsTab, string> = {
+      transit: "transit",
+      car: "car",
+      walk: "walk",
+      bicycle: "bicycle",
+    };
+    return `https://map.naver.com/p/directions/${userLocation.lat},${userLocation.lng},내 위치,/${spot.lat},${spot.lng},${encodeURIComponent(spot.name)},/-/${modeMap[mode]}`;
+  }, [userLocation]);
 
   // 사용자 위치 가져오기 → 쿼리 파라미터에 저장
   useEffect(() => {
@@ -597,56 +825,73 @@ export default function MockupHPage() {
             showSidebar ? "w-[380px]" : "w-0 border-r-0"
           )}
         >
-          {/* 사이드바 헤더 */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#03c75a] animate-pulse" />
-              <span className="text-sm font-bold text-gray-900">
-                주변 {filteredSpots.length}개 Spot
-              </span>
-            </div>
-            <button
-              onClick={() => setShowSidebar(false)}
-              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4 text-gray-500" />
-            </button>
-          </div>
-
-          {/* 스팟 목록 */}
-          <div className="flex-1 overflow-y-auto">
-            {isLoadingSpots && (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 text-[#03c75a] animate-spin" />
-                <span className="ml-2 text-sm text-gray-500">검색 중...</span>
-              </div>
-            )}
-
-            {spotsError && !isLoadingSpots && (
-              <div className="p-4">
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
-                  <p className="text-sm text-red-700">{spotsError}</p>
+          {directionsMode && selectedSpot && userLocation ? (
+            /* 길찾기 사이드바 */
+            <SidebarDirections
+              spot={selectedSpot}
+              userLocation={userLocation}
+              activeTab={directionsTab}
+              onTabChange={handleDirectionsTabChange}
+              onClose={handleCloseDirections}
+              loading={directionsLoading}
+              drivingData={drivingData}
+              error={directionsError}
+              naverUrl={getNaverDirectionsUrl(selectedSpot, directionsTab)}
+            />
+          ) : (
+            <>
+              {/* 사이드바 헤더 */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#03c75a] animate-pulse" />
+                  <span className="text-sm font-bold text-gray-900">
+                    주변 {filteredSpots.length}개 Spot
+                  </span>
                 </div>
+                <button
+                  onClick={() => setShowSidebar(false)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4 text-gray-500" />
+                </button>
               </div>
-            )}
 
-            {!isLoadingSpots && filteredSpots.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                <MapPin className="h-8 w-8 mb-2" />
-                <p className="text-sm">검색 결과가 없습니다</p>
+              {/* 스팟 목록 */}
+              <div className="flex-1 overflow-y-auto">
+                {isLoadingSpots && (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 text-[#03c75a] animate-spin" />
+                    <span className="ml-2 text-sm text-gray-500">검색 중...</span>
+                  </div>
+                )}
+
+                {spotsError && !isLoadingSpots && (
+                  <div className="p-4">
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                      <p className="text-sm text-red-700">{spotsError}</p>
+                    </div>
+                  </div>
+                )}
+
+                {!isLoadingSpots && filteredSpots.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <MapPin className="h-8 w-8 mb-2" />
+                    <p className="text-sm">검색 결과가 없습니다</p>
+                  </div>
+                )}
+
+                {filteredSpots.map((spot, idx) => (
+                  <SidebarSpotItem
+                    key={spot.id}
+                    spot={spot}
+                    index={idx + 1}
+                    isSelected={selectedSpotId === spot.id}
+                    onClick={() => handleSidebarSpotClick(spot)}
+                  />
+                ))}
               </div>
-            )}
-
-            {filteredSpots.map((spot, idx) => (
-              <SidebarSpotItem
-                key={spot.id}
-                spot={spot}
-                index={idx + 1}
-                isSelected={selectedSpotId === spot.id}
-                onClick={() => handleSidebarSpotClick(spot)}
-              />
-            ))}
-          </div>
+            </>
+          )}
         </div>
 
         {/* 사이드바 열기 탭 (닫혀 있을 때) */}
@@ -745,7 +990,7 @@ export default function MockupHPage() {
           {/* 내 위치 버튼 */}
           <div
             className="absolute right-4 z-30 transition-all duration-300"
-            style={{ bottom: selectedSpot ? "240px" : "16px" }}
+            style={{ bottom: selectedSpot && !directionsMode ? "240px" : "16px" }}
           >
             <button
               onClick={handleMyLocation}
@@ -755,10 +1000,14 @@ export default function MockupHPage() {
             </button>
           </div>
 
-          {/* 선택된 Spot 카드 */}
-          {selectedSpot && (
+          {/* 선택된 Spot 카드 (길찾기 모드가 아닐 때만) */}
+          {selectedSpot && !directionsMode && (
             <div className="absolute bottom-4 left-4 right-4 z-40 animate-in slide-in-from-bottom duration-300">
-              <SpotDetailCard spot={selectedSpot} onClose={() => handleSpotSelect(null)} />
+              <SpotDetailCard
+                spot={selectedSpot}
+                onClose={() => handleSpotSelect(null)}
+                onDirections={handleOpenDirections}
+              />
             </div>
           )}
         </div>
@@ -882,9 +1131,11 @@ function SidebarSpotItem({
 function SpotDetailCard({
   spot,
   onClose,
+  onDirections,
 }: {
   spot: NearbySpot;
   onClose: () => void;
+  onDirections: () => void;
 }) {
   const style = CATEGORY_STYLES[spot.category];
   const categoryIcon = spot.category === "cafe" ? "☕" : "🍽️";
@@ -968,7 +1219,10 @@ function SpotDetailCard({
             네이버 상세보기
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
-          <button className="flex items-center justify-center gap-1 py-2.5 px-4 border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 active:bg-gray-100 transition-colors">
+          <button
+            onClick={onDirections}
+            className="flex items-center justify-center gap-1 py-2.5 px-4 border border-gray-200 rounded-xl text-sm text-gray-700 font-medium hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          >
             <Navigation className="h-4 w-4" />
             길찾기
           </button>
@@ -977,6 +1231,239 @@ function SpotDetailCard({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 길찾기 패널
+// ============================================================
+function calcStraightDistance(
+  lat1: number, lng1: number, lat2: number, lng2: number
+): number {
+  const R = 6371000;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
+function SidebarDirections({
+  spot,
+  userLocation,
+  activeTab,
+  onTabChange,
+  onClose,
+  loading,
+  drivingData,
+  naverUrl,
+}: {
+  spot: NearbySpot;
+  userLocation: { lat: number; lng: number };
+  activeTab: DirectionsTab;
+  onTabChange: (tab: DirectionsTab) => void;
+  onClose: () => void;
+  loading: boolean;
+  drivingData: DrivingData | null;
+  error: string | null;
+  naverUrl: string;
+}) {
+  const dist = calcStraightDistance(userLocation.lat, userLocation.lng, spot.lat, spot.lng);
+
+  return (
+    <>
+      {/* 탭 바 */}
+      <div className="flex border-b border-gray-200 shrink-0">
+        {DIRECTIONS_TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className={cn(
+                "flex-1 flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition-colors",
+                isActive
+                  ? "text-white bg-[#03c75a]"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 출발/도착 정보 */}
+      <div className="px-4 py-3 border-b border-gray-100 shrink-0">
+        <div className="flex items-start gap-3">
+          <div className="flex flex-col items-center gap-1 pt-1">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#03c75a] border-2 border-green-200" />
+            <div className="w-px h-6 bg-gray-200" />
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-red-200" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-700 mb-3">내 위치</p>
+            <p className="text-sm font-bold text-gray-900 truncate">{spot.name}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 경로 결과 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 py-4">
+          {loading && (
+            <div className="flex items-center justify-center py-8 gap-2">
+              <Loader2 className="h-5 w-5 text-[#03c75a] animate-spin" />
+              <span className="text-sm text-gray-500">경로 검색 중...</span>
+            </div>
+          )}
+
+          {!loading && activeTab === "walk" && (
+            <WalkContent dist={dist} />
+          )}
+
+          {!loading && activeTab === "car" && drivingData && (
+            <CarContent data={drivingData} />
+          )}
+
+          {!loading && activeTab === "car" && !drivingData && (
+            <CarFallbackContent dist={dist} />
+          )}
+
+          {!loading && activeTab === "transit" && (
+            <TransitContent dist={dist} />
+          )}
+
+          {!loading && activeTab === "bicycle" && (
+            <BicycleContent dist={dist} />
+          )}
+        </div>
+
+        {/* 네이버 지도에서 보기 */}
+        <div className="px-4 pb-4">
+          <a
+            href={naverUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-[#03c75a] text-white rounded-xl text-sm font-medium hover:bg-[#02b350] transition-colors"
+          >
+            네이버 지도에서 보기
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+
+        {/* 뒤로가기 */}
+        <div className="px-4 pb-4">
+          <button
+            onClick={onClose}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function WalkContent({ dist }: { dist: number }) {
+  const time = Math.max(1, Math.round(dist / 67));
+  const steps = Math.round(dist * 1.3);
+  return (
+    <div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-gray-900">{time}</span>
+        <span className="text-sm text-gray-500">분</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-sm font-medium text-gray-700">{dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-sm text-gray-500">{steps.toLocaleString()}걸음</span>
+      </div>
+      <p className="text-[11px] text-gray-400 mt-1">직선 거리 기준 예상 시간입니다</p>
+    </div>
+  );
+}
+
+function CarContent({ data }: { data: DrivingData }) {
+  const km = (data.distance / 1000).toFixed(1);
+  const min = Math.round(data.duration / 1000 / 60);
+  return (
+    <div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-gray-900">{min}</span>
+        <span className="text-sm text-gray-500">분</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-sm font-medium text-gray-700">{km}km</span>
+      </div>
+      <div className="flex items-center gap-2 mt-1.5 text-[11px] text-gray-500">
+        {data.taxiFare > 0 && <span>택시비 약 {data.taxiFare.toLocaleString()}원</span>}
+        {data.tollFare > 0 && (
+          <>
+            <span className="text-gray-300">·</span>
+            <span>통행료 {data.tollFare.toLocaleString()}원</span>
+          </>
+        )}
+        {data.fuelPrice > 0 && (
+          <>
+            <span className="text-gray-300">·</span>
+            <span>연료비 약 {data.fuelPrice.toLocaleString()}원</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TransitContent({ dist }: { dist: number }) {
+  if (dist < 500) {
+    return (
+      <div className="py-2 text-center">
+        <p className="text-sm text-gray-600">가까운 거리는 도보를 추천합니다</p>
+        <p className="text-[11px] text-gray-400 mt-1">직선 거리 {dist}m</p>
+      </div>
+    );
+  }
+  return (
+    <div className="py-2 text-center">
+      <p className="text-sm text-gray-600">대중교통 경로는 네이버 지도에서 확인해주세요</p>
+      <p className="text-[11px] text-gray-400 mt-1">직선 거리 {dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}</p>
+    </div>
+  );
+}
+
+function CarFallbackContent({ dist }: { dist: number }) {
+  const time = Math.max(1, Math.round(dist / 500));
+  return (
+    <div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-gray-900">{time}</span>
+        <span className="text-sm text-gray-500">분</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-sm font-medium text-gray-700">{dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}</span>
+      </div>
+      <p className="text-[11px] text-gray-400 mt-1">자동차 경로는 네이버 지도에서 확인해주세요</p>
+    </div>
+  );
+}
+
+function BicycleContent({ dist }: { dist: number }) {
+  const time = Math.max(1, Math.round(dist / 250));
+  return (
+    <div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-gray-900">{time}</span>
+        <span className="text-sm text-gray-500">분</span>
+        <span className="mx-1 text-gray-300">|</span>
+        <span className="text-sm font-medium text-gray-700">{dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}</span>
+      </div>
+      <p className="text-[11px] text-gray-400 mt-1">직선 거리 기준 예상 시간입니다</p>
     </div>
   );
 }

@@ -251,12 +251,27 @@ export interface UserProfile {
   avatar: string;
   bio?: string;
   joinedAt: string;
+  instagramId?: string;
   stats: {
     visited: number;
     liked: number;
     recommended: number;
     spotlines: number; // 참여 중인 SpotLine 수
   };
+}
+
+// Instagram OAuth
+export interface InstagramUser {
+  instagramId: string;
+  username: string;
+  profilePicture: string;
+  accountType?: "PERSONAL" | "CREATOR" | "BUSINESS";
+}
+
+export interface InstagramAuthResponse {
+  success: boolean;
+  user: InstagramUser;
+  expiresAt: string;
 }
 
 // Spot 소스: SpotLine 제휴 vs 유저 추천
