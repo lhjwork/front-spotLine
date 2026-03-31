@@ -17,6 +17,16 @@ import {
   ExperienceResponse,
   QRCodeId,
   DemoExperienceResult,
+  DiscoverResponse,
+  SpotDetailResponse,
+  RouteDetailResponse,
+  RoutePreview,
+  PaginatedResponse,
+  SocialStatus,
+  SocialToggleResponse,
+  ReplicateRouteResponse,
+  MyRoute,
+  UserProfile,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -258,6 +268,149 @@ export const completeExperienceSession = async (experienceId: string): Promise<v
   }
 };
 
+// ==================== Discover API (v2 — Location-Based Discovery) ====================
+
+// v2 API client (Spring Boot backend)
+const apiV2 = axios.create({
+  baseURL: `${API_BASE_URL}/api/v2`,
+  headers: { "Content-Type": "application/json" },
+});
+
+export const fetchDiscover = async (
+  lat?: number,
+  lng?: number,
+  excludeSpotId?: string
+): Promise<DiscoverResponse> => {
+  try {
+    const params = new URLSearchParams();
+    if (lat != null) params.append("lat", lat.toString());
+    if (lng != null) params.append("lng", lng.toString());
+    if (excludeSpotId) params.append("excludeSpotId", excludeSpotId);
+
+    const url = `/spots/discover${params.toString() ? `?${params.toString()}` : ""}`;
+    const response = await apiV2.get<DiscoverResponse>(url, { timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "Spot 발견 정보를 가져올 수 없습니다");
+  }
+};
+
+// ==================== Spot 상세 API (v2) ====================
+
+// Spot 상세 조회 (SSR에서 사용)
+export const fetchSpotDetail = async (slug: string): Promise<SpotDetailResponse | null> => {
+  try {
+    const response = await apiV2.get<SpotDetailResponse>(`/spots/${slug}`, { timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    return handleApiError(error, "Spot 정보를 가져올 수 없습니다");
+  }
+};
+
+// Spot에 포함된 Route 목록 조회
+export const fetchSpotRoutes = async (spotId: string): Promise<RoutePreview[]> => {
+  try {
+    const response = await apiV2.get<RoutePreview[]>(`/spots/${spotId}/routes`, { timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    console.warn("Spot Routes 조회 실패:", error);
+    return [];
+  }
+};
+
+// 근처 Spot 조회 (v2)
+export const fetchNearbySpots = async (
+  lat: number,
+  lng: number,
+  excludeSpotId?: string,
+  limit: number = 6
+): Promise<SpotDetailResponse[]> => {
+  try {
+    const params = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      limit: limit.toString(),
+    });
+    if (excludeSpotId) params.append("excludeSpotId", excludeSpotId);
+
+    const response = await apiV2.get<SpotDetailResponse[]>(`/spots/nearby?${params.toString()}`, { timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    console.warn("근처 Spot 조회 실패:", error);
+    return [];
+  }
+};
+
+// ==================== Route 상세 API (v2) ====================
+
+// Route 상세 조회 (SSR에서 사용)
+export const fetchRouteDetail = async (slug: string): Promise<RouteDetailResponse | null> => {
+  try {
+    const response = await apiV2.get<RouteDetailResponse>(`/routes/${slug}`, { timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    return handleApiError(error, "Route 정보를 가져올 수 없습니다");
+  }
+};
+
+// 인기 Route 조회
+export const fetchPopularRoutes = async (area?: string, limit: number = 10): Promise<RoutePreview[]> => {
+  try {
+    const params = new URLSearchParams({ limit: limit.toString() });
+    if (area) params.append("area", area);
+
+    const response = await apiV2.get<{ content: RoutePreview[] }>(`/routes/popular?${params.toString()}`, { timeout: 5000 });
+    return response.data.content;
+  } catch (error) {
+    console.warn("인기 Route 조회 실패:", error);
+    return [];
+  }
+};
+
+// ==================== Feed API (v2 — Paginated Lists) ====================
+
+// Paginated Spot 목록 (Feed, City 페이지용)
+export const fetchFeedSpots = async (
+  area?: string,
+  category?: string,
+  page = 0,
+  size = 20
+): Promise<PaginatedResponse<SpotDetailResponse>> => {
+  try {
+    const params: Record<string, string | number> = { page, size };
+    if (area) params.area = area;
+    if (category) params.category = category;
+    const response = await apiV2.get<PaginatedResponse<SpotDetailResponse>>("/spots", { params, timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "Spot 목록을 불러올 수 없습니다");
+  }
+};
+
+// Paginated Route 목록 (Feed, City, Theme 페이지용)
+export const fetchFeedRoutes = async (
+  area?: string,
+  theme?: string,
+  page = 0,
+  size = 10
+): Promise<PaginatedResponse<RoutePreview>> => {
+  try {
+    const params: Record<string, string | number> = { page, size };
+    if (area) params.area = area;
+    if (theme) params.theme = theme.replace(/-/g, "_");
+    const response = await apiV2.get<PaginatedResponse<RoutePreview>>("/routes/popular", { params, timeout: 5000 });
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "Route 목록을 불러올 수 없습니다");
+  }
+};
+
 // ==================== 매장 API ====================
 
 // 모든 매장 조회
@@ -318,6 +471,35 @@ export const getStoreIdByQR = async (qrId: string): Promise<{ storeId: string; q
   } catch (error) {
     return handleApiError(error, "QR 코드를 찾을 수 없습니다");
   }
+};
+
+// QR ID → Spot slug 조회 (v2 우선, 레거시 fallback)
+export interface QrSpotResolution {
+  slug: string;
+  spotId: string;
+  source: "v2" | "legacy";
+}
+
+export const resolveQrToSpot = async (qrId: string): Promise<QrSpotResolution | null> => {
+  // 1. v2 API 시도
+  try {
+    const response = await apiV2.get<{ slug: string; spotId: string }>(`/qr/${qrId}/spot`, { timeout: 3000 });
+    if (response.data?.slug) {
+      return { slug: response.data.slug, spotId: response.data.spotId, source: "v2" };
+    }
+  } catch {
+    // v2 실패 → 레거시 fallback
+  }
+
+  // 2. 레거시 API fallback
+  try {
+    const legacy = await getStoreIdByQR(qrId);
+    return { slug: legacy.storeId, spotId: legacy.storeId, source: "legacy" };
+  } catch {
+    // 모두 실패
+  }
+
+  return null;
 };
 
 // 근처 매장 검색
@@ -663,4 +845,247 @@ export const logStoryCollapse = (qrId: QRCodeId, storeId: string, storySection?:
       storySection,
     },
   });
+};
+
+// ==================== Social API (v2 — 좋아요/저장) ====================
+
+// Auth 토큰 헬퍼 (non-React context에서 localStorage 직접 읽기)
+const getAuthToken = (): string => {
+  if (typeof window === "undefined") return "";
+  try {
+    const raw = localStorage.getItem("spotline_auth");
+    if (!raw) return "";
+    const data = JSON.parse(raw);
+    return data.instagramUser?.accessToken || "";
+  } catch {
+    return "";
+  }
+};
+
+// 좋아요 토글
+export const toggleLike = async (
+  type: "spot" | "route",
+  id: string
+): Promise<SocialToggleResponse> => {
+  const response = await apiV2.post<SocialToggleResponse>(
+    `/${type}s/${id}/like`,
+    {},
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
+// 저장 토글
+export const toggleSave = async (
+  type: "spot" | "route",
+  id: string
+): Promise<SocialToggleResponse> => {
+  const response = await apiV2.post<SocialToggleResponse>(
+    `/${type}s/${id}/save`,
+    {},
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
+// 소셜 상태 조회 (로그인 사용자)
+export const fetchSocialStatus = async (
+  type: "spot" | "route",
+  id: string
+): Promise<SocialStatus> => {
+  try {
+    const response = await apiV2.get<SocialStatus>(
+      `/${type}s/${id}/social`,
+      { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+    );
+    return response.data;
+  } catch {
+    return { isLiked: false, isSaved: false };
+  }
+};
+
+// ==================== Replication API (v2 — Route 복제/내 일정) ====================
+
+// Route 복제
+export const replicateRoute = async (
+  routeId: string,
+  scheduledDate: string | null
+): Promise<ReplicateRouteResponse> => {
+  const response = await apiV2.post<ReplicateRouteResponse>(
+    `/routes/${routeId}/replicate`,
+    { scheduledDate },
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
+// 내 Route 목록
+export const fetchMyRoutes = async (
+  status?: "scheduled" | "completed",
+  page: number = 0
+): Promise<{ items: MyRoute[]; hasMore: boolean }> => {
+  try {
+    const params: Record<string, string | number> = { page };
+    if (status) params.status = status;
+    const response = await apiV2.get<{ items: MyRoute[]; hasMore: boolean }>(
+      "/users/me/routes",
+      { params, headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+    );
+    return response.data;
+  } catch {
+    return { items: [], hasMore: false };
+  }
+};
+
+// 내 Route 상태 변경 (완주/취소)
+export const updateMyRouteStatus = async (
+  myRouteId: string,
+  status: "completed" | "cancelled"
+): Promise<MyRoute> => {
+  const response = await apiV2.patch<MyRoute>(
+    `/users/me/routes/${myRouteId}`,
+    { status },
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
+// 내 Route 삭제
+export const deleteMyRoute = async (myRouteId: string): Promise<void> => {
+  await apiV2.delete(`/users/me/routes/${myRouteId}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+};
+
+// Route 변형 목록
+export const fetchRouteVariations = async (
+  routeId: string,
+  page: number = 0
+): Promise<{ items: RoutePreview[]; hasMore: boolean }> => {
+  try {
+    const response = await apiV2.get<{ items: RoutePreview[]; hasMore: boolean }>(
+      `/routes/${routeId}/variations`,
+      { params: { page }, timeout: 5000 }
+    );
+    return response.data;
+  } catch {
+    return { items: [], hasMore: false };
+  }
+};
+
+// ==================== Follow API (v2 — 팔로우/팔로잉) ====================
+
+// 유저 프로필 조회
+export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  try {
+    const res = await apiV2.get<UserProfile>(`/users/${userId}/profile`, { timeout: 5000 });
+    return res.data;
+  } catch {
+    return null;
+  }
+};
+
+// 팔로우
+export const followUser = async (userId: string): Promise<{ followed: boolean; followersCount: number }> => {
+  const res = await apiV2.post(
+    `/users/${userId}/follow`,
+    {},
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 언팔로우
+export const unfollowUser = async (userId: string): Promise<{ followed: boolean; followersCount: number }> => {
+  const res = await apiV2.delete(
+    `/users/${userId}/follow`,
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 팔로워 목록
+export const fetchFollowers = async (
+  userId: string,
+  page = 1,
+  size = 20
+): Promise<PaginatedResponse<UserProfile>> => {
+  const res = await apiV2.get<PaginatedResponse<UserProfile>>(
+    `/users/${userId}/followers`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 팔로잉 목록
+export const fetchFollowing = async (
+  userId: string,
+  page = 1,
+  size = 20
+): Promise<PaginatedResponse<UserProfile>> => {
+  const res = await apiV2.get<PaginatedResponse<UserProfile>>(
+    `/users/${userId}/following`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 팔로우 상태 확인
+export const fetchFollowStatus = async (userId: string): Promise<{ isFollowing: boolean }> => {
+  try {
+    const res = await apiV2.get<{ isFollowing: boolean }>(
+      `/users/${userId}/follow/status`,
+      { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+    );
+    return res.data;
+  } catch {
+    return { isFollowing: false };
+  }
+};
+
+// 유저의 좋아요 Spot 목록 (공개 프로필용)
+export const fetchUserLikedSpots = async (
+  userId: string,
+  page = 1,
+  size = 12
+): Promise<PaginatedResponse<SpotDetailResponse>> => {
+  const res = await apiV2.get<PaginatedResponse<SpotDetailResponse>>(
+    `/users/${userId}/likes/spots`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 유저의 저장 Route 목록 (공개 프로필용)
+export const fetchUserSavedRoutes = async (
+  userId: string,
+  page = 1,
+  size = 12
+): Promise<PaginatedResponse<RoutePreview>> => {
+  const res = await apiV2.get<PaginatedResponse<RoutePreview>>(
+    `/users/${userId}/saves/routes`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 내 저장 목록
+export const fetchMySaves = async (
+  type: "spot" | "route",
+  page: number = 0
+): Promise<{ items: SpotDetailResponse[]; hasMore: boolean }> => {
+  try {
+    const response = await apiV2.get<{ items: SpotDetailResponse[]; hasMore: boolean }>(
+      `/users/me/saves`,
+      {
+        params: { type, page },
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+        timeout: 5000,
+      }
+    );
+    return response.data;
+  } catch {
+    return { items: [], hasMore: false };
+  }
 };

@@ -1,0 +1,128 @@
+import type { SpotDetailResponse, RouteDetailResponse, SpotCategory } from "@/types";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
+
+const CATEGORY_SCHEMA_MAP: Record<SpotCategory, string> = {
+  cafe: "CafeOrCoffeeShop",
+  restaurant: "Restaurant",
+  bar: "BarOrPub",
+  nature: "Park",
+  walk: "Park",
+  culture: "Museum",
+  exhibition: "Museum",
+  activity: "TouristAttraction",
+  shopping: "Store",
+  other: "LocalBusiness",
+};
+
+/** Spot → LocalBusiness (또는 하위 타입) JSON-LD */
+export function generateSpotJsonLd(spot: SpotDetailResponse): Record<string, unknown> {
+  const schemaType = CATEGORY_SCHEMA_MAP[spot.category] || "LocalBusiness";
+  const url = `${SITE_URL}/spot/${spot.slug}`;
+  const description = spot.crewNote || spot.description || `${spot.area}의 ${spot.title}`;
+
+  const images: string[] = [
+    ...(spot.placeInfo?.photos || []),
+    ...spot.media,
+    ...spot.mediaItems.map((m) => m.url),
+  ].filter(Boolean);
+
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    name: spot.title,
+    description,
+    url,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: spot.address,
+      addressLocality: spot.area,
+      addressRegion: spot.sido || "서울",
+      addressCountry: "KR",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: spot.latitude,
+      longitude: spot.longitude,
+    },
+  };
+
+  if (images.length > 0) {
+    jsonLd.image = images;
+  }
+
+  if (spot.placeInfo) {
+    if (spot.placeInfo.phone) {
+      jsonLd.telephone = spot.placeInfo.phone;
+    }
+    if (spot.placeInfo.businessHours) {
+      jsonLd.openingHours = spot.placeInfo.businessHours;
+    }
+    if (spot.placeInfo.rating != null && spot.placeInfo.reviewCount != null && spot.placeInfo.reviewCount > 0) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: spot.placeInfo.rating,
+        reviewCount: spot.placeInfo.reviewCount,
+      };
+    }
+  }
+
+  return jsonLd;
+}
+
+/** Route → TouristTrip + ItemList JSON-LD */
+export function generateRouteJsonLd(route: RouteDetailResponse): Record<string, unknown> {
+  const url = `${SITE_URL}/route/${route.slug}`;
+  const description = route.description || `${route.area}의 ${route.title} - ${route.spots.length}곳`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: route.title,
+    description,
+    url,
+    touristType: route.theme,
+    itinerary: {
+      "@type": "ItemList",
+      numberOfItems: route.spots.length,
+      itemListElement: route.spots.map((spot) => ({
+        "@type": "ListItem",
+        position: spot.order + 1,
+        item: {
+          "@type": "Place",
+          name: spot.spotTitle,
+          address: spot.spotAddress,
+        },
+      })),
+    },
+  };
+}
+
+/** Organization JSON-LD (layout.tsx) */
+export function generateOrganizationJsonLd(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Spotline",
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description: "QR 기반 로컬 연결 서비스. 경험을 기록하고 공유하는 소셜 플랫폼.",
+    sameAs: [],
+  };
+}
+
+/** BreadcrumbList JSON-LD */
+export function generateBreadcrumbJsonLd(
+  items: Array<{ name: string; url?: string }>
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      ...(item.url ? { item: `${SITE_URL}${item.url}` } : {}),
+    })),
+  };
+}

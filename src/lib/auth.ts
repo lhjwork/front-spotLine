@@ -27,6 +27,6 @@ export function createUserProfileFromInstagram(igUser: InstagramUser): UserProfi
     avatar: igUser.profilePicture,
     instagramId: igUser.instagramId,
     joinedAt: new Date().toISOString(),
-    stats: { visited: 0, liked: 0, recommended: 0, spotlines: 0 },
+    stats: { visited: 0, liked: 0, recommended: 0, spotlines: 0, followers: 0, following: 0 },
   };
 }

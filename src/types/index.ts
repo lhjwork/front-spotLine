@@ -234,10 +234,255 @@ export interface NearbyStoreParams {
   category?: StoreCategory;
 }
 
+// ============================================================
+// Spot/Route 핵심 타입 (Experience Social Platform)
+// ============================================================
+
+export type SpotCategory =
+  | "cafe" | "restaurant" | "bar"
+  | "nature" | "culture" | "exhibition"
+  | "walk" | "activity" | "shopping" | "other";
+
+export type RouteTheme =
+  | "date" | "travel" | "walk" | "hangout"
+  | "food-tour" | "cafe-tour" | "culture";
+
+// QR Partner System (Phase 8)
+export type PartnerTier = "basic" | "premium";
+
+export interface SpotPartnerInfo {
+  isPartner: boolean;
+  brandColor: string;
+  benefitText: string | null;
+  tier: PartnerTier;
+  partnerSince: string;
+}
+
+// Spot 상세 응답 (GET /api/v2/spots/:slug)
+export interface SpotDetailResponse {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  category: SpotCategory;
+  source: string;
+  crewNote: string | null;
+  address: string;
+  latitude: number;
+  longitude: number;
+  area: string;
+  sido: string | null;
+  sigungu: string | null;
+  dong: string | null;
+  blogUrl: string | null;
+  instagramUrl: string | null;
+  websiteUrl: string | null;
+  naverPlaceId: string | null;
+  kakaoPlaceId: string | null;
+  tags: string[];
+  media: string[];
+  mediaItems: SpotMediaItem[];
+  likesCount: number;
+  savesCount: number;
+  viewsCount: number;
+  creatorType: string;
+  creatorName: string | null;
+  createdAt: string;
+  placeInfo: DiscoverPlaceInfo | null;
+  partner: SpotPartnerInfo | null;
+}
+
+// Route 상세 응답 (GET /api/v2/routes/:slug)
+export interface RouteDetailResponse {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  theme: RouteTheme;
+  area: string;
+  totalDuration: number;
+  totalDistance: number;
+  spots: RouteSpotDetail[];
+  likesCount: number;
+  savesCount: number;
+  replicationsCount: number;
+  completionsCount: number;
+  creatorType: string;
+  creatorName: string | null;
+  parentRouteId: string | null;
+  variationsCount: number;
+  createdAt: string;
+}
+
+// Route 내 Spot 상세 (RouteDetailResponse.spots 항목)
+export interface RouteSpotDetail {
+  order: number;
+  suggestedTime: string | null;
+  stayDuration: number | null;
+  walkingTimeToNext: number | null;
+  distanceToNext: number | null;
+  transitionNote: string | null;
+  spotId: string;
+  spotSlug: string;
+  spotTitle: string;
+  spotCategory: string;
+  spotArea: string;
+  spotAddress: string;
+  spotLatitude: number;
+  spotLongitude: number;
+  crewNote: string | null;
+  spotMedia: string[];
+}
+
+// ============================================================
+// Discover API 타입 (Location-Based Discovery)
+// ============================================================
+
+export interface DiscoverCurrentSpot {
+  spot: DiscoverSpot;
+  placeInfo: DiscoverPlaceInfo | null;
+  distanceFromUser: number; // meters
+}
+
+export interface DiscoverNextSpot {
+  spot: DiscoverSpot;
+  placeInfo: DiscoverPlaceInfo | null;
+  distanceFromCurrent: number; // meters
+  walkingTime: number; // minutes
+}
+
+export interface SpotMediaItem {
+  id: string;
+  url: string;
+  mediaType: "IMAGE" | "VIDEO";
+  thumbnailUrl: string | null;
+  durationSec: number | null;
+  displayOrder: number;
+}
+
+export interface DiscoverSpot {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  category: string;
+  source: string;
+  crewNote: string | null;
+  address: string;
+  latitude: number;
+  longitude: number;
+  area: string;
+  naverPlaceId: string | null;
+  kakaoPlaceId: string | null;
+  tags: string[];
+  media: string[];
+  mediaItems?: SpotMediaItem[];
+  likesCount: number;
+  savesCount: number;
+  viewsCount: number;
+  creatorType: string;
+  creatorName: string | null;
+  createdAt: string;
+  placeInfo: DiscoverPlaceInfo | null;
+}
+
+export interface DiscoverPlaceInfo {
+  provider: string;
+  placeId: string;
+  name: string;
+  address: string;
+  phone: string | null;
+  category: string | null;
+  businessHours: string | null;
+  rating: number | null;
+  reviewCount: number | null;
+  photos: string[] | null;
+  url: string | null;
+}
+
+export interface RoutePreview {
+  id: string;
+  slug: string;
+  title: string;
+  theme: string;
+  area: string;
+  totalDuration: number; // minutes
+  totalDistance: number; // meters
+  spotCount: number;
+  likesCount: number;
+}
+
+export interface DiscoverResponse {
+  currentSpot: DiscoverCurrentSpot | null;
+  nextSpot: DiscoverNextSpot | null;
+  nearbySpots: DiscoverSpot[];
+  popularRoutes: RoutePreview[];
+  area: string | null;
+  locationGranted: boolean;
+}
+
+export interface GeolocationState {
+  coordinates: { lat: number; lng: number } | null;
+  status: "idle" | "requesting" | "granted" | "denied" | "unavailable";
+  error: string | null;
+  accuracy: number | null;
+}
+
 // 헬스 체크 타입
 export interface HealthCheckResponse {
   status: string;
   message: string;
+}
+
+// ============================================================
+// Social Features 타입 (Phase 6)
+// ============================================================
+
+// 소셜 상태 (사용자별, 리소스별)
+export interface SocialStatus {
+  isLiked: boolean;
+  isSaved: boolean;
+}
+
+// 소셜 토글 API 응답
+export interface SocialToggleResponse {
+  liked?: boolean;
+  saved?: boolean;
+  likesCount: number;
+  savesCount: number;
+}
+
+// ============================================================
+// Feed / City / Theme 타입 (Experience Feed - Phase 4)
+// ============================================================
+
+// Spring Boot Page 응답 매핑
+export interface PaginatedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;       // current page (0-indexed)
+  size: number;
+  last: boolean;
+  first: boolean;
+}
+
+// City 정적 데이터
+export interface CityInfo {
+  slug: string;
+  name: string;
+  description: string;
+  area: string;
+}
+
+// Theme 정적 데이터
+export interface ThemeInfo {
+  slug: string;
+  name: string;
+  description: string;
+  theme: RouteTheme;
+  colorClass: string;
+  iconName: string;
 }
 
 // ============================================================
@@ -257,6 +502,8 @@ export interface UserProfile {
     liked: number;
     recommended: number;
     spotlines: number; // 참여 중인 SpotLine 수
+    followers: number;
+    following: number;
   };
 }
 
@@ -340,6 +587,36 @@ export interface MockupSpot {
 
   // 크루 정보 (source === "spotline" 일 때)
   author?: string;
+}
+
+// ============================================================
+// Experience Replication 타입 (Phase 7)
+// ============================================================
+
+// 내 Route (복제된 Route)
+export interface MyRoute {
+  id: string;
+  routeId: string;
+  routeSlug: string;
+  title: string;
+  area: string;
+  spotsCount: number;
+  scheduledDate: string | null;
+  status: "scheduled" | "completed" | "cancelled";
+  completedAt: string | null;
+  parentRouteId: string;
+  createdAt: string;
+}
+
+// 복제 요청
+export interface ReplicateRouteRequest {
+  scheduledDate: string | null;
+}
+
+// 복제 응답
+export interface ReplicateRouteResponse {
+  myRoute: MyRoute;
+  replicationsCount: number;
 }
 
 // SpotLine 요약 (목록 표시용)

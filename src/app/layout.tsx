@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthInitializer from "@/components/auth/AuthInitializer";
+import BottomNavBar from "@/components/layout/BottomNavBar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -70,6 +71,7 @@ export default function RootLayout({
       >
         <AuthInitializer />
         {children}
+        <BottomNavBar />
       </body>
     </html>
   );

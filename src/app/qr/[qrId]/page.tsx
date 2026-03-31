@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getStoreIdByQR } from "@/lib/api";
+import { resolveQrToSpot } from "@/lib/api";
 
 export default function QRPage() {
   const params = useParams();
@@ -22,9 +22,19 @@ export default function QRPage() {
           return;
         }
 
-        // 실제 QR 코드 처리
-        const { storeId } = await getStoreIdByQR(qrId);
-        router.replace(`/spotline/${storeId}?qr=${qrId}`);
+        // 실제 QR 코드 처리 (v2 우선, 레거시 fallback)
+        const result = await resolveQrToSpot(qrId);
+
+        if (result) {
+          if (result.source === "v2") {
+            router.replace(`/spot/${result.slug}?qr=${qrId}`);
+          } else {
+            router.replace(`/spotline/${result.spotId}?qr=${qrId}`);
+          }
+        } else {
+          setError("등록되지 않은 QR 코드입니다");
+          return;
+        }
       } catch (err) {
         console.error("QR 코드 처리 실패:", err);
         setError(err instanceof Error ? err.message : "QR 코드를 처리할 수 없습니다");
