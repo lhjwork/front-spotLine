@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthInitializer from "@/components/auth/AuthInitializer";
 import BottomNavBar from "@/components/layout/BottomNavBar";
+import JsonLd from "@/components/seo/JsonLd";
+import { generateOrganizationJsonLd } from "@/lib/seo/jsonld";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -69,6 +71,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <JsonLd data={generateOrganizationJsonLd()} />
         <AuthInitializer />
         {children}
         <BottomNavBar />

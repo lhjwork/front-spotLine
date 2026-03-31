@@ -1089,3 +1089,30 @@ export const fetchMySaves = async (
     return { items: [], hasMore: false };
   }
 };
+
+// ==================== Sitemap API (v2 — slug 목록) ====================
+
+export interface SlugEntry {
+  slug: string;
+  updatedAt: string;
+}
+
+/** 전체 active Spot slug 목록 (sitemap용) */
+export async function fetchAllSpotSlugs(): Promise<SlugEntry[]> {
+  try {
+    const res = await apiV2.get<SlugEntry[]>("/spots/slugs", { timeout: 10000 });
+    return res.data;
+  } catch {
+    return [];
+  }
+}
+
+/** 전체 active Route slug 목록 (sitemap용) */
+export async function fetchAllRouteSlugs(): Promise<SlugEntry[]> {
+  try {
+    const res = await apiV2.get<SlugEntry[]>("/routes/slugs", { timeout: 10000 });
+    return res.data;
+  } catch {
+    return [];
+  }
+}

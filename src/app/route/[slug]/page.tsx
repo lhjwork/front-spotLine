@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchRouteDetail } from "@/lib/api";
+import JsonLd from "@/components/seo/JsonLd";
+import Breadcrumb from "@/components/seo/Breadcrumb";
+import { generateRouteJsonLd } from "@/lib/seo/jsonld";
 import RouteHeader from "@/components/route/RouteHeader";
 import RouteTimeline from "@/components/route/RouteTimeline";
 import RouteMapPreview from "@/components/route/RouteMapPreview";
@@ -21,10 +24,14 @@ export async function generateMetadata({ params }: RoutePageProps): Promise<Meta
   }
 
   const description = route.description || `${route.area}의 ${route.title} - ${route.spots.length}곳`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
 
   return {
     title: route.title,
     description,
+    alternates: {
+      canonical: `${siteUrl}/route/${slug}`,
+    },
     openGraph: {
       title: `${route.title} | Spotline`,
       description,
@@ -48,6 +55,12 @@ export default async function RoutePage({ params }: RoutePageProps) {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
+      <JsonLd data={generateRouteJsonLd(route)} />
+      <Breadcrumb items={[
+        { name: route.area, url: `/city/${route.area}` },
+        { name: route.theme, url: `/theme/${route.theme}` },
+        { name: route.title },
+      ]} />
       <RouteHeader route={route} />
 
       <div className="mx-auto max-w-lg px-4">

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchSpotDetail, fetchSpotRoutes, fetchNearbySpots } from "@/lib/api";
+import JsonLd from "@/components/seo/JsonLd";
+import Breadcrumb from "@/components/seo/Breadcrumb";
+import { generateSpotJsonLd } from "@/lib/seo/jsonld";
 import SpotHero from "@/components/spot/SpotHero";
 import SpotCrewNote from "@/components/spot/SpotCrewNote";
 import SpotPlaceInfo from "@/components/spot/SpotPlaceInfo";
@@ -29,10 +32,14 @@ export async function generateMetadata({ params }: SpotPageProps): Promise<Metad
 
   const description = spot.crewNote || spot.description || `${spot.area}의 ${spot.title}`;
   const imageUrl = spot.placeInfo?.photos?.[0] || spot.media?.[0];
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
 
   return {
     title: spot.title,
     description,
+    alternates: {
+      canonical: `${siteUrl}/spot/${slug}`,
+    },
     openGraph: {
       title: `${spot.title} | Spotline`,
       description,
@@ -70,6 +77,11 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
+      <JsonLd data={generateSpotJsonLd(spot)} />
+      <Breadcrumb items={[
+        { name: spot.area, url: `/city/${spot.area}` },
+        { name: spot.title },
+      ]} />
       <SpotHero spot={spot} />
 
       <div className="mx-auto max-w-lg px-4">

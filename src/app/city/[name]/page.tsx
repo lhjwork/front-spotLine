@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Layout from "@/components/layout/Layout";
+import Breadcrumb from "@/components/seo/Breadcrumb";
 import CityHero from "@/components/city/CityHero";
 import CityRoutes from "@/components/city/CityRoutes";
 import CitySpots from "@/components/city/CitySpots";
@@ -23,9 +24,14 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
   const city = findCityBySlug(name);
   if (!city) return {};
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
+
   return {
     title: `${city.name} 인기 경험 · 카페, 맛집, 문화 | Spotline`,
     description: city.description,
+    alternates: {
+      canonical: `${siteUrl}/city/${name}`,
+    },
     openGraph: {
       title: `${city.name} 탐색 | Spotline`,
       description: city.description,
@@ -47,6 +53,7 @@ export default async function CityPage({ params }: CityPageProps) {
   return (
     <Layout showFooter>
       <div className="max-w-4xl mx-auto">
+        <Breadcrumb items={[{ name: city.name }]} />
         <CityHero city={city} />
         <CityRoutes routes={routesResult.content} />
         <CitySpots spots={spotsResult.content} cityArea={city.area} />

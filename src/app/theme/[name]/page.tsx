@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Layout from "@/components/layout/Layout";
+import Breadcrumb from "@/components/seo/Breadcrumb";
 import ThemeHero from "@/components/theme/ThemeHero";
 import ThemeRoutes from "@/components/theme/ThemeRoutes";
 import ThemeNavigation from "@/components/theme/ThemeNavigation";
@@ -22,9 +23,14 @@ export async function generateMetadata({ params }: ThemePageProps): Promise<Meta
   const theme = findThemeBySlug(name);
   if (!theme) return {};
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
+
   return {
     title: `${theme.name} 추천 코스 | Spotline`,
     description: theme.description,
+    alternates: {
+      canonical: `${siteUrl}/theme/${name}`,
+    },
     openGraph: {
       title: `${theme.name} 코스 | Spotline`,
       description: theme.description,
@@ -44,6 +50,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
   return (
     <Layout showFooter>
       <div className="max-w-4xl mx-auto">
+        <Breadcrumb items={[{ name: theme.name }]} />
         <ThemeHero theme={theme} />
         <ThemeRoutes routes={routesResult.content} />
         <ThemeNavigation currentSlug={theme.slug} />
