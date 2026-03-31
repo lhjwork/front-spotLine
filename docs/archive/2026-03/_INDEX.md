@@ -7,6 +7,7 @@
 | [experience-feed](./experience-feed/) | 95% | 0 | 2 days | 2026-03-28 |
 | [feed-improvements](./feed-improvements/) | 95% | 0 | 1 day | 2026-03-28 |
 | [discover-improvements](./discover-improvements/) | 100% | 0 | 1 day | 2026-03-28 |
+| [seo-structured-data](./seo-structured-data/) | 97% | 0 | 1 day | 2026-03-31 |
 
 ## Documents
 
@@ -54,3 +55,12 @@
 | Design | [discover-improvements.design.md](./discover-improvements/discover-improvements.design.md) |
 | Analysis | [discover-improvements.analysis.md](./discover-improvements/discover-improvements.analysis.md) |
 | Report | [discover-improvements.report.md](./discover-improvements/discover-improvements.report.md) |
+
+### seo-structured-data (JSON-LD Schema.org + sitemap.xml + robots.txt + canonical URLs)
+
+| Document | File |
+|----------|------|
+| Plan | [seo-structured-data.plan.md](./seo-structured-data/seo-structured-data.plan.md) |
+| Design | [seo-structured-data.design.md](./seo-structured-data/seo-structured-data.design.md) |
+| Analysis | [seo-structured-data.analysis.md](./seo-structured-data/seo-structured-data.analysis.md) |
+| Report | [seo-structured-data.report.md](./seo-structured-data/seo-structured-data.report.md) |
