@@ -45,10 +45,14 @@ export const useFeedStore = create<FeedState>((set) => ({
     return { category, spots: [], spotsPage: 0, hasMoreSpots: true, error: null };
   }),
 
-  appendSpots: (newSpots, hasMore) => set((state) => ({
-    spots: [...state.spots, ...newSpots],
-    hasMoreSpots: hasMore,
-  })),
+  appendSpots: (newSpots, hasMore) => set((state) => {
+    const existingIds = new Set(state.spots.map((s) => s.id));
+    const unique = newSpots.filter((s) => !existingIds.has(s.id));
+    return {
+      spots: [...state.spots, ...unique],
+      hasMoreSpots: hasMore,
+    };
+  }),
 
   nextSpotsPage: () => set((state) => ({ spotsPage: state.spotsPage + 1 })),
 

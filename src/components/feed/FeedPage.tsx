@@ -18,6 +18,7 @@ export default function FeedPage() {
   const router = useRouter();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isFiltering, setIsFiltering] = useState(false);
+  const initializedRef = useRef(false);
   const {
     area, category, spots, spotsPage, hasMoreSpots, routes,
     isLoading, error,
@@ -25,17 +26,19 @@ export default function FeedPage() {
     setIsLoading, setError,
   } = useFeedStore();
 
-  // Init filters from URL
+  // Init filters from URL (once)
   useEffect(() => {
     const urlArea = searchParams.get("area");
     const urlCategory = searchParams.get("category");
     if (urlArea) setArea(urlArea);
     if (urlCategory) setCategory(urlCategory as SpotCategory);
+    initializedRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync filters to URL
   useEffect(() => {
+    if (!initializedRef.current) return;
     const params = new URLSearchParams();
     if (area) params.set("area", area);
     if (category) params.set("category", category);
@@ -45,24 +48,31 @@ export default function FeedPage() {
 
   // Scroll to content on filter change
   useEffect(() => {
+    if (!initializedRef.current) return;
     contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [area, category]);
 
   // Load routes when area changes
   useEffect(() => {
+    if (!initializedRef.current) return;
+    let cancelled = false;
     const loadRoutes = async () => {
       try {
         const result = await fetchFeedRoutes(area || undefined, undefined, 0, 5);
-        setRoutes(result.content);
+        if (!cancelled) setRoutes(result.content);
       } catch {
         // Routes are non-critical, don't block
       }
     };
     loadRoutes();
+    return () => { cancelled = true; };
   }, [area, setRoutes]);
 
   // Load spots when area/category/page changes
   useEffect(() => {
+    if (!initializedRef.current) return;
+    let cancelled = false;
+
     const loadSpots = async () => {
       if (spotsPage === 0 && spots.length > 0) {
         setIsFiltering(true);
@@ -76,15 +86,22 @@ export default function FeedPage() {
           spotsPage,
           20
         );
-        appendSpots(result.content, !result.last);
+        if (!cancelled) {
+          appendSpots(result.content, !result.last);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Spot을 불러올 수 없습니다");
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Spot을 불러올 수 없습니다");
+        }
       } finally {
-        setIsLoading(false);
-        setIsFiltering(false);
+        if (!cancelled) {
+          setIsLoading(false);
+          setIsFiltering(false);
+        }
       }
     };
     loadSpots();
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [area, category, spotsPage]);
 
