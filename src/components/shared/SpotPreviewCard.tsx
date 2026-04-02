@@ -16,7 +16,7 @@ interface SpotPreviewCardProps {
 }
 
 export default function SpotPreviewCard({ spot }: SpotPreviewCardProps) {
-  const imageUrl = spot.placeInfo?.photos?.[0] || spot.media?.[0];
+  const imageUrl = spot.mediaItems?.[0]?.url || spot.placeInfo?.photos?.[0] || spot.media?.[0];
   const categoryLabel = categoryLabels[spot.category] || spot.category;
 
   return (
