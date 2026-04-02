@@ -1,0 +1,5 @@
+# Archive Index — 2026-04
+
+| Feature | Match Rate | Archived | Documents |
+|---------|:----------:|----------|-----------|
+| qr-partner-system | 95% | 2026-04-02 | plan, design, analysis, report |
