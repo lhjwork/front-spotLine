@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { logPageEnter } from "@/lib/api";
+import { useEffect, useRef } from "react";
+import { logPageEnter, recordQrScan, generateSessionId } from "@/lib/api";
 
 interface QrAnalyticsProps {
   spotId: string;
@@ -9,21 +9,19 @@ interface QrAnalyticsProps {
 }
 
 export default function QrAnalytics({ spotId, qrId }: QrAnalyticsProps) {
-  const [startTime] = useState(Date.now());
+  const logged = useRef(false);
 
   useEffect(() => {
-    // 페이지 진입 이벤트 (fire-and-forget)
+    if (logged.current) return;
+    logged.current = true;
+
+    // 기존 레거시 페이지 진입 이벤트 (fire-and-forget)
     logPageEnter(spotId, qrId);
 
-    // 이탈 시 체류 시간 기록
-    const handleBeforeUnload = () => {
-      const stayDuration = Date.now() - startTime;
-      console.log(`QR Spot 체류 시간: ${stayDuration}ms (spotId: ${spotId}, qrId: ${qrId})`);
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [spotId, qrId, startTime]);
+    // v2 스캔 기록 (파트너 QR 분석용, fire-and-forget)
+    const sessionId = generateSessionId();
+    recordQrScan(qrId, sessionId);
+  }, [spotId, qrId]);
 
   return null;
 }

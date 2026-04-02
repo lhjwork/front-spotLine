@@ -502,6 +502,20 @@ export const resolveQrToSpot = async (qrId: string): Promise<QrSpotResolution | 
   return null;
 };
 
+// ==================== QR Scan Recording (v2 — Partner Analytics) ====================
+
+// QR 스캔 기록 (fire-and-forget, 파트너 분석용)
+export const recordQrScan = async (qrId: string, sessionId: string): Promise<void> => {
+  try {
+    await apiV2.post(`/qr/${qrId}/scan`, null, {
+      params: { sessionId },
+      timeout: 3000,
+    });
+  } catch {
+    // fire-and-forget: 실패해도 사용자 경험에 영향 없음
+  }
+};
+
 // 근처 매장 검색
 export const getNearbyStores = async (params: NearbyStoreParams): Promise<Store[]> => {
   try {

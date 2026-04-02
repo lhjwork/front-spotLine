@@ -635,6 +635,76 @@ front-spotLine/src/
 
 ---
 
+## 8.5 QR 스캔 기록 연동 (미구현 — 추가 설계)
+
+### 8.5.1 recordQrScan API 함수 추가 (`front-spotLine/src/lib/api.ts`)
+
+```typescript
+/**
+ * QR 스캔 기록 (fire-and-forget)
+ * Backend: POST /api/v2/qr/{qrId}/scan
+ */
+export const recordQrScan = async (qrId: string, sessionId: string): Promise<void> => {
+  try {
+    await apiV2.post(`/qr/${qrId}/scan`, null, {
+      params: { sessionId },
+      timeout: 3000,
+    });
+  } catch {
+    // fire-and-forget: 실패해도 무시
+  }
+};
+```
+
+### 8.5.2 QrAnalytics.tsx 수정 (`front-spotLine/src/components/qr/QrAnalytics.tsx`)
+
+**현재**: `logPageEnter(spotId, qrId)` 호출 + `console.log`로 stayDuration
+**변경**: `recordQrScan(qrId, sessionId)` 호출 추가
+
+```tsx
+"use client";
+import { useEffect, useRef } from "react";
+import { logPageEnter, recordQrScan } from "@/lib/api";
+import { getOrCreateSessionId } from "@/lib/spotline";
+
+interface QrAnalyticsProps {
+  spotId: string;
+  qrId: string;
+}
+
+export default function QrAnalytics({ spotId, qrId }: QrAnalyticsProps) {
+  const logged = useRef(false);
+
+  useEffect(() => {
+    if (logged.current) return;
+    logged.current = true;
+
+    // 기존 logPageEnter 유지
+    logPageEnter(spotId, qrId);
+
+    // 신규: v2 스캔 기록 (파트너 QR 분석용)
+    const sessionId = getOrCreateSessionId();
+    recordQrScan(qrId, sessionId);
+  }, [spotId, qrId]);
+
+  return null;
+}
+```
+
+**변경 포인트**:
+- `recordQrScan()` 추가 호출 — fire-and-forget, 기존 logPageEnter와 병렬
+- `getOrCreateSessionId()` 활용 (이미 `spotline.ts`에 구현됨)
+- `useRef`로 중복 호출 방지 (Strict Mode 대응)
+
+### 8.5.3 구현 영향도
+
+| 파일 | 변경 유형 | 영향도 |
+|------|----------|--------|
+| `src/lib/api.ts` | 함수 1개 추가 (`recordQrScan`) | 최소 |
+| `src/components/qr/QrAnalytics.tsx` | import + 1줄 호출 추가 | 최소 |
+
+---
+
 ## 9. Error Handling & Fallback
 
 ### 9.1 Admin
@@ -678,3 +748,4 @@ front-spotLine/src/
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
 | 0.1 | 2026-03-28 | Initial design | Development Team |
+| 0.2 | 2026-04-02 | QR 스캔 기록 연동 설계 추가 (§8.5), 구현 상태 반영 | Development Team |

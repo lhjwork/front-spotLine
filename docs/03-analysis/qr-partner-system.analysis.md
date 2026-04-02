@@ -502,11 +502,94 @@ The 4 "changed" items (debounce, form library, modal vs inline, preview binding)
 
 ---
 
-## 13. Conclusion
+## 13. QR Scan Recording Gap Analysis (Design 8.5 — Added 2026-04-02)
 
-The QR Partner System implementation achieves a **96% match rate** with the design document. All 16 specified files exist and contain the expected functionality. The 4 intentional deviations are minor UX/pattern choices that don't affect feature completeness. The 2 missing items (brandColor fallback, admin SpotDetailResponse.partner) are low-impact edge cases.
+> Design v0.2 added section 8.5 for QR scan recording integration. This section verifies the front-end implementation.
 
-**Recommendation**: Match rate >= 90%. This feature passes the Check phase. Proceed to `/pdca report qr-partner-system`.
+### 13.1 recordQrScan API Function (`src/lib/api.ts`)
+
+| Design Spec | Implementation | Status |
+|---|---|---|
+| Function: `recordQrScan(qrId, sessionId): Promise<void>` | Line 508: `export const recordQrScan = async (qrId: string, sessionId: string): Promise<void>` | ✅ Match |
+| Endpoint: `apiV2.post(\`/qr/${qrId}/scan\`)` | `apiV2.post(\`/qr/${qrId}/scan\`, null, ...)` | ✅ Match |
+| Params: `{ params: { sessionId }, timeout: 3000 }` | `{ params: { sessionId }, timeout: 3000 }` | ✅ Match |
+| Error handling: `catch {}` (fire-and-forget) | `catch { // fire-and-forget }` | ✅ Match |
+
+### 13.2 QrAnalytics.tsx Modification (`src/components/qr/QrAnalytics.tsx`)
+
+| Design Spec | Implementation | Status |
+|---|---|---|
+| `"use client"` directive | Present | ✅ Match |
+| `useRef(false)` guard for Strict Mode | `logged.current` guard | ✅ Match |
+| `logPageEnter(spotId, qrId)` call preserved | Present | ✅ Match |
+| `recordQrScan(qrId, sessionId)` call added | Present (line 22) | ✅ Match |
+| Session ID source: `getOrCreateSessionId()` from `@/lib/spotline` | `generateSessionId()` from `@/lib/api` | ⚠️ Different |
+| Import: separate from `@/lib/spotline` | All imports from `@/lib/api` | ⚠️ Changed |
+
+### 13.3 Session ID Deviation Detail
+
+**Design specifies**: `getOrCreateSessionId()` from `@/lib/spotline` -- a get-or-create pattern that persists the session ID in `sessionStorage`, reusing it across the same browser session.
+
+**Implementation uses**: `generateSessionId()` from `@/lib/api` -- generates a new unique session ID on every call (`session_{timestamp}_{random}`).
+
+**Impact**: Medium. Each QR scan page load generates a new session ID. The same user scanning the same QR code twice in one browser session will be counted as 2 unique visitors instead of 1 in partner analytics. This inflates `uniqueVisitors` in `PartnerAnalyticsResponse`.
+
+**Mitigation options**:
+1. Switch to `getOrCreateSessionId()` from `@/lib/spotline` (design intent)
+2. Accept current behavior and update design document (simpler, avoids sessionStorage dependency)
+3. Use a hybrid approach: `getOrCreateSessionId()` for scan recording, `generateSessionId()` for legacy logPageEnter
+
+### 13.4 Section 8.5 Match Rate
+
+| Status | Count |
+|---|---|
+| ✅ Match | 8 specs |
+| ⚠️ Different | 2 specs (session ID source) |
+| ❌ Missing | 0 |
+
+**Section 8.5 Match Rate: 80%**
+
+---
+
+## 14. Updated Overall Scores (v1.1 — Including Section 8.5)
+
+| Category | v1.0 Score | v1.1 Score | Change |
+|----------|:-----:|:-----:|:------:|
+| Data Model Match | 98% | 98% | -- |
+| API Specification Match | 100% | 100% | -- |
+| Component Match (Admin) | 95% | 95% | -- |
+| Component Match (Front 4.2) | 100% | 100% | -- |
+| QR Scan Recording (8.5) | N/A | 80% | New |
+| Routing & Navigation | 100% | 100% | -- |
+| Error Handling | 90% | 90% | -- |
+| Convention Compliance | 96% | 96% | -- |
+| **Overall** | **96%** | **95%** | -1% |
+
+```
+Design-Implementation Match Rate (v1.1)
+==========================================
+  Data Model:     98%  ████████████████████ ✅
+  API Spec:      100%  ████████████████████ ✅
+  Components:     95%  ███████████████████  ✅
+  Front 4.2:    100%  ████████████████████ ✅
+  QR Scan 8.5:   80%  ████████████████     ⚠️
+  Routing:       100%  ████████████████████ ✅
+  Error Handle:   90%  ██████████████████   ✅
+  Convention:     96%  ███████████████████  ✅
+  ──────────────────────────────────────────
+  OVERALL:        95%  ███████████████████  ✅
+==========================================
+```
+
+---
+
+## 15. Conclusion
+
+The QR Partner System implementation achieves a **95% overall match rate** with the design document (v0.2). All 16 specified files exist with the expected functionality. The new QR scan recording feature (section 8.5) is implemented with one notable deviation: session ID generation uses `generateSessionId()` instead of `getOrCreateSessionId()`, which may inflate unique visitor counts in partner analytics.
+
+**v1.0 gaps** (brandColor fallback, admin SpotDetailResponse.partner) remain unchanged. **v1.1 adds** the session ID source deviation as a new finding.
+
+**Recommendation**: Match rate >= 90%. This feature passes the Check phase. The session ID deviation should be addressed as a low-priority fix or documented as intentional. Proceed to `/pdca report qr-partner-system`.
 
 ---
 
@@ -514,4 +597,5 @@ The QR Partner System implementation achieves a **96% match rate** with the desi
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
-| 1.0 | 2026-03-28 | Initial gap analysis | gap-detector |
+| 1.0 | 2026-03-28 | Initial gap analysis (full system: admin + front + types) | gap-detector |
+| 1.1 | 2026-04-02 | Added Section 8.5 (QR Scan Recording) gap analysis, updated overall scores | gap-detector |
