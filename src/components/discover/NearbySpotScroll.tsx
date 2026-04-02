@@ -53,7 +53,7 @@ export default function NearbySpotScroll({
           className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide"
         >
           {spots.map((spot) => {
-            const imageUrl = spot.media?.[0] || null;
+            const imageUrl = spot.mediaItems?.[0]?.url || spot.media?.[0] || null;
             const category =
               categoryLabels[spot.category?.toUpperCase()] || spot.category;
 
