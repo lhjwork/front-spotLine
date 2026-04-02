@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "lhj-spotline-assets-2026.s3.ap-northeast-2.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
     formats: ["image/webp", "image/avif"],
     qualities: [75, 85], // 품질 85 추가
