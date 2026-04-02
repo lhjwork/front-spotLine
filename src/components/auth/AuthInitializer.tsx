@@ -2,13 +2,24 @@
 
 import { useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 export default function AuthInitializer() {
-  const initFromStorage = useAuthStore((s) => s.initFromStorage);
+  const initFromSupabase = useAuthStore((s) => s.initFromSupabase);
+  const setSession = useAuthStore((s) => s.setSession);
 
   useEffect(() => {
-    initFromStorage();
-  }, [initFromStorage]);
+    initFromSupabase();
+
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [initFromSupabase, setSession]);
 
   return null;
 }

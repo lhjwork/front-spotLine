@@ -65,6 +65,30 @@ body {
   background: #a8a8a8;
 }
 
+/* 얇은 블루 스크롤바 (가로 스크롤 영역용) */
+[data-scrollbar="blue"]::-webkit-scrollbar {
+  height: 4px;
+}
+
+[data-scrollbar="blue"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-scrollbar="blue"]::-webkit-scrollbar-thumb {
+  background: #2563eb;
+  border-radius: 2px;
+}
+
+[data-scrollbar="blue"]::-webkit-scrollbar-thumb:hover {
+  background: #1d4ed8;
+}
+
+/* Firefox */
+[data-scrollbar="blue"] {
+  scrollbar-width: thin;
+  scrollbar-color: #2563eb transparent;
+}
+
 /* 포커스 스타일 개선 */
 .focus-visible\:ring-2:focus-visible {
   outline: 2px solid transparent;

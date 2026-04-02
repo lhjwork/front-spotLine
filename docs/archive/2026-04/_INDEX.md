@@ -4,3 +4,4 @@
 |---------|:----------:|----------|-----------|
 | qr-partner-system | 95% | 2026-04-02 | plan, design, analysis, report |
 | spot-detail-improvements | 97% | 2026-04-02 | plan, design, analysis, report |
+| supabase-auth-migration | 97% | 2026-04-03 | plan, design, analysis, report |

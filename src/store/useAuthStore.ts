@@ -1,84 +1,93 @@
 import { create } from "zustand";
-import type { UserProfile, InstagramUser } from "@/types";
+import type { UserProfile } from "@/types";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
+import type { Session } from "@supabase/supabase-js";
 
-const AUTH_STORAGE_KEY = "spotline_auth";
-
-interface StoredAuthData {
-  user: UserProfile;
-  instagramUser: InstagramUser;
-  expiresAt: string;
-}
+const PROFILE_CACHE_KEY = "spotline_user_profile";
 
 interface AuthState {
   isAuthenticated: boolean;
   user: UserProfile | null;
-  instagramUser: InstagramUser | null;
+  session: Session | null;
   isLoading: boolean;
-  error: string | null;
 
-  setUser: (user: UserProfile, instagramUser: InstagramUser, expiresAt: string) => void;
-  setIsLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  logout: () => void;
-  initFromStorage: () => void;
-  clearError: () => void;
+  setSession: (session: Session | null) => void;
+  setUser: (user: UserProfile) => void;
+  logout: () => Promise<void>;
+  initFromSupabase: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   user: null,
-  instagramUser: null,
-  isLoading: false,
-  error: null,
+  session: null,
+  isLoading: true,
 
-  setUser: (user, instagramUser, expiresAt) => {
-    const data: StoredAuthData = { user, instagramUser, expiresAt };
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
-    } catch {
-      // localStorage 용량 초과 등 무시
-    }
-    set({ isAuthenticated: true, user, instagramUser, error: null });
-  },
-
-  setIsLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
-
-  logout: () => {
-    try {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-    } catch {
-      // 무시
-    }
-    set({
-      isAuthenticated: false,
-      user: null,
-      instagramUser: null,
-      error: null,
-    });
-  },
-
-  initFromStorage: () => {
-    try {
-      const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (!raw) return;
-
-      const data: StoredAuthData = JSON.parse(raw);
-
-      // 만료 체크
-      if (new Date(data.expiresAt) < new Date()) {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        return;
-      }
-
+  setSession: (session) => {
+    if (session) {
+      const cachedProfile = loadCachedProfile();
       set({
         isAuthenticated: true,
-        user: data.user,
-        instagramUser: data.instagramUser,
+        session,
+        user: cachedProfile || sessionToUserProfile(session),
       });
-    } catch {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } else {
+      clearCachedProfile();
+      set({ isAuthenticated: false, session: null, user: null });
     }
   },
+
+  setUser: (user) => {
+    saveCachedProfile(user);
+    set({ user });
+  },
+
+  logout: async () => {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    clearCachedProfile();
+    set({ isAuthenticated: false, session: null, user: null });
+  },
+
+  initFromSupabase: async () => {
+    const supabase = createSupabaseBrowserClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    get().setSession(session);
+    set({ isLoading: false });
+  },
 }));
+
+function sessionToUserProfile(session: Session): UserProfile {
+  const user = session.user;
+  const meta = user.user_metadata || {};
+  return {
+    id: user.id,
+    nickname: meta.full_name || meta.name || user.email?.split("@")[0] || "user",
+    avatar: meta.avatar_url || meta.picture || "",
+    email: user.email,
+    joinedAt: user.created_at,
+    stats: { visited: 0, liked: 0, recommended: 0, spotlines: 0, followers: 0, following: 0 },
+  };
+}
+
+function loadCachedProfile(): UserProfile | null {
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedProfile(user: UserProfile): void {
+  try {
+    localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(user));
+  } catch {}
+}
+
+function clearCachedProfile(): void {
+  try {
+    localStorage.removeItem(PROFILE_CACHE_KEY);
+    localStorage.removeItem("spotline_auth"); // 레거시 정리
+  } catch {}
+}

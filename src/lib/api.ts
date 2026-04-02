@@ -863,17 +863,11 @@ export const logStoryCollapse = (qrId: QRCodeId, storeId: string, storySection?:
 
 // ==================== Social API (v2 — 좋아요/저장) ====================
 
-// Auth 토큰 헬퍼 (non-React context에서 localStorage 직접 읽기)
+// Auth 토큰 헬퍼 (Supabase session에서 access_token 추출)
+import { useAuthStore } from "@/store/useAuthStore";
 const getAuthToken = (): string => {
-  if (typeof window === "undefined") return "";
-  try {
-    const raw = localStorage.getItem("spotline_auth");
-    if (!raw) return "";
-    const data = JSON.parse(raw);
-    return data.instagramUser?.accessToken || "";
-  } catch {
-    return "";
-  }
+  const session = useAuthStore.getState().session;
+  return session?.access_token || "";
 };
 
 // 좋아요 토글

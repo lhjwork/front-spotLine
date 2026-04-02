@@ -1,47 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
-import { createUserProfileFromInstagram, getAndClearReturnUrl } from "@/lib/auth";
-import type { InstagramAuthResponse } from "@/types";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
+import { getAndClearReturnUrl } from "@/lib/auth";
 
 export default function AuthCallbackPage() {
-  const searchParams = useSearchParams();
-  const setUser = useAuthStore((s) => s.setUser);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const errorParam = searchParams.get("error");
-    if (errorParam) {
-      setError(errorParam);
-      return;
-    }
+    const supabase = createSupabaseBrowserClient();
 
-    const data = searchParams.get("data");
-    if (!data) {
-      setError("인증 데이터가 없습니다.");
-      return;
-    }
-
-    try {
-      const decoded = atob(data.replace(/-/g, "+").replace(/_/g, "/"));
-      const authData: InstagramAuthResponse = JSON.parse(decoded);
-
-      if (!authData.success || !authData.user) {
-        setError("인증 데이터가 올바르지 않습니다.");
+    supabase.auth.getSession().then(({ data: { session }, error: err }) => {
+      if (err || !session) {
+        setError(err?.message || "인증 처리 중 오류가 발생했습니다.");
         return;
       }
-
-      const userProfile = createUserProfileFromInstagram(authData.user);
-      setUser(userProfile, authData.user, authData.expiresAt);
-
       const returnUrl = getAndClearReturnUrl();
       window.location.href = returnUrl;
-    } catch {
-      setError("인증 처리 중 오류가 발생했습니다.");
-    }
-  }, [searchParams, setUser]);
+    });
+  }, []);
 
   if (error) {
     return (

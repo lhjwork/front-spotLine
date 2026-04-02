@@ -50,7 +50,8 @@ export default function NearbySpotScroll({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide"
+          data-scrollbar="blue"
+          className="flex gap-3 overflow-x-auto px-4 pb-2"
         >
           {spots.map((spot) => {
             const imageUrl = spot.mediaItems?.[0]?.url || spot.media?.[0] || null;

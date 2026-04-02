@@ -496,7 +496,8 @@ export interface UserProfile {
   avatar: string;
   bio?: string;
   joinedAt: string;
-  instagramId?: string;
+  email?: string;
+  instagramId?: string; // 레거시 호환
   stats: {
     visited: number;
     liked: number;
@@ -505,20 +506,6 @@ export interface UserProfile {
     followers: number;
     following: number;
   };
-}
-
-// Instagram OAuth
-export interface InstagramUser {
-  instagramId: string;
-  username: string;
-  profilePicture: string;
-  accountType?: "PERSONAL" | "CREATOR" | "BUSINESS";
-}
-
-export interface InstagramAuthResponse {
-  success: boolean;
-  user: InstagramUser;
-  expiresAt: string;
 }
 
 // Spot 소스: SpotLine 제휴 vs 유저 추천
