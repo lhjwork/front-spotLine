@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, User } from "lucide-react";
+import { MessageCircle, User, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { updateComment, deleteComment } from "@/lib/api";
 import type { CommentResponse } from "@/types";
 import CommentMenu from "./CommentMenu";
 import CommentForm from "./CommentForm";
+import ReportModal from "./ReportModal";
 
 interface CommentItemProps {
   comment: CommentResponse;
@@ -38,6 +39,7 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, isRe
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [showReplies, setShowReplies] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false);
   const session = useAuthStore((s) => s.session);
   const currentUserId = session?.user?.id;
   const isOwner = currentUserId === comment.userId;
@@ -91,6 +93,15 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, isRe
             {isOwner && !comment.isDeleted && (
               <CommentMenu onEdit={() => setIsEditing(true)} onDelete={handleDelete} />
             )}
+            {!isOwner && currentUserId && !comment.isDeleted && (
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-red-500"
+                title="신고"
+              >
+                <Flag size={14} />
+              </button>
+            )}
           </div>
 
           {/* Content */}
@@ -138,6 +149,16 @@ export default function CommentItem({ comment, onReply, onUpdate, onDelete, isRe
           )}
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <ReportModal
+          targetType="COMMENT"
+          targetId={comment.id}
+          onClose={() => setShowReportModal(false)}
+          onSuccess={() => setShowReportModal(false)}
+        />
+      )}
 
       {/* Replies */}
       {comment.replies && comment.replies.length > 0 && (

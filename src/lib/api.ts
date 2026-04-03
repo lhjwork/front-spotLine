@@ -1147,6 +1147,20 @@ export async function deleteComment(commentId: string): Promise<void> {
   });
 }
 
+// ==================== Report API (v2 — 콘텐츠 신고) ====================
+
+export async function createReport(request: {
+  targetType: string;
+  targetId: string;
+  reason: string;
+  description?: string;
+}): Promise<void> {
+  await apiV2.post("/reports", request, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+}
+
 // ==================== Sitemap API (v2 — slug 목록) ====================
 
 export interface SlugEntry {
