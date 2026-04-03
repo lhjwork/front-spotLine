@@ -1161,6 +1161,24 @@ export async function createReport(request: {
   });
 }
 
+// ==================== View Count API (v2 — 조회수 증가) ====================
+
+export async function incrementSpotView(spotId: string): Promise<void> {
+  try {
+    await apiV2.post(`/spots/${spotId}/view`, null, { timeout: 3000 });
+  } catch {
+    // fire-and-forget: 에러 무시
+  }
+}
+
+export async function incrementRouteView(routeId: string): Promise<void> {
+  try {
+    await apiV2.post(`/routes/${routeId}/view`, null, { timeout: 3000 });
+  } catch {
+    // fire-and-forget: 에러 무시
+  }
+}
+
 // ==================== Sitemap API (v2 — slug 목록) ====================
 
 export interface SlugEntry {

@@ -11,6 +11,7 @@ import RouteVariations from "@/components/route/RouteVariations";
 import RouteBottomBar from "@/components/route/RouteBottomBar";
 import SocialHydrator from "@/components/social/SocialHydrator";
 import CommentSection from "@/components/comment/CommentSection";
+import ViewTracker from "@/components/common/ViewTracker";
 
 interface RoutePageProps {
   params: Promise<{ slug: string }>;
@@ -82,6 +83,7 @@ export default async function RoutePage({ params }: RoutePageProps) {
         )}
       </div>
 
+      <ViewTracker type="route" id={route.id} />
       <SocialHydrator type="route" id={route.id} likesCount={route.likesCount} savesCount={route.savesCount} />
       <RouteBottomBar route={route} />
     </main>

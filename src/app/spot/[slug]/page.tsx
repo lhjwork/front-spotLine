@@ -17,6 +17,7 @@ import QrAnalytics from "@/components/qr/QrAnalytics";
 import AreaCta from "@/components/shared/AreaCta";
 import PartnerBenefit from "@/components/spot/PartnerBenefit";
 import CommentSection from "@/components/comment/CommentSection";
+import ViewTracker from "@/components/common/ViewTracker";
 
 interface SpotPageProps {
   params: Promise<{ slug: string }>;
@@ -124,6 +125,7 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         )}
       </div>
 
+      <ViewTracker type="spot" id={spot.id} />
       <SocialHydrator type="spot" id={spot.id} likesCount={spot.likesCount} savesCount={spot.savesCount} />
       <SpotBottomBar spot={spot} />
     </main>
