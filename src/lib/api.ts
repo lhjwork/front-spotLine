@@ -1098,6 +1098,55 @@ export const fetchMySaves = async (
   }
 };
 
+// ==================== Comment API ====================
+
+import type {
+  CommentResponse as CommentResponseType,
+  CommentTargetType,
+  CreateCommentRequest,
+  UpdateCommentRequest,
+} from "@/types";
+
+export async function fetchComments(
+  targetType: CommentTargetType,
+  targetId: string,
+  page = 0,
+  size = 20
+): Promise<PaginatedResponse<CommentResponseType>> {
+  try {
+    const res = await apiV2.get<PaginatedResponse<CommentResponseType>>("/comments", {
+      params: { targetType, targetId, page, size },
+      timeout: 5000,
+    });
+    return res.data;
+  } catch {
+    return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 20, last: true, first: true };
+  }
+}
+
+export async function createComment(request: CreateCommentRequest): Promise<CommentResponseType> {
+  const res = await apiV2.post<CommentResponseType>("/comments", request, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return res.data;
+}
+
+export async function updateComment(commentId: string, request: UpdateCommentRequest): Promise<CommentResponseType> {
+  const res = await apiV2.put<CommentResponseType>(`/comments/${commentId}`, request, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return res.data;
+}
+
+export async function deleteComment(commentId: string): Promise<void> {
+  await apiV2.delete(`/comments/${commentId}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+}
+
 // ==================== Sitemap API (v2 — slug 목록) ====================
 
 export interface SlugEntry {

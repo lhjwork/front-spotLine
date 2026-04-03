@@ -16,6 +16,7 @@ import QrBanner from "@/components/qr/QrBanner";
 import QrAnalytics from "@/components/qr/QrAnalytics";
 import AreaCta from "@/components/shared/AreaCta";
 import PartnerBenefit from "@/components/spot/PartnerBenefit";
+import CommentSection from "@/components/comment/CommentSection";
 
 interface SpotPageProps {
   params: Promise<{ slug: string }>;
@@ -115,6 +116,8 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         {nearbySpots.length > 0 && (
           <SpotNearby spots={nearbySpots} />
         )}
+
+        <CommentSection targetType="SPOT" targetId={spot.id} commentsCount={spot.commentsCount ?? 0} />
 
         {isQrMode && spot.area && (
           <AreaCta area={spot.area} />

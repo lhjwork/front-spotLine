@@ -10,6 +10,7 @@ import RouteMapPreview from "@/components/route/RouteMapPreview";
 import RouteVariations from "@/components/route/RouteVariations";
 import RouteBottomBar from "@/components/route/RouteBottomBar";
 import SocialHydrator from "@/components/social/SocialHydrator";
+import CommentSection from "@/components/comment/CommentSection";
 
 interface RoutePageProps {
   params: Promise<{ slug: string }>;
@@ -69,6 +70,8 @@ export default async function RoutePage({ params }: RoutePageProps) {
         {route.spots.length >= 2 && (
           <RouteMapPreview spots={route.spots} title={route.title} />
         )}
+
+        <CommentSection targetType="ROUTE" targetId={route.id} commentsCount={route.commentsCount ?? 0} />
 
         {route.variationsCount > 0 && (
           <RouteVariations

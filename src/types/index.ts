@@ -285,6 +285,7 @@ export interface SpotDetailResponse {
   likesCount: number;
   savesCount: number;
   viewsCount: number;
+  commentsCount: number;
   creatorType: string;
   creatorName: string | null;
   createdAt: string;
@@ -307,6 +308,7 @@ export interface RouteDetailResponse {
   savesCount: number;
   replicationsCount: number;
   completionsCount: number;
+  commentsCount: number;
   creatorType: string;
   creatorName: string | null;
   parentRouteId: string | null;
@@ -619,4 +621,35 @@ export interface SpotLineSummary {
   totalVisits: number;
   area: string;
   coverImage: string;
+}
+
+// ============================================================
+// Comment 타입 (Comment System)
+// ============================================================
+
+export type CommentTargetType = "SPOT" | "ROUTE";
+
+export interface CommentResponse {
+  id: string;
+  targetType: CommentTargetType;
+  targetId: string;
+  userId: string;
+  userName: string;
+  userAvatarUrl: string | null;
+  content: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  replies: CommentResponse[];
+}
+
+export interface CreateCommentRequest {
+  targetType: CommentTargetType;
+  targetId: string;
+  content: string;
+  parentId?: string;
+}
+
+export interface UpdateCommentRequest {
+  content: string;
 }
