@@ -4,19 +4,19 @@ import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useMyRoutesStore } from "@/store/useMyRoutesStore";
+import { useMySpotLinesStore } from "@/store/useMySpotLinesStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
-import MyRouteCard from "@/components/route/MyRouteCard";
+import MySpotLineCard from "@/components/spotline/MySpotLineCard";
 
 type TabType = "scheduled" | "completed";
 
-export default function MyRoutesList() {
-  const routes = useMyRoutesStore((s) => s.routes);
-  const isLoading = useMyRoutesStore((s) => s.isLoading);
-  const fetchRoutes = useMyRoutesStore((s) => s.fetchRoutes);
-  const markComplete = useMyRoutesStore((s) => s.markComplete);
-  const removeRoute = useMyRoutesStore((s) => s.removeRoute);
+export default function MySpotLinesList() {
+  const spotLines = useMySpotLinesStore((s) => s.spotLines);
+  const isLoading = useMySpotLinesStore((s) => s.isLoading);
+  const fetchSpotLines = useMySpotLinesStore((s) => s.fetchSpotLines);
+  const markComplete = useMySpotLinesStore((s) => s.markComplete);
+  const removeSpotLine = useMySpotLinesStore((s) => s.removeSpotLine);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [activeTab, setActiveTab] = useState<TabType>("scheduled");
@@ -27,13 +27,13 @@ export default function MyRoutesList() {
       setShowLogin(true);
       return;
     }
-    fetchRoutes(activeTab);
-  }, [isAuthenticated, activeTab, fetchRoutes]);
+    fetchSpotLines(activeTab);
+  }, [isAuthenticated, activeTab, fetchSpotLines]);
 
-  const filtered = routes.filter((r) => r.status === activeTab);
+  const filtered = spotLines.filter((r) => r.status === activeTab);
 
-  const scheduledCount = routes.filter((r) => r.status === "scheduled").length;
-  const completedCount = routes.filter((r) => r.status === "completed").length;
+  const scheduledCount = spotLines.filter((r) => r.status === "scheduled").length;
+  const completedCount = spotLines.filter((r) => r.status === "completed").length;
 
   return (
     <>
@@ -71,12 +71,12 @@ export default function MyRoutesList() {
           </div>
         ) : filtered.length > 0 ? (
           <div className="space-y-3">
-            {filtered.map((myRoute) => (
-              <MyRouteCard
-                key={myRoute.id}
-                myRoute={myRoute}
+            {filtered.map((mySpotLine) => (
+              <MySpotLineCard
+                key={mySpotLine.id}
+                mySpotLine={mySpotLine}
                 onMarkComplete={markComplete}
-                onDelete={removeRoute}
+                onDelete={removeSpotLine}
               />
             ))}
           </div>
@@ -89,13 +89,13 @@ export default function MyRoutesList() {
                 : "완료한 일정이 없습니다"}
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              Route를 둘러보며 내 일정에 추가해보세요
+              SpotLine을 둘러보며 내 일정에 추가해보세요
             </p>
             <Link
               href="/feed"
               className="mt-4 rounded-xl bg-purple-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-purple-700"
             >
-              Route 둘러보기
+              SpotLine 둘러보기
             </Link>
           </div>
         )}

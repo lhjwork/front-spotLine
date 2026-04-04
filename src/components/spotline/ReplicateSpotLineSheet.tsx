@@ -4,14 +4,14 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, CalendarPlus, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useMyRoutesStore } from "@/store/useMyRoutesStore";
-import { replicateRoute } from "@/lib/api";
-import type { MyRoute } from "@/types";
+import { useMySpotLinesStore } from "@/store/useMySpotLinesStore";
+import { replicateSpotLine } from "@/lib/api";
+import type { MySpotLine } from "@/types";
 
-interface ReplicateRouteSheetProps {
+interface ReplicateSpotLineSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  route: {
+  spotLine: {
     id: string;
     slug: string;
     title: string;
@@ -20,7 +20,7 @@ interface ReplicateRouteSheetProps {
   };
 }
 
-const LOCAL_STORAGE_KEY = "spotline_my_routes";
+const LOCAL_STORAGE_KEY = "spotline_my_spotlines";
 
 const getQuickDates = () => {
   const today = new Date();
@@ -46,12 +46,12 @@ const formatDateKr = (dateStr: string): string => {
   return `${m}월 ${d}일 (${day})`;
 };
 
-export default function ReplicateRouteSheet({
+export default function ReplicateSpotLineSheet({
   isOpen,
   onClose,
-  route,
-}: ReplicateRouteSheetProps) {
-  const addRoute = useMyRoutesStore((s) => s.addRoute);
+  spotLine,
+}: ReplicateSpotLineSheetProps) {
+  const addSpotLine = useMySpotLinesStore((s) => s.addSpotLine);
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showDateInput, setShowDateInput] = useState(false);
@@ -101,26 +101,26 @@ export default function ReplicateRouteSheet({
     setIsSubmitting(true);
 
     try {
-      const response = await replicateRoute(route.id, date);
-      addRoute(response.myRoute);
+      const response = await replicateSpotLine(spotLine.id, date);
+      addSpotLine(response.mySpotLine);
       setToast("내 일정에 추가되었습니다");
       onClose();
     } catch {
       // localStorage fallback
-      const localRoute: MyRoute = {
+      const localSpotLine: MySpotLine = {
         id: `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        routeId: route.id,
-        routeSlug: route.slug,
-        title: route.title,
-        area: route.area,
-        spotsCount: route.spotsCount,
+        spotLineId: spotLine.id,
+        spotLineSlug: spotLine.slug,
+        title: spotLine.title,
+        area: spotLine.area,
+        spotsCount: spotLine.spotsCount,
         scheduledDate: date,
         status: "scheduled",
         completedAt: null,
-        parentRouteId: route.id,
+        parentSpotLineId: spotLine.id,
         createdAt: new Date().toISOString(),
       };
-      addRoute(localRoute);
+      addSpotLine(localSpotLine);
       console.warn("복제 API 실패 — localStorage에 저장");
       setToast("내 일정에 추가되었습니다");
       onClose();
@@ -157,7 +157,7 @@ export default function ReplicateRouteSheet({
               <h3 className="text-lg font-bold text-gray-900">내 일정에 추가</h3>
             </div>
             <p className="mt-1 text-sm text-gray-500">
-              {route.title} · {route.area} · {route.spotsCount}곳
+              {spotLine.title} · {spotLine.area} · {spotLine.spotsCount}곳
             </p>
           </div>
 

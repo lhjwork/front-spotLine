@@ -2,10 +2,10 @@
 
 import { Route, Clock, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { RoutePreview } from "@/types";
+import type { SpotLinePreview } from "@/types";
 
-interface PopularRoutesListProps {
-  routes: RoutePreview[];
+interface PopularSpotLinesListProps {
+  spotLines: SpotLinePreview[];
   className?: string;
 }
 
@@ -19,22 +19,22 @@ const themeLabels: Record<string, string> = {
   CULTURE: "문화",
 };
 
-export default function PopularRoutesList({
-  routes,
+export default function PopularSpotLinesList({
+  spotLines,
   className,
-}: PopularRoutesListProps) {
-  if (routes.length === 0) return null;
+}: PopularSpotLinesListProps) {
+  if (spotLines.length === 0) return null;
 
   return (
     <div className={cn("px-4", className)}>
       <h3 className="mb-3 text-sm font-semibold text-gray-700">
-        이 지역 인기 Route
+        이 지역 인기 SpotLine
       </h3>
       <div className="space-y-2">
-        {routes.map((route) => (
+        {spotLines.map((spotLine) => (
           <button
-            key={route.id}
-            onClick={() => (window.location.href = `/route/${route.slug}`)}
+            key={spotLine.id}
+            onClick={() => (window.location.href = `/spotline/${spotLine.slug}`)}
             className="flex w-full items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
@@ -42,22 +42,22 @@ export default function PopularRoutesList({
             </div>
             <div className="flex-1 text-left min-w-0">
               <p className="truncate text-sm font-medium text-gray-900">
-                {route.title}
+                {spotLine.title}
               </p>
               <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span>{themeLabels[route.theme] || route.theme}</span>
+                <span>{themeLabels[spotLine.theme] || spotLine.theme}</span>
                 <span>·</span>
-                <span>{route.spotCount}곳</span>
+                <span>{spotLine.spotCount}곳</span>
                 <span>·</span>
                 <span className="flex items-center gap-0.5">
                   <Clock className="h-3 w-3" />
-                  {route.totalDuration}분
+                  {spotLine.totalDuration}분
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-0.5 text-xs text-gray-400">
               <Heart className="h-3 w-3" />
-              {route.likesCount}
+              {spotLine.likesCount}
             </div>
           </button>
         ))}

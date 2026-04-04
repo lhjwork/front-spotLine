@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { Map, ExternalLink } from "lucide-react";
-import type { RouteSpotDetail } from "@/types";
+import type { SpotLineSpotDetail } from "@/types";
 
-interface RouteMapPreviewProps {
-  spots: RouteSpotDetail[];
+interface SpotLineMapPreviewProps {
+  spots: SpotLineSpotDetail[];
   title: string;
 }
 
-export default function RouteMapPreview({ spots, title }: RouteMapPreviewProps) {
+export default function SpotLineMapPreview({ spots, title }: SpotLineMapPreviewProps) {
   const [expanded, setExpanded] = useState(false);
 
   const sorted = [...spots].sort((a, b) => a.order - b.order);

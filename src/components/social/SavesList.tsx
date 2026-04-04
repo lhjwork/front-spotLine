@@ -9,7 +9,7 @@ import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
 import Link from "next/link";
 import type { SpotDetailResponse } from "@/types";
 
-type TabType = "spot" | "route";
+type TabType = "spot" | "spotline";
 
 export default function SavesList() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -52,7 +52,7 @@ export default function SavesList() {
         <Bookmark className="mb-4 h-12 w-12 text-gray-300" />
         <h3 className="text-lg font-bold text-gray-900">로그인이 필요합니다</h3>
         <p className="mt-2 text-sm text-gray-500">
-          저장한 Spot과 Route를 확인하려면 로그인해주세요
+          저장한 Spot과 SpotLine을 확인하려면 로그인해주세요
         </p>
         <button
           onClick={() => setShowLogin(true)}
@@ -73,7 +73,7 @@ export default function SavesList() {
     <div>
       {/* Tabs */}
       <div className="flex border-b border-gray-200">
-        {(["spot", "route"] as const).map((tab) => (
+        {(["spot", "spotline"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -84,7 +84,7 @@ export default function SavesList() {
                 : "text-gray-500 hover:text-gray-700"
             )}
           >
-            {tab === "spot" ? "Spot" : "Route"}
+            {tab === "spot" ? "Spot" : "SpotLine"}
           </button>
         ))}
       </div>
@@ -103,7 +103,7 @@ export default function SavesList() {
           <p className="mt-1 text-xs text-gray-500">
             {activeTab === "spot"
               ? "Spot을 둘러보며 마음에 드는 곳을 저장해보세요"
-              : "Route를 둘러보며 가고 싶은 코스를 저장해보세요"}
+              : "SpotLine을 둘러보며 가고 싶은 코스를 저장해보세요"}
           </p>
           <Link
             href="/feed"

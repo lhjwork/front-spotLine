@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MapPin, Clock, Footprints } from "lucide-react";
 import { cn } from "@/lib/utils";
 import OptimizedImage from "@/components/common/OptimizedImage";
-import type { RouteSpotDetail } from "@/types";
+import type { SpotLineSpotDetail } from "@/types";
 
 const categoryLabels: Record<string, string> = {
   CAFE: "카페", cafe: "카페",
@@ -17,13 +17,13 @@ const categoryLabels: Record<string, string> = {
   OTHER: "기타", other: "기타",
 };
 
-interface RouteTimelineItemProps {
-  spot: RouteSpotDetail;
+interface SpotLineTimelineItemProps {
+  spot: SpotLineSpotDetail;
   isLast: boolean;
   index: number;
 }
 
-export default function RouteTimelineItem({ spot, isLast, index }: RouteTimelineItemProps) {
+export default function SpotLineTimelineItem({ spot, isLast, index }: SpotLineTimelineItemProps) {
   const imageUrl = spot.spotMedia?.[0];
   const categoryLabel = categoryLabels[spot.spotCategory] || spot.spotCategory;
 

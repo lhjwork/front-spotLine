@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import { fetchRouteVariations } from "@/lib/api";
-import type { RoutePreview } from "@/types";
+import { fetchSpotLineVariations } from "@/lib/api";
+import type { SpotLinePreview } from "@/types";
 
-interface VariationsListProps {
-  routeId: string;
+interface SpotLineVariationsListProps {
+  spotLineId: string;
 }
 
-export default function VariationsList({ routeId }: VariationsListProps) {
-  const [variations, setVariations] = useState<RoutePreview[]>([]);
+export default function SpotLineVariationsList({ spotLineId }: SpotLineVariationsListProps) {
+  const [variations, setVariations] = useState<SpotLinePreview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -20,7 +20,7 @@ export default function VariationsList({ routeId }: VariationsListProps) {
       setIsLoading(true);
       setError(false);
       try {
-        const data = await fetchRouteVariations(routeId);
+        const data = await fetchSpotLineVariations(spotLineId);
         setVariations(data.items);
       } catch {
         setError(true);
@@ -29,7 +29,7 @@ export default function VariationsList({ routeId }: VariationsListProps) {
       }
     };
     load();
-  }, [routeId]);
+  }, [spotLineId]);
 
   if (isLoading) {
     return (
@@ -47,7 +47,7 @@ export default function VariationsList({ routeId }: VariationsListProps) {
   if (error || variations.length === 0) {
     return (
       <p className="mt-3 text-xs text-gray-400">
-        {error ? "변형 목록을 불러올 수 없습니다" : "변형 Route가 없습니다"}
+        {error ? "변형 목록을 불러올 수 없습니다" : "변형 SpotLine이 없습니다"}
       </p>
     );
   }
@@ -57,7 +57,7 @@ export default function VariationsList({ routeId }: VariationsListProps) {
       {variations.map((v) => (
         <Link
           key={v.id}
-          href={`/route/${v.slug}`}
+          href={`/spotline/${v.slug}`}
           className="flex items-center gap-3 rounded-xl border border-purple-100 bg-white p-3 transition-colors hover:bg-purple-50"
         >
           <MapPin className="h-4 w-4 shrink-0 text-purple-500" />

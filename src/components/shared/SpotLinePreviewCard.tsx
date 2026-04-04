@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Route, Clock, MapPin, Heart } from "lucide-react";
 import { formatWalkingTime } from "@/lib/utils";
-import type { RoutePreview } from "@/types";
+import type { SpotLinePreview } from "@/types";
 
 const themeLabels: Record<string, string> = {
   date: "데이트", travel: "여행", walk: "산책",
@@ -19,17 +19,17 @@ const themeColors: Record<string, string> = {
   culture: "bg-purple-100 text-purple-700",
 };
 
-interface RoutePreviewCardProps {
-  route: RoutePreview;
+interface SpotLinePreviewCardProps {
+  spotLine: SpotLinePreview;
 }
 
-export default function RoutePreviewCard({ route }: RoutePreviewCardProps) {
-  const themeLabel = themeLabels[route.theme] || route.theme;
-  const themeColor = themeColors[route.theme] || "bg-gray-100 text-gray-700";
+export default function SpotLinePreviewCard({ spotLine }: SpotLinePreviewCardProps) {
+  const themeLabel = themeLabels[spotLine.theme] || spotLine.theme;
+  const themeColor = themeColors[spotLine.theme] || "bg-gray-100 text-gray-700";
 
   return (
     <Link
-      href={`/route/${route.slug}`}
+      href={`/spotline/${spotLine.slug}`}
       className="block rounded-xl border border-gray-100 bg-white p-4 transition-shadow hover:shadow-md"
     >
       <div className="flex items-start gap-3">
@@ -41,23 +41,23 @@ export default function RoutePreviewCard({ route }: RoutePreviewCardProps) {
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${themeColor}`}>
               {themeLabel}
             </span>
-            <span className="text-xs text-gray-400">{route.area}</span>
+            <span className="text-xs text-gray-400">{spotLine.area}</span>
           </div>
           <h3 className="truncate text-sm font-bold text-gray-900">
-            {route.title}
+            {spotLine.title}
           </h3>
           <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
             <span className="flex items-center gap-0.5">
               <MapPin className="h-3 w-3" />
-              {route.spotCount}곳
+              {spotLine.spotCount}곳
             </span>
             <span className="flex items-center gap-0.5">
               <Clock className="h-3 w-3" />
-              {formatWalkingTime(route.totalDuration)}
+              {formatWalkingTime(spotLine.totalDuration)}
             </span>
             <span className="flex items-center gap-0.5">
               <Heart className="h-3 w-3" />
-              {route.likesCount}
+              {spotLine.likesCount}
             </span>
           </div>
         </div>

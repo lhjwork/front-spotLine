@@ -128,7 +128,7 @@
    │  fetch(`${API_BASE}/api/routes/${slug}`)
    │
 3. Backend: GET /api/routes/:slug
-   │  ├── DB에서 Route + RouteSpots 조회 (populate spots)
+   │  ├── DB에서 Route + SpotLineSpots 조회 (populate spots)
    │  ├── 각 Spot의 PlaceInfo 캐시 조회 (배치)
    │  ├── 이동 경로 정보 계산 (거리, 도보 시간)
    │  └── 변형 Route 목록 조회
@@ -235,7 +235,7 @@ type RouteTheme =
   | "date" | "travel" | "walk" | "hangout"
   | "food-tour" | "cafe-tour" | "culture";
 
-interface RouteSpot {
+interface SpotLineSpot {
   spotId: string;
   order: number;
   suggestedTime?: string;          // "17:30"
@@ -266,7 +266,7 @@ interface Route {
   slug: string;
   title: string;
   description: string;
-  spots: RouteSpot[];
+  spots: SpotLineSpot[];
   totalDuration?: number;          // 분
   totalDistance?: number;           // m
   area: string;                    // 대표 지역
@@ -327,8 +327,8 @@ interface User {
 ```
 [User] 1 ──── N [Spot]       (creator)
 [User] 1 ──── N [Route]      (creator)
-[Route] 1 ──── N [RouteSpot] (ordered spots)
-[RouteSpot] N ──── 1 [Spot]  (spot reference)
+[Route] 1 ──── N [SpotLineSpot] (ordered spots)
+[SpotLineSpot] N ──── 1 [Spot]  (spot reference)
 [Spot] 1 ──── 1 [PlaceInfo]  (via externalPlace, cached)
 [Route] 1 ──── N [Route]     (variations/parentRoute)
 [User] N ──── N [User]       (follow, Phase 6)
@@ -385,7 +385,7 @@ interface User {
 |-----------|-----------|----------|
 | `Store` | `Spot` (source: "qr") | storeInfo 필드로 매장 상세 유지 |
 | `SpotlineStore` | `Spot` (source: "qr" \| "crew") | location, qrCode 매핑 |
-| `NextSpot` | `RouteSpot` 내 Spot 참조 | walkingTime, distance → transitionToNext |
+| `NextSpot` | `SpotLineSpot` 내 Spot 참조 | walkingTime, distance → transitionToNext |
 | `MockupSpot` | `Spot` | slug, source, tags 직접 매핑 |
 | `SpotLineSummary` | `Route` (creator: crew) | 크루 라인 → Route로 표현 |
 | `UserProfile` | `User` | stats 확장 (spotCount, routeCount 추가) |
@@ -465,11 +465,11 @@ interface SpotPreview {
 ```typescript
 interface RouteDetailResponse {
   route: Route;
-  spots: RouteSpotDetail[];        // Spot + PlaceInfo 병합
+  spots: SpotLineSpotDetail[];        // Spot + PlaceInfo 병합
   variations: RoutePreview[];      // 변형 Route (최대 5)
 }
 
-interface RouteSpotDetail {
+interface SpotLineSpotDetail {
   spot: Spot;
   placeInfo: PlaceInfo | null;
   order: number;

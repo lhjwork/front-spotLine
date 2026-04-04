@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import Breadcrumb from "@/components/seo/Breadcrumb";
 import CityHero from "@/components/city/CityHero";
-import CityRoutes from "@/components/city/CityRoutes";
+import CitySpotLines from "@/components/city/CitySpotLines";
 import CitySpots from "@/components/city/CitySpots";
 import CityNavigation from "@/components/city/CityNavigation";
 import { CITIES, findCityBySlug } from "@/constants/cities";
-import { fetchFeedSpots, fetchFeedRoutes } from "@/lib/api";
+import { fetchFeedSpots, fetchFeedSpotLines } from "@/lib/api";
 
 export const revalidate = 3600;
 
@@ -45,9 +45,9 @@ export default async function CityPage({ params }: CityPageProps) {
   if (!city) notFound();
 
   const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 0, last: true, first: true };
-  const [spotsResult, routesResult] = await Promise.all([
+  const [spotsResult, spotLinesResult] = await Promise.all([
     fetchFeedSpots(city.area, undefined, 0, 12).catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedSpots>>),
-    fetchFeedRoutes(city.area, undefined, 0, 5).catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedRoutes>>),
+    fetchFeedSpotLines(city.area, undefined, 0, 5).catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedSpotLines>>),
   ]);
 
   return (
@@ -55,7 +55,7 @@ export default async function CityPage({ params }: CityPageProps) {
       <div className="max-w-4xl mx-auto">
         <Breadcrumb items={[{ name: city.name }]} />
         <CityHero city={city} />
-        <CityRoutes routes={routesResult.content} />
+        <CitySpotLines spotLines={spotLinesResult.content} />
         <CitySpots spots={spotsResult.content} cityArea={city.area} />
         <CityNavigation currentSlug={city.slug} />
       </div>

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import MyRoutesList from "@/components/route/MyRoutesList";
+import MySpotLinesList from "@/components/spotline/MySpotLinesList";
 
 export const metadata: Metadata = {
   title: "내 일정 | Spotline",
-  description: "복제한 Route를 관리하고 완주를 기록하세요",
+  description: "복제한 SpotLine을 관리하고 완주를 기록하세요",
 };
 
-export default function MyRoutesPage() {
+export default function MySpotLinesPage() {
   return (
     <main className="min-h-screen bg-white">
       {/* Header */}
@@ -19,7 +19,7 @@ export default function MyRoutesPage() {
         <h1 className="text-lg font-bold text-gray-900">내 일정</h1>
       </header>
 
-      <MyRoutesList />
+      <MySpotLinesList />
     </main>
   );
 }

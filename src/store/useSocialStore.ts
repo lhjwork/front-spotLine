@@ -26,22 +26,22 @@ interface SocialState {
   followStatus: Record<string, FollowItem>;
 
   initSocialStatus: (
-    type: "spot" | "route",
+    type: "spot" | "spotline",
     id: string,
     status: SocialStatus,
     likesCount: number,
     savesCount: number
   ) => void;
-  toggleLike: (type: "spot" | "route", id: string) => Promise<void>;
-  toggleSave: (type: "spot" | "route", id: string) => Promise<void>;
-  getItem: (type: "spot" | "route", id: string) => SocialItem | undefined;
+  toggleLike: (type: "spot" | "spotline", id: string) => Promise<void>;
+  toggleSave: (type: "spot" | "spotline", id: string) => Promise<void>;
+  getItem: (type: "spot" | "spotline", id: string) => SocialItem | undefined;
 
   initFollowStatus: (userId: string, isFollowing: boolean, followersCount: number) => void;
   toggleFollow: (userId: string) => Promise<void>;
   getFollowStatus: (userId: string) => FollowItem | undefined;
 }
 
-const makeKey = (type: "spot" | "route", id: string) => `${type}:${id}`;
+const makeKey = (type: "spot" | "spotline", id: string) => `${type}:${id}`;
 
 export const useSocialStore = create<SocialState>((set, get) => ({
   items: {},

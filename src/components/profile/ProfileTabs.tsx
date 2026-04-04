@@ -3,29 +3,29 @@
 import { useState, useEffect, useCallback } from "react";
 import { Heart, Bookmark, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchUserLikedSpots, fetchUserSavedRoutes, fetchMyRoutes } from "@/lib/api";
+import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines } from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
-import RoutePreviewCard from "@/components/shared/RoutePreviewCard";
-import type { SpotDetailResponse, RoutePreview, MyRoute } from "@/types";
+import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
+import type { SpotDetailResponse, SpotLinePreview, MySpotLine } from "@/types";
 
 interface ProfileTabsProps {
   userId: string;
   isMe?: boolean;
 }
 
-type TabKey = "likes" | "saves" | "routes";
+type TabKey = "likes" | "saves" | "spotlines";
 
 const TABS: { key: TabKey; label: string; icon: typeof Heart }[] = [
   { key: "likes", label: "좋아요", icon: Heart },
   { key: "saves", label: "저장", icon: Bookmark },
-  { key: "routes", label: "Route", icon: MapPin },
+  { key: "spotlines", label: "SpotLine", icon: MapPin },
 ];
 
 export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("likes");
   const [likedSpots, setLikedSpots] = useState<SpotDetailResponse[] | null>(null);
-  const [savedRoutes, setSavedRoutes] = useState<RoutePreview[] | null>(null);
-  const [myRoutes, setMyRoutes] = useState<MyRoute[] | null>(null);
+  const [savedSpotLines, setSavedSpotLines] = useState<SpotLinePreview[] | null>(null);
+  const [mySpotLines, setMySpotLines] = useState<MySpotLine[] | null>(null);
   const [loading, setLoading] = useState(false);
 
   const loadTabData = useCallback(async (tab: TabKey) => {
@@ -34,19 +34,19 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
       if (tab === "likes" && !likedSpots) {
         const res = await fetchUserLikedSpots(userId);
         setLikedSpots(res.content);
-      } else if (tab === "saves" && !savedRoutes) {
-        const res = await fetchUserSavedRoutes(userId);
-        setSavedRoutes(res.content);
-      } else if (tab === "routes" && isMe && !myRoutes) {
-        const res = await fetchMyRoutes();
-        setMyRoutes(res.items);
+      } else if (tab === "saves" && !savedSpotLines) {
+        const res = await fetchUserSavedSpotLines(userId);
+        setSavedSpotLines(res.content);
+      } else if (tab === "spotlines" && isMe && !mySpotLines) {
+        const res = await fetchMySpotLines();
+        setMySpotLines(res.items);
       }
     } catch {
       // 데이터 로딩 실패 시 빈 상태 유지
     } finally {
       setLoading(false);
     }
-  }, [userId, isMe, likedSpots, savedRoutes, myRoutes]);
+  }, [userId, isMe, likedSpots, savedSpotLines, mySpotLines]);
 
   useEffect(() => {
     loadTabData(activeTab);
@@ -56,7 +56,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
     setActiveTab(tab);
   };
 
-  const filteredTabs = isMe ? TABS : TABS.filter((t) => t.key !== "routes");
+  const filteredTabs = isMe ? TABS : TABS.filter((t) => t.key !== "spotlines");
 
   return (
     <div>
@@ -98,44 +98,44 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
         )}
 
         {!loading && activeTab === "saves" && (
-          savedRoutes && savedRoutes.length > 0 ? (
+          savedSpotLines && savedSpotLines.length > 0 ? (
             <div className="space-y-3">
-              {savedRoutes.map((route) => (
-                <RoutePreviewCard key={route.id} route={route} />
+              {savedSpotLines.map((spotLine) => (
+                <SpotLinePreviewCard key={spotLine.id} spotLine={spotLine} />
               ))}
             </div>
           ) : (
-            <EmptyState message="아직 저장한 Route가 없습니다" />
+            <EmptyState message="아직 저장한 SpotLine이 없습니다" />
           )
         )}
 
-        {!loading && activeTab === "routes" && isMe && (
-          myRoutes && myRoutes.length > 0 ? (
+        {!loading && activeTab === "spotlines" && isMe && (
+          mySpotLines && mySpotLines.length > 0 ? (
             <div className="space-y-3">
-              {myRoutes.map((route) => (
+              {mySpotLines.map((spotLine) => (
                 <div
-                  key={route.id}
+                  key={spotLine.id}
                   className="rounded-xl border border-gray-200 p-4"
                 >
-                  <h3 className="font-medium">{route.title}</h3>
+                  <h3 className="font-medium">{spotLine.title}</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    {route.area} · {route.spotsCount}개 Spot
+                    {spotLine.area} · {spotLine.spotsCount}개 Spot
                   </p>
                   <span
                     className={cn(
                       "mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium",
-                      route.status === "scheduled" && "bg-blue-50 text-blue-600",
-                      route.status === "completed" && "bg-green-50 text-green-600",
-                      route.status === "cancelled" && "bg-gray-100 text-gray-500"
+                      spotLine.status === "scheduled" && "bg-blue-50 text-blue-600",
+                      spotLine.status === "completed" && "bg-green-50 text-green-600",
+                      spotLine.status === "cancelled" && "bg-gray-100 text-gray-500"
                     )}
                   >
-                    {route.status === "scheduled" ? "예정" : route.status === "completed" ? "완주" : "취소"}
+                    {spotLine.status === "scheduled" ? "예정" : spotLine.status === "completed" ? "완주" : "취소"}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <EmptyState message="아직 복제한 Route가 없습니다" />
+            <EmptyState message="아직 복제한 SpotLine이 없습니다" />
           )
         )}
       </div>

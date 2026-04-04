@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SpotDetailResponse, RoutePreview, SpotCategory } from "@/types";
+import type { SpotDetailResponse, SpotLinePreview, SpotCategory } from "@/types";
 
 interface FeedState {
   area: string | null;
@@ -13,8 +13,8 @@ interface FeedState {
   appendSpots: (newSpots: SpotDetailResponse[], hasMore: boolean) => void;
   nextSpotsPage: () => void;
 
-  routes: RoutePreview[];
-  setRoutes: (routes: RoutePreview[]) => void;
+  spotLines: SpotLinePreview[];
+  setSpotLines: (spotLines: SpotLinePreview[]) => void;
 
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
@@ -31,13 +31,13 @@ export const useFeedStore = create<FeedState>((set) => ({
   spots: [],
   spotsPage: 0,
   hasMoreSpots: true,
-  routes: [],
+  spotLines: [],
   isLoading: false,
   error: null,
 
   setArea: (area) => set((state) => {
     if (state.area === area) return state;
-    return { area, spots: [], spotsPage: 0, hasMoreSpots: true, routes: [], error: null };
+    return { area, spots: [], spotsPage: 0, hasMoreSpots: true, spotLines: [], error: null };
   }),
 
   setCategory: (category) => set((state) => {
@@ -56,7 +56,7 @@ export const useFeedStore = create<FeedState>((set) => ({
 
   nextSpotsPage: () => set((state) => ({ spotsPage: state.spotsPage + 1 })),
 
-  setRoutes: (routes) => set({ routes }),
+  setSpotLines: (spotLines) => set({ spotLines }),
 
   setIsLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
@@ -65,7 +65,7 @@ export const useFeedStore = create<FeedState>((set) => ({
     spots: [],
     spotsPage: 0,
     hasMoreSpots: true,
-    routes: [],
+    spotLines: [],
     error: null,
   }),
 }));

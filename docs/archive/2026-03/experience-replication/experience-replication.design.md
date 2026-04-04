@@ -57,7 +57,7 @@ RouteVariations (수정)
   ├── "변형 보기" 클릭 → 인라인 확장
   │     └── VariationsList (신규)
   │           └── RoutePreview 카드 × N
-  └── parentRouteId 있으면 → "원본 보기" 링크
+  └── parentSpotLineId 있으면 → "원본 보기" 링크
 ```
 
 ### 2.2 Data Flow
@@ -104,7 +104,7 @@ RouteVariations "변형 보기" → fetchRouteVariations API
 // 내 Route (복제된 Route) — types/index.ts에 추가
 interface MyRoute {
   id: string;
-  routeId: string;         // 원본 Route ID
+  spotLineId: string;         // 원본 Route ID
   routeSlug: string;       // 원본 Route slug (링크용)
   title: string;
   area: string;
@@ -112,7 +112,7 @@ interface MyRoute {
   scheduledDate: string | null;  // ISO 날짜, null = "미정"
   status: "scheduled" | "completed" | "cancelled";
   completedAt: string | null;
-  parentRouteId: string;   // = routeId (복제 원본)
+  parentSpotLineId: string;   // = spotLineId (복제 원본)
   createdAt: string;
 }
 
@@ -131,9 +131,9 @@ interface ReplicateRouteResponse {
 ### 3.2 Entity Relationships
 
 ```
-[RouteDetailResponse] 1 ──── N [MyRoute]  (via routeId)
+[RouteDetailResponse] 1 ──── N [MyRoute]  (via spotLineId)
      │
-     └── parentRouteId ──── 1 [RouteDetailResponse]  (변형 원본)
+     └── parentSpotLineId ──── 1 [RouteDetailResponse]  (변형 원본)
 ```
 
 ### 3.3 localStorage Schema (Backend Fallback)
@@ -154,15 +154,15 @@ interface LocalMyRoutes {
 
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
-| POST | `/api/v2/routes/{routeId}/replicate` | Route 복제 | Required |
+| POST | `/api/v2/routes/{spotLineId}/replicate` | Route 복제 | Required |
 | GET | `/api/v2/users/me/routes` | 내 Route 목록 | Required |
 | PATCH | `/api/v2/users/me/routes/{myRouteId}` | 내 Route 상태 변경 | Required |
 | DELETE | `/api/v2/users/me/routes/{myRouteId}` | 내 Route 삭제 | Required |
-| GET | `/api/v2/routes/{routeId}/variations` | 변형 Route 목록 | Optional |
+| GET | `/api/v2/routes/{spotLineId}/variations` | 변형 Route 목록 | Optional |
 
 ### 4.2 Detailed Specification
 
-#### `POST /api/v2/routes/{routeId}/replicate`
+#### `POST /api/v2/routes/{spotLineId}/replicate`
 
 **Request:**
 ```json
@@ -176,7 +176,7 @@ interface LocalMyRoutes {
 {
   "myRoute": {
     "id": "mr_abc123",
-    "routeId": "route_xyz",
+    "spotLineId": "route_xyz",
     "routeSlug": "gangnam-cafe-tour",
     "title": "강남 카페 투어",
     "area": "강남",
@@ -184,7 +184,7 @@ interface LocalMyRoutes {
     "scheduledDate": "2026-04-05",
     "status": "scheduled",
     "completedAt": null,
-    "parentRouteId": "route_xyz",
+    "parentSpotLineId": "route_xyz",
     "createdAt": "2026-03-27T10:00:00Z"
   },
   "replicationsCount": 42
@@ -224,7 +224,7 @@ interface LocalMyRoutes {
 }
 ```
 
-#### `GET /api/v2/routes/{routeId}/variations?page=0&size=10`
+#### `GET /api/v2/routes/{spotLineId}/variations?page=0&size=10`
 
 **Response (200):**
 ```json
@@ -290,8 +290,8 @@ interface ReplicateRouteSheetProps {
 **동작 명세:**
 1. 빠른 선택 버튼: "오늘", "내일", "이번 주말" — 클릭 시 해당 날짜 자동 설정
 2. "다른 날짜 선택" — 클릭 시 `<input type="date" min={today}>` 표시
-3. "추가하기" — `replicateRoute(routeId, selectedDate)` 호출
-4. "나중에 정할게요" — `replicateRoute(routeId, null)` 호출
+3. "추가하기" — `replicateRoute(spotLineId, selectedDate)` 호출
+4. "나중에 정할게요" — `replicateRoute(spotLineId, null)` 호출
 5. 성공 시: 토스트 "내 일정에 추가되었습니다" + 시트 닫기
 6. ESC, backdrop 클릭으로 닫기 (LoginBottomSheet 패턴)
 
@@ -417,7 +417,7 @@ const getDday = (scheduledDate: string | null): string => {
 │  │  └──────────────────────────────┘ │  │
 │  └────────────────────────────────────┘  │
 │                                          │
-│  (parentRouteId 있으면)                    │
+│  (parentSpotLineId 있으면)                    │
 │  🔗 원본 Route 보기 → /route/{parentSlug} │
 └──────────────────────────────────────────┘
 ```
@@ -425,8 +425,8 @@ const getDday = (scheduledDate: string | null): string => {
 **수정된 Props:**
 ```typescript
 interface RouteVariationsProps {
-  routeId: string;
-  parentRouteId: string | null;
+  spotLineId: string;
+  parentSpotLineId: string | null;
   variationsCount: number;
   parentRouteSlug?: string;  // 추가: 원본 Route 링크용
 }
@@ -457,7 +457,7 @@ interface RouteVariationsProps {
 // 핵심 로직:
 //   handleQuickDate(date: string) → setSelectedDate
 //   handleSubmit() → replicateRoute API or localStorage fallback
-//   handleSkipDate() → replicateRoute(routeId, null)
+//   handleSkipDate() → replicateRoute(spotLineId, null)
 ```
 
 **localStorage Fallback:**
@@ -578,7 +578,7 @@ const [expanded, setExpanded] = useState(false);
 // variationsCount > 0일 때 "보기" 버튼 표시
 // expanded = true일 때 VariationsList 렌더링
 
-// parentRouteId + parentRouteSlug 있으면 Link to /route/{parentRouteSlug}
+// parentSpotLineId + parentRouteSlug 있으면 Link to /route/{parentRouteSlug}
 ```
 
 ### 6.5 VariationsList.tsx (신규)
@@ -587,11 +587,11 @@ const [expanded, setExpanded] = useState(false);
 
 ```typescript
 interface VariationsListProps {
-  routeId: string;
+  spotLineId: string;
 }
 
 // State: variations (RoutePreview[]), isLoading, error
-// mount 시 fetchRouteVariations(routeId) 호출
+// mount 시 fetchRouteVariations(spotLineId) 호출
 // 각 항목: Link to /route/{variation.slug}
 // 로딩 중: 스켈레톤 2~3개
 // 에러 시: "변형 목록을 불러올 수 없습니다" 텍스트
@@ -604,11 +604,11 @@ interface VariationsListProps {
 
 // Route 복제
 export const replicateRoute = async (
-  routeId: string,
+  spotLineId: string,
   scheduledDate: string | null
 ): Promise<ReplicateRouteResponse> => {
   const response = await apiV2.post<ReplicateRouteResponse>(
-    `/routes/${routeId}/replicate`,
+    `/routes/${spotLineId}/replicate`,
     { scheduledDate },
     { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
   );
@@ -656,12 +656,12 @@ export const deleteMyRoute = async (myRouteId: string): Promise<void> => {
 
 // Route 변형 목록
 export const fetchRouteVariations = async (
-  routeId: string,
+  spotLineId: string,
   page: number = 0
 ): Promise<{ items: RoutePreview[]; hasMore: boolean }> => {
   try {
     const response = await apiV2.get<{ items: RoutePreview[]; hasMore: boolean }>(
-      `/routes/${routeId}/variations`,
+      `/routes/${spotLineId}/variations`,
       { params: { page }, timeout: 5000 }
     );
     return response.data;

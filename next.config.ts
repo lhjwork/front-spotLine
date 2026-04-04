@@ -77,6 +77,17 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      // Legacy Route → SpotLine 리다이렉트 (SEO 301)
+      {
+        source: "/route/:slug",
+        destination: "/spotline/:slug",
+        permanent: true,
+      },
+      {
+        source: "/my-routes",
+        destination: "/my-spotlines",
+        permanent: true,
+      },
     ];
   },
 };

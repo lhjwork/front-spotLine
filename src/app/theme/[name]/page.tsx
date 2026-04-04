@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import Breadcrumb from "@/components/seo/Breadcrumb";
 import ThemeHero from "@/components/theme/ThemeHero";
-import ThemeRoutes from "@/components/theme/ThemeRoutes";
+import ThemeSpotLines from "@/components/theme/ThemeSpotLines";
 import ThemeNavigation from "@/components/theme/ThemeNavigation";
 import { THEMES, findThemeBySlug } from "@/constants/themes";
-import { fetchFeedRoutes } from "@/lib/api";
+import { fetchFeedSpotLines } from "@/lib/api";
 
 export const revalidate = 3600;
 
@@ -44,15 +44,15 @@ export default async function ThemePage({ params }: ThemePageProps) {
   if (!theme) notFound();
 
   const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 0, last: true, first: true };
-  const routesResult = await fetchFeedRoutes(undefined, theme.theme, 0, 10)
-    .catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedRoutes>>);
+  const spotLinesResult = await fetchFeedSpotLines(undefined, theme.theme, 0, 10)
+    .catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedSpotLines>>);
 
   return (
     <Layout showFooter>
       <div className="max-w-4xl mx-auto">
         <Breadcrumb items={[{ name: theme.name }]} />
         <ThemeHero theme={theme} />
-        <ThemeRoutes routes={routesResult.content} />
+        <ThemeSpotLines spotLines={spotLinesResult.content} />
         <ThemeNavigation currentSlug={theme.slug} />
       </div>
     </Layout>

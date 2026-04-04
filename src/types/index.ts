@@ -235,7 +235,7 @@ export interface NearbyStoreParams {
 }
 
 // ============================================================
-// Spot/Route 핵심 타입 (Experience Social Platform)
+// Spot/SpotLine 핵심 타입 (Experience Social Platform)
 // ============================================================
 
 export type SpotCategory =
@@ -243,7 +243,7 @@ export type SpotCategory =
   | "nature" | "culture" | "exhibition"
   | "walk" | "activity" | "shopping" | "other";
 
-export type RouteTheme =
+export type SpotLineTheme =
   | "date" | "travel" | "walk" | "hangout"
   | "food-tour" | "cafe-tour" | "culture";
 
@@ -293,17 +293,17 @@ export interface SpotDetailResponse {
   partner: SpotPartnerInfo | null;
 }
 
-// Route 상세 응답 (GET /api/v2/routes/:slug)
-export interface RouteDetailResponse {
+// SpotLine 상세 응답 (GET /api/v2/spotlines/:slug)
+export interface SpotLineDetailResponse {
   id: string;
   slug: string;
   title: string;
   description: string | null;
-  theme: RouteTheme;
+  theme: SpotLineTheme;
   area: string;
   totalDuration: number;
   totalDistance: number;
-  spots: RouteSpotDetail[];
+  spots: SpotLineSpotDetail[];
   likesCount: number;
   savesCount: number;
   replicationsCount: number;
@@ -311,13 +311,13 @@ export interface RouteDetailResponse {
   commentsCount: number;
   creatorType: string;
   creatorName: string | null;
-  parentRouteId: string | null;
+  parentSpotLineId: string | null;
   variationsCount: number;
   createdAt: string;
 }
 
-// Route 내 Spot 상세 (RouteDetailResponse.spots 항목)
-export interface RouteSpotDetail {
+// SpotLine 내 Spot 상세 (SpotLineDetailResponse.spots 항목)
+export interface SpotLineSpotDetail {
   order: number;
   suggestedTime: string | null;
   stayDuration: number | null;
@@ -402,7 +402,7 @@ export interface DiscoverPlaceInfo {
   url: string | null;
 }
 
-export interface RoutePreview {
+export interface SpotLinePreview {
   id: string;
   slug: string;
   title: string;
@@ -418,7 +418,7 @@ export interface DiscoverResponse {
   currentSpot: DiscoverCurrentSpot | null;
   nextSpot: DiscoverNextSpot | null;
   nearbySpots: DiscoverSpot[];
-  popularRoutes: RoutePreview[];
+  popularSpotLines: SpotLinePreview[];
   area: string | null;
   locationGranted: boolean;
 }
@@ -482,7 +482,7 @@ export interface ThemeInfo {
   slug: string;
   name: string;
   description: string;
-  theme: RouteTheme;
+  theme: SpotLineTheme;
   colorClass: string;
   iconName: string;
 }
@@ -582,29 +582,29 @@ export interface MockupSpot {
 // Experience Replication 타입 (Phase 7)
 // ============================================================
 
-// 내 Route (복제된 Route)
-export interface MyRoute {
+// 내 SpotLine (복제된 SpotLine)
+export interface MySpotLine {
   id: string;
-  routeId: string;
-  routeSlug: string;
+  spotLineId: string;
+  spotLineSlug: string;
   title: string;
   area: string;
   spotsCount: number;
   scheduledDate: string | null;
   status: "scheduled" | "completed" | "cancelled";
   completedAt: string | null;
-  parentRouteId: string;
+  parentSpotLineId: string;
   createdAt: string;
 }
 
 // 복제 요청
-export interface ReplicateRouteRequest {
+export interface ReplicateSpotLineRequest {
   scheduledDate: string | null;
 }
 
 // 복제 응답
-export interface ReplicateRouteResponse {
-  myRoute: MyRoute;
+export interface ReplicateSpotLineResponse {
+  mySpotLine: MySpotLine;
   replicationsCount: number;
 }
 
@@ -627,7 +627,7 @@ export interface SpotLineSummary {
 // Comment 타입 (Comment System)
 // ============================================================
 
-export type CommentTargetType = "SPOT" | "ROUTE";
+export type CommentTargetType = "SPOT" | "SPOTLINE";
 
 export interface CommentResponse {
   id: string;

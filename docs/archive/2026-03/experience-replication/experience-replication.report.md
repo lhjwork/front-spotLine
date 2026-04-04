@@ -173,7 +173,7 @@ No blocker issues found. Implementation is production-ready.
 **Scope Items** (6 of 6 = 100%):
 
 - ✅ **Route 복제 바텀시트** — ReplicateRouteSheet.tsx (날짜 선택 UI + 빠른 선택 버튼 + native input fallback)
-- ✅ **복제 API 연동** — replicateRoute() function (POST /api/v2/routes/{routeId}/replicate)
+- ✅ **복제 API 연동** — replicateRoute() function (POST /api/v2/routes/{spotLineId}/replicate)
 - ✅ **내 일정 페이지** — /my-routes (서버 컴포넌트 + 예정/완료 탭 + 빈 상태)
 - ✅ **완주 마킹** — MyRouteCard markComplete button + updateMyRouteStatus() API
 - ✅ **RouteVariations 인터랙션** — VariationsList + 인라인 확장 + 원본 링크
@@ -420,7 +420,7 @@ RouteVariations → VariationsList → fetchRouteVariations() API
 
 1. **Phase 7.5: Route Customization** (Spot editing)
    - Allow users to reorder/remove/add spots when replicating
-   - Requires RouteSpot DTO changes
+   - Requires SpotLineSpot DTO changes
    - Estimated scope: 3-4 components
 
 2. **Phase 8: Calendar View** (for /my-routes)

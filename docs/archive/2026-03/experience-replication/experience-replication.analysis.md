@@ -38,11 +38,11 @@ Design document(experience-replication.design.md)와 실제 구현 코드 10개 
 
 | Design Function | Implementation | Status | Notes |
 |----------------|---------------|--------|-------|
-| `replicateRoute(routeId, scheduledDate)` | L910-920 | ✅ Match | Signature, endpoint, auth header identical |
+| `replicateRoute(spotLineId, scheduledDate)` | L910-920 | ✅ Match | Signature, endpoint, auth header identical |
 | `fetchMyRoutes(status?, page)` | L923-938 | ✅ Match | Return type `{ items, hasMore }` matches |
 | `updateMyRouteStatus(myRouteId, status)` | L941-951 | ✅ Match | PATCH with auth header |
 | `deleteMyRoute(myRouteId)` | L954-959 | ✅ Match | DELETE with auth header |
-| `fetchRouteVariations(routeId, page)` | L962-975 | ✅ Match | Uses `RoutePreviewType` alias for `RoutePreview` |
+| `fetchRouteVariations(spotLineId, page)` | L962-975 | ✅ Match | Uses `RoutePreviewType` alias for `RoutePreview` |
 
 **Note**: `fetchRouteVariations` uses `RoutePreviewType` (aliased as `RoutePreview as RoutePreviewType` at import L29) instead of direct `RoutePreview`. Functionally identical but creates a redundant import alias.
 
@@ -50,11 +50,11 @@ Design document(experience-replication.design.md)와 실제 구현 코드 10개 
 
 | Design Endpoint | Impl Endpoint | Status |
 |-----------------|--------------|--------|
-| `POST /api/v2/routes/{routeId}/replicate` | `/routes/${routeId}/replicate` (on apiV2) | ✅ Match |
+| `POST /api/v2/routes/{spotLineId}/replicate` | `/routes/${spotLineId}/replicate` (on apiV2) | ✅ Match |
 | `GET /api/v2/users/me/routes` | `/users/me/routes` (on apiV2) | ✅ Match |
 | `PATCH /api/v2/users/me/routes/{myRouteId}` | `/users/me/routes/${myRouteId}` (on apiV2) | ✅ Match |
 | `DELETE /api/v2/users/me/routes/{myRouteId}` | `/users/me/routes/${myRouteId}` (on apiV2) | ✅ Match |
-| `GET /api/v2/routes/{routeId}/variations` | `/routes/${routeId}/variations` (on apiV2) | ✅ Match |
+| `GET /api/v2/routes/{spotLineId}/variations` | `/routes/${spotLineId}/variations` (on apiV2) | ✅ Match |
 
 ### 2.4 Store (`useMyRoutesStore.ts`)
 
@@ -161,9 +161,9 @@ Design document(experience-replication.design.md)와 실제 구현 코드 10개 
 
 | Design Spec | Implementation | Status |
 |------------|---------------|--------|
-| Props: `{ routeId: string }` | L9-11 | ✅ |
+| Props: `{ spotLineId: string }` | L9-11 | ✅ |
 | States: `variations, isLoading, error` | L14-16 | ✅ |
-| Mount fetch `fetchRouteVariations(routeId)` | L18-32 | ✅ |
+| Mount fetch `fetchRouteVariations(spotLineId)` | L18-32 | ✅ |
 | Loading skeleton (2-3) | L36-44 (2 skeletons) | ✅ |
 | Error message "변형 목록을 불러올 수 없습니다" | L49 | ✅ |
 | Each item: Link to `/route/{slug}` | L58-60 | ✅ |
@@ -173,7 +173,7 @@ Design document(experience-replication.design.md)와 실제 구현 코드 10개 
 | Design Spec | Implementation | Status |
 |------------|---------------|--------|
 | `"use client"` added | L1 | ✅ |
-| Props: `routeId, parentRouteId, variationsCount, parentRouteSlug?` | L9-14 | ✅ |
+| Props: `spotLineId, parentSpotLineId, variationsCount, parentRouteSlug?` | L9-14 | ✅ |
 | `expanded` state | L22 | ✅ |
 | Click to toggle expand | L32 | ✅ |
 | ChevronDown/ChevronUp icons | L47-51 | ✅ |

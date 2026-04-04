@@ -4,21 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import { GitBranch, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import VariationsList from "@/components/route/VariationsList";
+import SpotLineVariationsList from "@/components/spotline/SpotLineVariationsList";
 
-interface RouteVariationsProps {
-  routeId: string;
-  parentRouteId: string | null;
+interface SpotLineVariationsProps {
+  spotLineId: string;
+  parentSpotLineId: string | null;
   variationsCount: number;
-  parentRouteSlug?: string;
+  parentSpotLineSlug?: string;
 }
 
-export default function RouteVariations({
-  routeId,
-  parentRouteId,
+export default function SpotLineVariations({
+  spotLineId,
+  parentSpotLineId,
   variationsCount,
-  parentRouteSlug,
-}: RouteVariationsProps) {
+  parentSpotLineSlug,
+}: SpotLineVariationsProps) {
   const [expanded, setExpanded] = useState(false);
   const hasVariations = variationsCount > 0;
 
@@ -35,9 +35,9 @@ export default function RouteVariations({
           <GitBranch className="h-5 w-5 shrink-0 text-purple-600" />
           <div className="flex-1">
             <p className="text-sm font-medium text-purple-800">
-              {parentRouteId
-                ? "이 Route는 다른 Route에서 변형되었습니다"
-                : `${variationsCount}개의 변형 Route가 있습니다`}
+              {parentSpotLineId
+                ? "이 SpotLine은 다른 SpotLine에서 변형되었습니다"
+                : `${variationsCount}개의 변형 SpotLine이 있습니다`}
             </p>
             <p className="mt-0.5 text-xs text-purple-600">
               다른 사람들이 이 코스를 자신만의 방식으로 변형했어요
@@ -55,19 +55,19 @@ export default function RouteVariations({
         {/* Inline variations list */}
         {expanded && hasVariations && (
           <div onClick={(e) => e.stopPropagation()}>
-            <VariationsList routeId={routeId} />
+            <SpotLineVariationsList spotLineId={spotLineId} />
           </div>
         )}
       </div>
 
       {/* Parent route link */}
-      {parentRouteId && parentRouteSlug && (
+      {parentSpotLineId && parentSpotLineSlug && (
         <Link
-          href={`/route/${parentRouteSlug}`}
+          href={`/spotline/${parentSpotLineSlug}`}
           className="mt-2 flex items-center gap-1.5 text-sm text-purple-600 hover:text-purple-700"
         >
           <ExternalLink className="h-3.5 w-3.5" />
-          원본 Route 보기
+          원본 SpotLine 보기
         </Link>
       )}
     </section>

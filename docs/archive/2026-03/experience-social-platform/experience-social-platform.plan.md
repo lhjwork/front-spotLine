@@ -106,7 +106,7 @@ Spot (매장 = 장소의 한 유형, 시간+활동 추가)
 
 현재 NextSpot (다음 장소 추천)
   ↓ 통합
-RouteSpot (Route 내 순서가 있는 Spot, QR 추천도 Route로 표현)
+SpotLineSpot (Route 내 순서가 있는 Spot, QR 추천도 Route로 표현)
 ```
 
 ---
@@ -238,7 +238,7 @@ Step 3: Route 구성
 **기존 타입과의 관계**:
 - `SpotlineStore` → `Spot` (source: "qr" | "crew") + `storeInfo` 필드
 - `MockupSpot` → `Spot`으로 진화 (time, creator, qrCode 추가)
-- `NextSpot` → Route 내 `RouteSpot` 참조로 대체
+- `NextSpot` → Route 내 `SpotLineSpot` 참조로 대체
 - `Store` (레거시) → `Spot` + `storeInfo`로 마이그레이션
 - **QR 기반 Spot은 storeInfo와 qrCode가 채워진 Spot**
 
@@ -252,7 +252,7 @@ Step 3: Route 구성
 | slug | string | SEO-friendly URL slug |
 | title | string | "성수 데이트 코스" |
 | description | string | 경험 전체 설명 |
-| spots | RouteSpot[] | 순서가 있는 Spot 목록 |
+| spots | SpotLineSpot[] | 순서가 있는 Spot 목록 |
 | totalDuration | number | 총 소요시간 (분) |
 | totalDistance | number | 총 거리 (m) |
 | area | string | 대표 지역 |
@@ -264,7 +264,7 @@ Step 3: Route 구성
 | createdAt | string | 생성일 |
 
 ```typescript
-interface RouteSpot {
+interface SpotLineSpot {
   spot: SpotRef;
   order: number;
   suggestedTime: string;      // "17:30"
@@ -468,7 +468,7 @@ Route 변형 시스템:
 |-------------|-------------|----------|
 | `Store` / `SpotlineStore` | `Spot` (source: "qr") | 매장 정보 → Spot + storeInfo, **QR 기능 완전 유지** |
 | `QRCode` | `Spot.qrCode` | QR 정보가 Spot의 속성으로 통합 |
-| `NextSpot` | `RouteSpot` | 다음 장소 추천 → Route 시스템으로 확장 (기존 추천도 유지) |
+| `NextSpot` | `SpotLineSpot` | 다음 장소 추천 → Route 시스템으로 확장 (기존 추천도 유지) |
 | `SpotLineSummary` | `Route` (source: "crew") | 크루 라인 → 크루가 만든 Route |
 | `MockupSpot` | `Spot` | 1:1 매핑, qrCode/storeInfo/source 추가 |
 | `UserProfile` | `User` | 확장 (social, schedule 추가) |

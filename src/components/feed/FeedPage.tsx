@@ -3,12 +3,12 @@
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFeedStore } from "@/store/useFeedStore";
-import { fetchFeedSpots, fetchFeedRoutes } from "@/lib/api";
+import { fetchFeedSpots, fetchFeedSpotLines } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { SpotCategory } from "@/types";
 import FeedAreaTabs from "./FeedAreaTabs";
 import FeedCategoryChips from "./FeedCategoryChips";
-import FeedRouteSection from "./FeedRouteSection";
+import FeedSpotLineSection from "./FeedSpotLineSection";
 import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
 import ExploreNavBar from "@/components/shared/ExploreNavBar";
@@ -20,9 +20,9 @@ export default function FeedPage() {
   const [isFiltering, setIsFiltering] = useState(false);
   const initializedRef = useRef(false);
   const {
-    area, category, spots, spotsPage, hasMoreSpots, routes,
+    area, category, spots, spotsPage, hasMoreSpots, spotLines,
     isLoading, error,
-    setArea, setCategory, appendSpots, nextSpotsPage, setRoutes,
+    setArea, setCategory, appendSpots, nextSpotsPage, setSpotLines,
     setIsLoading, setError,
   } = useFeedStore();
 
@@ -52,21 +52,21 @@ export default function FeedPage() {
     contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [area, category]);
 
-  // Load routes when area changes
+  // Load spotLines when area changes
   useEffect(() => {
     if (!initializedRef.current) return;
     let cancelled = false;
-    const loadRoutes = async () => {
+    const loadSpotLines = async () => {
       try {
-        const result = await fetchFeedRoutes(area || undefined, undefined, 0, 5);
-        if (!cancelled) setRoutes(result.content);
+        const result = await fetchFeedSpotLines(area || undefined, undefined, 0, 5);
+        if (!cancelled) setSpotLines(result.content);
       } catch {
-        // Routes are non-critical, don't block
+        // SpotLines are non-critical, don't block
       }
     };
-    loadRoutes();
+    loadSpotLines();
     return () => { cancelled = true; };
-  }, [area, setRoutes]);
+  }, [area, setSpotLines]);
 
   // Load spots when area/category/page changes
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function FeedPage() {
   }, [isLoading, hasMoreSpots, nextSpotsPage]);
 
   // Initial loading
-  if (isLoading && spots.length === 0 && routes.length === 0) {
+  if (isLoading && spots.length === 0 && spotLines.length === 0) {
     return <FeedSkeleton />;
   }
 
@@ -137,7 +137,7 @@ export default function FeedPage() {
       <FeedAreaTabs selected={area} onSelect={setArea} />
       <FeedCategoryChips selected={category} onSelect={setCategory} />
       <div ref={contentRef} />
-      <FeedRouteSection routes={routes} />
+      <FeedSpotLineSection spotLines={spotLines} />
       <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>
         <FeedSpotGrid
           spots={spots}

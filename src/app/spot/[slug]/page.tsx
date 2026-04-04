@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { fetchSpotDetail, fetchSpotRoutes, fetchNearbySpots } from "@/lib/api";
+import { fetchSpotDetail, fetchSpotSpotLines, fetchNearbySpots } from "@/lib/api";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumb from "@/components/seo/Breadcrumb";
 import { generateSpotJsonLd } from "@/lib/seo/jsonld";
@@ -8,7 +8,7 @@ import SpotHero from "@/components/spot/SpotHero";
 import SpotCrewNote from "@/components/spot/SpotCrewNote";
 import SpotPlaceInfo from "@/components/spot/SpotPlaceInfo";
 import SpotImageGallery from "@/components/spot/SpotImageGallery";
-import SpotRoutes from "@/components/spot/SpotRoutes";
+import SpotSpotLines from "@/components/spot/SpotSpotLines";
 import SpotNearby from "@/components/spot/SpotNearby";
 import SpotBottomBar from "@/components/spot/SpotBottomBar";
 import SocialHydrator from "@/components/social/SocialHydrator";
@@ -67,8 +67,8 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
     notFound();
   }
 
-  const [routes, nearbySpots] = await Promise.all([
-    fetchSpotRoutes(spot.id),
+  const [spotLines, nearbySpots] = await Promise.all([
+    fetchSpotSpotLines(spot.id),
     fetchNearbySpots(spot.latitude, spot.longitude, spot.id, 6),
   ]);
 
@@ -110,8 +110,8 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
           <SpotImageGallery photos={allPhotos} title={spot.title} />
         )}
 
-        {routes.length > 0 && (
-          <SpotRoutes routes={routes} />
+        {spotLines.length > 0 && (
+          <SpotSpotLines spotLines={spotLines} />
         )}
 
         {nearbySpots.length > 0 && (

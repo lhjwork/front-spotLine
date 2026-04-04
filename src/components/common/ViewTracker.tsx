@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { incrementSpotView, incrementRouteView } from "@/lib/api";
+import { incrementSpotView, incrementSpotLineView } from "@/lib/api";
 
 interface ViewTrackerProps {
-  type: "spot" | "route";
+  type: "spot" | "spotline";
   id: string;
 }
 
@@ -13,7 +13,7 @@ export default function ViewTracker({ type, id }: ViewTrackerProps) {
     if (type === "spot") {
       incrementSpotView(id);
     } else {
-      incrementRouteView(id);
+      incrementSpotLineView(id);
     }
   }, [type, id]);
 

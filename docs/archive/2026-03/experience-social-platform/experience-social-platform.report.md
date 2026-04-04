@@ -88,7 +88,7 @@
 1. **Data Layer**:
    - Spot type: id, slug, title, location, category, crewNote, externalPlace (naverPlaceId, kakaoPlaceId)
    - Route type: id, slug, title, spots (ordered), totalDuration, totalDistance, theme, variations, parentRoute
-   - RouteSpot: spot reference + order + transitionToNext (walkingTime, distance)
+   - SpotLineSpot: spot reference + order + transitionToNext (walkingTime, distance)
    - **Rationale**: Minimize DB footprint. Spot ≠ store detail. External place info via API.
 
 2. **Architecture**:
@@ -111,7 +111,7 @@
 
 5. **Backend API Contract**:
    - `GET /api/spots/:slug` → SpotDetailResponse (DB + PlaceInfo merged)
-   - `GET /api/routes/:slug` → RouteDetailResponse (Route + RouteSpot array)
+   - `GET /api/routes/:slug` → RouteDetailResponse (Route + SpotLineSpot array)
    - `GET /api/spots/{slug}/routes` → RoutePreviewResponse[] (routes containing this spot)
    - **Rationale**: Clear separation, enables caching at backend
 
@@ -124,7 +124,7 @@
 **Files Implemented**:
 
 **Types & API (3 files)**:
-- `src/types/index.ts`: SpotDetailResponse, RouteDetailResponse, RouteSpot, SpotCategory, RouteTheme, etc.
+- `src/types/index.ts`: SpotDetailResponse, RouteDetailResponse, SpotLineSpot, SpotCategory, RouteTheme, etc.
 - `src/lib/api.ts`: fetchSpotDetail, fetchRouteDetail, fetchSpotRoutes, fetchNearbySpots, fetchPopularRoutes, fetchDiscover
 - `src/lib/utils.ts`: formatWalkingTime(), formatDistance() utility functions
 
@@ -271,7 +271,7 @@
 | FR-07 | Discover landing with location-based blocks | ✅ Complete | Current Spot, Next Spot, Popular Routes shown |
 | FR-08 | Shared card components (SpotMini, SpotPreview, RoutePreview, TagList) | ✅ Complete | Reusable across Spot/Route/Discover pages |
 | FR-09 | API functions: fetch{Spot,Route}Detail, {Spot,Route}Routes, NearbySpots | ✅ Complete | 6 functions, type-safe, error handling |
-| FR-10 | Data types: Spot, Route, RouteSpot, PlaceInfo, etc. | ✅ Complete | Full type definitions in `src/types/index.ts` |
+| FR-10 | Data types: Spot, Route, SpotLineSpot, PlaceInfo, etc. | ✅ Complete | Full type definitions in `src/types/index.ts` |
 
 ### 4.2 Non-Functional Requirements
 
@@ -398,7 +398,7 @@
 
 5. **Shared Component Strategy**: SpotMiniCard, RoutePreviewCard became core building blocks reused in 6+ locations (Spot page, Route page, Popular Routes, etc.). High leverage design.
 
-6. **Type Safety**: Expanding `src/types/index.ts` with SpotDetailResponse, RouteDetailResponse, RouteSpot, SpotCategory, RouteTheme centralized all type definitions. Made refactoring safe.
+6. **Type Safety**: Expanding `src/types/index.ts` with SpotDetailResponse, RouteDetailResponse, SpotLineSpot, SpotCategory, RouteTheme centralized all type definitions. Made refactoring safe.
 
 7. **Architecture Clarity**: Backend merges DB + Place API (one responsibility); Front renders (one responsibility). Clear separation avoided complex client-side composition.
 
@@ -673,7 +673,7 @@ Browser: fetch Spot page with metadata
 - 6 Route components: RouteHeader, RouteTimeline, RouteTimelineItem, RouteMapPreview, RouteVariations, RouteBottomBar
 - 4 shared card components: SpotMiniCard, SpotPreviewCard, RoutePreviewCard, TagList
 - API functions: fetchSpotDetail, fetchRouteDetail, fetchSpotRoutes, fetchNearbySpots, fetchPopularRoutes
-- Type definitions: SpotDetailResponse, RouteDetailResponse, RouteSpot, SpotCategory, RouteTheme
+- Type definitions: SpotDetailResponse, RouteDetailResponse, SpotLineSpot, SpotCategory, RouteTheme
 - Discover landing enhanced with Route blocks and Popular Routes section
 - Utility functions: formatWalkingTime(), formatDistance()
 

@@ -1,7 +1,7 @@
 import { ArrowLeft, Clock, MapPin, Heart, Users, Copy } from "lucide-react";
 import Link from "next/link";
 import { formatDistance, formatWalkingTime } from "@/lib/utils";
-import type { RouteDetailResponse } from "@/types";
+import type { SpotLineDetailResponse } from "@/types";
 
 const themeLabels: Record<string, string> = {
   date: "데이트", travel: "여행", walk: "산책",
@@ -19,13 +19,13 @@ const themeColors: Record<string, string> = {
   culture: "bg-purple-100 text-purple-700",
 };
 
-interface RouteHeaderProps {
-  route: RouteDetailResponse;
+interface SpotLineHeaderProps {
+  spotLine: SpotLineDetailResponse;
 }
 
-export default function RouteHeader({ route }: RouteHeaderProps) {
-  const themeLabel = themeLabels[route.theme] || route.theme;
-  const themeColor = themeColors[route.theme] || "bg-gray-100 text-gray-700";
+export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
+  const themeLabel = themeLabels[spotLine.theme] || spotLine.theme;
+  const themeColor = themeColors[spotLine.theme] || "bg-gray-100 text-gray-700";
 
   return (
     <section className="bg-white pb-4">
@@ -45,11 +45,11 @@ export default function RouteHeader({ route }: RouteHeaderProps) {
           {themeLabel}
         </span>
 
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">{route.title}</h1>
+        <h1 className="mt-2 text-2xl font-bold text-gray-900">{spotLine.title}</h1>
 
-        {route.description && (
+        {spotLine.description && (
           <p className="mt-1 text-sm text-gray-600 leading-relaxed">
-            {route.description}
+            {spotLine.description}
           </p>
         )}
 
@@ -57,14 +57,14 @@ export default function RouteHeader({ route }: RouteHeaderProps) {
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5" />
-            {route.area} · {route.spots.length}곳
+            {spotLine.area} · {spotLine.spots.length}곳
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
-            {formatWalkingTime(route.totalDuration)}
+            {formatWalkingTime(spotLine.totalDuration)}
           </span>
           <span className="flex items-center gap-1">
-            {formatDistance(route.totalDistance)}
+            {formatDistance(spotLine.totalDistance)}
           </span>
         </div>
 
@@ -72,21 +72,21 @@ export default function RouteHeader({ route }: RouteHeaderProps) {
         <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
           <span className="flex items-center gap-1">
             <Heart className="h-3 w-3" />
-            {route.likesCount.toLocaleString()}
+            {spotLine.likesCount.toLocaleString()}
           </span>
           <span className="flex items-center gap-1">
             <Copy className="h-3 w-3" />
-            {route.replicationsCount.toLocaleString()}
+            {spotLine.replicationsCount.toLocaleString()}
           </span>
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
-            {route.completionsCount.toLocaleString()} 완주
+            {spotLine.completionsCount.toLocaleString()} 완주
           </span>
         </div>
 
-        {route.creatorName && (
+        {spotLine.creatorName && (
           <p className="mt-2 text-xs text-gray-400">
-            by {route.creatorName}
+            by {spotLine.creatorName}
           </p>
         )}
       </div>

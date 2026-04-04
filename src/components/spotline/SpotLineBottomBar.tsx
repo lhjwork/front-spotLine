@@ -6,15 +6,15 @@ import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
-import ReplicateRouteSheet from "@/components/route/ReplicateRouteSheet";
-import type { RouteDetailResponse } from "@/types";
+import ReplicateSpotLineSheet from "@/components/spotline/ReplicateSpotLineSheet";
+import type { SpotLineDetailResponse } from "@/types";
 
-interface RouteBottomBarProps {
-  route: RouteDetailResponse;
+interface SpotLineBottomBarProps {
+  spotLine: SpotLineDetailResponse;
 }
 
-export default function RouteBottomBar({ route }: RouteBottomBarProps) {
-  const item = useSocialStore((s) => s.getItem("route", route.id));
+export default function SpotLineBottomBar({ spotLine }: SpotLineBottomBarProps) {
+  const item = useSocialStore((s) => s.getItem("spotline", spotLine.id));
   const toggleLike = useSocialStore((s) => s.toggleLike);
   const toggleSave = useSocialStore((s) => s.toggleSave);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -25,7 +25,7 @@ export default function RouteBottomBar({ route }: RouteBottomBarProps) {
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
-  const likesCount = item?.likesCount ?? route.likesCount;
+  const likesCount = item?.likesCount ?? spotLine.likesCount;
 
   const handleLike = () => {
     if (!isAuthenticated) {
@@ -33,7 +33,7 @@ export default function RouteBottomBar({ route }: RouteBottomBarProps) {
       setShowLogin(true);
       return;
     }
-    toggleLike("route", route.id);
+    toggleLike("spotline", spotLine.id);
   };
 
   const handleSave = () => {
@@ -42,7 +42,7 @@ export default function RouteBottomBar({ route }: RouteBottomBarProps) {
       setShowLogin(true);
       return;
     }
-    toggleSave("route", route.id);
+    toggleSave("spotline", spotLine.id);
   };
 
   const handleReplicate = () => {
@@ -56,8 +56,8 @@ export default function RouteBottomBar({ route }: RouteBottomBarProps) {
 
   const handleShare = async () => {
     const shareData = {
-      title: route.title,
-      text: route.description || `${route.area}의 ${route.title}`,
+      title: spotLine.title,
+      text: spotLine.description || `${spotLine.area}의 ${spotLine.title}`,
       url: window.location.href,
     };
 
@@ -127,15 +127,15 @@ export default function RouteBottomBar({ route }: RouteBottomBarProps) {
         message={loginMessage}
       />
 
-      <ReplicateRouteSheet
+      <ReplicateSpotLineSheet
         isOpen={showReplicate}
         onClose={() => setShowReplicate(false)}
-        route={{
-          id: route.id,
-          slug: route.slug,
-          title: route.title,
-          area: route.area,
-          spotsCount: route.spots.length,
+        spotLine={{
+          id: spotLine.id,
+          slug: spotLine.slug,
+          title: spotLine.title,
+          area: spotLine.area,
+          spotsCount: spotLine.spots.length,
         }}
       />
     </>

@@ -13,7 +13,7 @@ import LocationPermissionBanner from "./LocationPermissionBanner";
 import SpotBlock from "./SpotBlock";
 import TransitionInfo from "./TransitionInfo";
 import NearbySpotScroll from "./NearbySpotScroll";
-import PopularRoutesList from "./PopularRoutesList";
+import PopularSpotLinesList from "./PopularSpotLinesList";
 import DiscoverSkeleton from "./DiscoverSkeleton";
 import ExploreNavBar from "@/components/shared/ExploreNavBar";
 
@@ -177,8 +177,8 @@ export default function DiscoverPage() {
       )}
 
       {/* Popular routes in the area */}
-      {data.popularRoutes?.length > 0 && (
-        <PopularRoutesList routes={data.popularRoutes} className="mt-6" />
+      {data.popularSpotLines?.length > 0 && (
+        <PopularSpotLinesList spotLines={data.popularSpotLines} className="mt-6" />
       )}
 
       {/* Link to full feed */}

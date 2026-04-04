@@ -31,7 +31,7 @@
 **타입 시스템 준비 완료:**
 - `RouteDetailResponse.replicationsCount` — 복제 횟수
 - `RouteDetailResponse.completionsCount` — 완주 횟수
-- `RouteDetailResponse.parentRouteId` — 부모 Route (변형 추적)
+- `RouteDetailResponse.parentSpotLineId` — 부모 Route (변형 추적)
 - `RouteDetailResponse.variationsCount` — 변형 수
 
 **인증 + 소셜 인프라 완료 (Phase 6):**
@@ -50,12 +50,12 @@
 
 **현재 v2 API:**
 ```
-GET /api/v2/routes/{slug}     ← replicationsCount, parentRouteId, variationsCount 포함
+GET /api/v2/routes/{slug}     ← replicationsCount, parentSpotLineId, variationsCount 포함
 ```
 
 **Phase 7에 필요한 신규 API** (Backend 구현 필요):
 ```
-POST /api/v2/routes/{id}/replicate    ← Route 복제 (parentRouteId 설정)
+POST /api/v2/routes/{id}/replicate    ← Route 복제 (parentSpotLineId 설정)
 GET  /api/v2/routes/{id}/variations   ← 변형 Route 목록
 GET  /api/v2/users/me/routes          ← 내 Route 목록 (복제한 것들)
 PATCH /api/v2/users/me/routes/{id}    ← Route 상태 변경 (예정→완료)
@@ -72,7 +72,7 @@ PATCH /api/v2/users/me/routes/{id}    ← Route 상태 변경 (예정→완료)
 | # | Item | Description |
 |---|------|-------------|
 | 1 | **Route 복제 바텀시트** | "내 일정에 추가" → ReplicateRouteSheet (날짜 선택 + 확인) |
-| 2 | **복제 API 연동** | `replicateRoute(routeId, scheduledDate)` → v2 API POST |
+| 2 | **복제 API 연동** | `replicateRoute(spotLineId, scheduledDate)` → v2 API POST |
 | 3 | **내 일정 페이지** | `/my-routes` — 복제한 Route 목록 (예정/완료 탭) |
 | 4 | **완주 마킹** | 내 일정에서 Route 완주 표시 (체크 버튼) |
 | 5 | **RouteVariations 인터랙션** | 변형 목록 페이지 연결 + 원본 Route 링크 |
@@ -143,7 +143,7 @@ RouteBottomBar ("내 일정에 추가" 탭)
   → POST /api/v2/routes/{id}/replicate
     Body: { scheduledDate: "2026-04-05" }
     Authorization: Bearer {token}
-  → 성공: { id, slug, parentRouteId, scheduledDate, status }
+  → 성공: { id, slug, parentSpotLineId, scheduledDate, status }
   → useMyRoutesStore.addRoute(response)
   → 토스트 + 시트 닫기
 ```
@@ -209,7 +209,7 @@ RouteBottomBar ("내 일정에 추가" 탭)
 // 내 Route (복제된 Route)
 interface MyRoute {
   id: string;
-  routeId: string;         // 원본 Route ID
+  spotLineId: string;         // 원본 Route ID
   routeSlug: string;       // 원본 Route slug (링크용)
   title: string;
   area: string;
@@ -217,7 +217,7 @@ interface MyRoute {
   scheduledDate: string;   // ISO 날짜
   status: "scheduled" | "completed" | "cancelled";
   completedAt: string | null;
-  parentRouteId: string;   // = routeId (복제 원본)
+  parentSpotLineId: string;   // = spotLineId (복제 원본)
   createdAt: string;
 }
 
@@ -285,7 +285,7 @@ src/
 
 ```typescript
 // Route 복제
-replicateRoute(routeId: string, scheduledDate: string): Promise<ReplicateRouteResponse>
+replicateRoute(spotLineId: string, scheduledDate: string): Promise<ReplicateRouteResponse>
 
 // 내 Route 목록
 fetchMyRoutes(status?: "scheduled" | "completed", page?: number): Promise<{ items: MyRoute[]; hasMore: boolean }>
@@ -297,7 +297,7 @@ updateMyRouteStatus(myRouteId: string, status: "completed" | "cancelled"): Promi
 deleteMyRoute(myRouteId: string): Promise<void>
 
 // Route 변형 목록
-fetchRouteVariations(routeId: string, page?: number): Promise<{ items: RoutePreview[]; hasMore: boolean }>
+fetchRouteVariations(spotLineId: string, page?: number): Promise<{ items: RoutePreview[]; hasMore: boolean }>
 ```
 
 **인증 헤더**: 모든 API는 `Authorization: Bearer {token}` 필요.

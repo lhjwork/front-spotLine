@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { icon: User, label: "마이", href: "/profile/me", match: (p: string) => p.startsWith("/profile") },
 ] as const;
 
-const HIDDEN_PREFIXES = ["/spot/", "/route/", "/spotline/", "/qr/"];
+const HIDDEN_PREFIXES = ["/spot/", "/spotline/", "/qr/"];
 
 export default function BottomNavBar() {
   const pathname = usePathname();

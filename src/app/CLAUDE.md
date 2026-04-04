@@ -4,8 +4,10 @@
 
 - `/` — 랜딩 페이지 (서버 컴포넌트)
 - `/qr/[qrId]` — QR 스캔 진입점 (데모/실제 분기 후 리다이렉트)
-- `/spotline/[qrId]` — 메인 SpotLine 페이지
+- `/spotline/[slug]` — SpotLine 상세 페이지 (SSR + SEO)
 - `/spotline/demo-store` — 데모 전용 페이지
+- `/spot/[slug]` — Spot 상세 페이지 (SSR + SEO)
+- `/my-spotlines` — 내 SpotLine 일정 관리
 - `/about` — 서비스 소개
 - `/api/demo/*` — 데모 데이터 API 라우트
 
@@ -27,7 +29,7 @@
 1. QR 스캔 → `/qr/[qrId]` 진입
 2. `demo_` 접두사로 데모 모드 감지
 3. API로 매장 ID 매핑 조회
-4. `/spotline/[storeId]?qr=[qrId]`로 리다이렉트
+4. `/spot/[slug]?qr=[qrId]`로 리다이렉트
 
 ## 분석 & 세션
 

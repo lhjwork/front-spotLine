@@ -1,11 +1,11 @@
-import RouteTimelineItem from "./RouteTimelineItem";
-import type { RouteSpotDetail } from "@/types";
+import SpotLineTimelineItem from "./SpotLineTimelineItem";
+import type { SpotLineSpotDetail } from "@/types";
 
-interface RouteTimelineProps {
-  spots: RouteSpotDetail[];
+interface SpotLineTimelineProps {
+  spots: SpotLineSpotDetail[];
 }
 
-export default function RouteTimeline({ spots }: RouteTimelineProps) {
+export default function SpotLineTimeline({ spots }: SpotLineTimelineProps) {
   const sorted = [...spots].sort((a, b) => a.order - b.order);
 
   return (
@@ -13,7 +13,7 @@ export default function RouteTimeline({ spots }: RouteTimelineProps) {
       <h2 className="mb-4 text-sm font-semibold text-gray-900">경로 타임라인</h2>
       <div>
         {sorted.map((spot, index) => (
-          <RouteTimelineItem
+          <SpotLineTimelineItem
             key={spot.spotId}
             spot={spot}
             isLast={index === sorted.length - 1}

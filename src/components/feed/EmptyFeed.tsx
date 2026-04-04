@@ -1,7 +1,7 @@
 import { Compass, MapPin } from "lucide-react";
 
 interface EmptyFeedProps {
-  type: "spot" | "route";
+  type: "spot" | "spotline";
   onResetArea?: () => void;
 }
 
@@ -10,9 +10,9 @@ const config = {
     icon: Compass,
     message: "이 지역에 Spot이 아직 없어요",
   },
-  route: {
+  spotline: {
     icon: MapPin,
-    message: "이 지역에 Route가 아직 없어요",
+    message: "이 지역에 SpotLine이 아직 없어요",
   },
 } as const;
 

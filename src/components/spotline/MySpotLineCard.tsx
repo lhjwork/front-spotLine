@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { Check, Trash2, ExternalLink, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { MyRoute } from "@/types";
+import type { MySpotLine } from "@/types";
 
-interface MyRouteCardProps {
-  myRoute: MyRoute;
+interface MySpotLineCardProps {
+  mySpotLine: MySpotLine;
   onMarkComplete: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -43,31 +43,31 @@ const formatDate = (dateStr: string): string => {
   return `${y}.${m}.${d} (${day})`;
 };
 
-export default function MyRouteCard({
-  myRoute,
+export default function MySpotLineCard({
+  mySpotLine,
   onMarkComplete,
   onDelete,
-}: MyRouteCardProps) {
-  const isCompleted = myRoute.status === "completed";
+}: MySpotLineCardProps) {
+  const isCompleted = mySpotLine.status === "completed";
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       {/* Title row */}
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900">{myRoute.title}</h3>
+          <h3 className="font-semibold text-gray-900">{mySpotLine.title}</h3>
           <p className="mt-0.5 text-sm text-gray-500">
-            {myRoute.area} · {myRoute.spotsCount}곳
+            {mySpotLine.area} · {mySpotLine.spotsCount}곳
           </p>
         </div>
         {!isCompleted && (
           <span
             className={cn(
               "ml-2 text-sm font-bold",
-              getDdayColor(myRoute.scheduledDate)
+              getDdayColor(mySpotLine.scheduledDate)
             )}
           >
-            {getDday(myRoute.scheduledDate)}
+            {getDday(mySpotLine.scheduledDate)}
           </span>
         )}
       </div>
@@ -75,10 +75,10 @@ export default function MyRouteCard({
       {/* Date */}
       <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
         <Calendar className="h-3.5 w-3.5" />
-        {isCompleted && myRoute.completedAt
-          ? `완주: ${formatDate(myRoute.completedAt.split("T")[0])}`
-          : myRoute.scheduledDate
-            ? formatDate(myRoute.scheduledDate)
+        {isCompleted && mySpotLine.completedAt
+          ? `완주: ${formatDate(mySpotLine.completedAt.split("T")[0])}`
+          : mySpotLine.scheduledDate
+            ? formatDate(mySpotLine.scheduledDate)
             : "날짜 미정"}
       </div>
 
@@ -86,7 +86,7 @@ export default function MyRouteCard({
       <div className="mt-3 flex items-center gap-2">
         {!isCompleted && (
           <button
-            onClick={() => onMarkComplete(myRoute.id)}
+            onClick={() => onMarkComplete(mySpotLine.id)}
             className="flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition-colors hover:bg-green-100"
           >
             <Check className="h-3.5 w-3.5" />
@@ -95,7 +95,7 @@ export default function MyRouteCard({
         )}
 
         <button
-          onClick={() => onDelete(myRoute.id)}
+          onClick={() => onDelete(mySpotLine.id)}
           className="flex items-center gap-1 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -103,7 +103,7 @@ export default function MyRouteCard({
         </button>
 
         <Link
-          href={`/route/${myRoute.routeSlug}`}
+          href={`/spotline/${mySpotLine.spotLineSlug}`}
           className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-purple-600 transition-colors hover:bg-purple-50"
         >
           <ExternalLink className="h-3.5 w-3.5" />

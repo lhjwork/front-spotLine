@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Route, Clock, MapPin } from "lucide-react";
 import { formatWalkingTime } from "@/lib/utils";
-import type { RoutePreview } from "@/types";
+import type { SpotLinePreview } from "@/types";
 
 const themeLabels: Record<string, string> = {
   date: "데이트", travel: "여행", walk: "산책",
@@ -9,21 +9,21 @@ const themeLabels: Record<string, string> = {
   "cafe-tour": "카페 투어", culture: "문화",
 };
 
-interface SpotRoutesProps {
-  routes: RoutePreview[];
+interface SpotSpotLinesProps {
+  spotLines: SpotLinePreview[];
 }
 
-export default function SpotRoutes({ routes }: SpotRoutesProps) {
+export default function SpotSpotLines({ spotLines }: SpotSpotLinesProps) {
   return (
     <section className="mt-4">
       <h2 className="mb-3 text-sm font-semibold text-gray-900">
-        이 Spot이 포함된 Route
+        이 Spot이 포함된 SpotLine
       </h2>
       <div className="space-y-2">
-        {routes.map((route) => (
+        {spotLines.map((spotLine) => (
           <Link
-            key={route.id}
-            href={`/route/${route.slug}`}
+            key={spotLine.id}
+            href={`/spotline/${spotLine.slug}`}
             className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 transition-colors hover:bg-gray-50"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100">
@@ -31,19 +31,19 @@ export default function SpotRoutes({ routes }: SpotRoutesProps) {
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-sm font-medium text-gray-900">
-                {route.title}
+                {spotLine.title}
               </h3>
               <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span>{themeLabels[route.theme] || route.theme}</span>
+                <span>{themeLabels[spotLine.theme] || spotLine.theme}</span>
                 <span>·</span>
                 <span className="flex items-center gap-0.5">
                   <MapPin className="h-3 w-3" />
-                  {route.spotCount}곳
+                  {spotLine.spotCount}곳
                 </span>
                 <span>·</span>
                 <span className="flex items-center gap-0.5">
                   <Clock className="h-3 w-3" />
-                  {formatWalkingTime(route.totalDuration)}
+                  {formatWalkingTime(spotLine.totalDuration)}
                 </span>
               </div>
             </div>

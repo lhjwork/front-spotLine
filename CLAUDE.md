@@ -21,11 +21,12 @@ pnpm clean        # .next 및 캐시 삭제
 
 ### 핵심 플로우
 
-사용자가 QR 코드 스캔 → `/spotline/[qrId]` 페이지 진입 → 매장 정보 + 추천 다음 장소 표시. 인증 시스템 없이 익명/프라이버시 우선 설계. 세션 ID는 클라이언트에서 생성하여 분석용으로만 사용.
+사용자가 QR 코드 스캔 → `/qr/[qrId]` 페이지 ���입 → Spot 상세로 리다이렉트. SpotLine 상세는 `/spotline/[slug]`. 인증 시스템 없이 익명/프라이버시 우선 설계. 세션 ID는 클라이언트에서 생성하여 분석용으로만 사용.
 
 ### 주요 파일
 
-- `src/app/spotline/[qrId]/page.tsx` — 메인 동적 페이지, 프로덕션/데모 모드 모두 처리
+- `src/app/spotline/[slug]/page.tsx` — SpotLine 상세 페이지 (SSR + SEO)
+- `src/app/qr/[qrId]/page.tsx` — QR 스캔 진입점 (Spot으로 리다이렉���)
 - `src/lib/api.ts` — Axios 기반 API 레이어. 메인 API + 데모 API 이중 엔드포인트, 에러 핸들링, 타임아웃 관리, 분석 로깅
 - `src/lib/spotline.ts` — 체험 세션 헬퍼 함수
 - `src/store/useSpotlineStore.ts` — 단일 Zustand 스토어 (현재 매장 데이터, 다음 장소, 로딩/에러 상태, 필터)

@@ -268,7 +268,7 @@ On error: Keep optimistic state, show toast (graceful degradation)
 - [ ] Backend deploys v2 API endpoints
 - [ ] CORS headers configured (Instagram OAuth callback)
 - [ ] Rate limiting configured (like/save spam prevention)
-- [ ] Database indexes created (userId, spotId, routeId on likes/saves tables)
+- [ ] Database indexes created (userId, spotId, spotLineId on likes/saves tables)
 - [ ] Cache warming configured (popular spots/routes)
 - [ ] Integration tests passed (front ↔ backend)
 - [ ] Production monitoring activated (error rates, latency)
@@ -328,7 +328,7 @@ src/components/auth/LoginBottomSheet.tsx
 src/components/social/SocialHydrator.tsx
   ├─ Type: Invisible client component (renders null)
   ├─ Purpose: Bridge SSR counts ↔ Client social state
-  ├─ Props: { spotId?, routeId? }
+  ├─ Props: { spotId?, spotLineId? }
   └─ Effect: Fetch and sync user's like/save status on mount
 
 src/components/social/SavesList.tsx
@@ -396,7 +396,7 @@ src/app/route/[slug]/page.tsx
 ### Type Coverage
 - 100% TypeScript coverage (no `any` types)
 - Interface-based API responses
-- Branded types for userId, spotId, routeId (type safety)
+- Branded types for userId, spotId, spotLineId (type safety)
 
 ### Test Coverage (Manual)
 - ✅ toggleLike with auth gate

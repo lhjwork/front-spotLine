@@ -151,7 +151,7 @@ SpotBottomBar (좋아요 버튼 탭)
 
 ```
 RouteBottomBar (저장 버튼 탭)
-  → useSocialStore.toggleSave("route", routeId)
+  → useSocialStore.toggleSave("route", spotLineId)
   → optimistic: saved = !saved, count ±1
   → POST /api/v2/routes/{id}/save (Authorization: Bearer token)
   → 성공: 서버 count 반영

@@ -1,4 +1,4 @@
-import type { SpotDetailResponse, RouteDetailResponse, SpotCategory } from "@/types";
+import type { SpotDetailResponse, SpotLineDetailResponse, SpotCategory } from "@/types";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
 
@@ -70,22 +70,22 @@ export function generateSpotJsonLd(spot: SpotDetailResponse): Record<string, unk
   return jsonLd;
 }
 
-/** Route → TouristTrip + ItemList JSON-LD */
-export function generateRouteJsonLd(route: RouteDetailResponse): Record<string, unknown> {
-  const url = `${SITE_URL}/route/${route.slug}`;
-  const description = route.description || `${route.area}의 ${route.title} - ${route.spots.length}곳`;
+/** SpotLine → TouristTrip + ItemList JSON-LD */
+export function generateSpotLineJsonLd(spotLine: SpotLineDetailResponse): Record<string, unknown> {
+  const url = `${SITE_URL}/spotline/${spotLine.slug}`;
+  const description = spotLine.description || `${spotLine.area}의 ${spotLine.title} - ${spotLine.spots.length}곳`;
 
   return {
     "@context": "https://schema.org",
     "@type": "TouristTrip",
-    name: route.title,
+    name: spotLine.title,
     description,
     url,
-    touristType: route.theme,
+    touristType: spotLine.theme,
     itinerary: {
       "@type": "ItemList",
-      numberOfItems: route.spots.length,
-      itemListElement: route.spots.map((spot) => ({
+      numberOfItems: spotLine.spots.length,
+      itemListElement: spotLine.spots.map((spot) => ({
         "@type": "ListItem",
         position: spot.order + 1,
         item: {
