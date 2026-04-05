@@ -54,7 +54,7 @@ export default async function CityPage({ params }: CityPageProps) {
     <Layout showFooter>
       <div className="max-w-4xl mx-auto">
         <Breadcrumb items={[{ name: city.name }]} />
-        <CityHero city={city} />
+        <CityHero city={city} spotCount={spotsResult.totalElements} spotLineCount={spotLinesResult.totalElements} />
         <CitySpotLines spotLines={spotLinesResult.content} />
         <CitySpots spots={spotsResult.content} cityArea={city.area} />
         <CityNavigation currentSlug={city.slug} />

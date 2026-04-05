@@ -12,9 +12,11 @@ interface FeedSpotGridProps {
   onLoadMore: () => void;
   isLoading: boolean;
   onResetArea?: () => void;
+  keyword?: string;
+  onResetFilters?: () => void;
 }
 
-export default function FeedSpotGrid({ spots, hasMore, onLoadMore, isLoading, onResetArea }: FeedSpotGridProps) {
+export default function FeedSpotGrid({ spots, hasMore, onLoadMore, isLoading, onResetArea, keyword, onResetFilters }: FeedSpotGridProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const lastCardRef = useCallback(
@@ -32,7 +34,7 @@ export default function FeedSpotGrid({ spots, hasMore, onLoadMore, isLoading, on
   );
 
   if (spots.length === 0 && !isLoading) {
-    return <EmptyFeed type="spot" onResetArea={onResetArea} />;
+    return <EmptyFeed type="spot" onResetArea={onResetArea} keyword={keyword} onResetFilters={onResetFilters} />;
   }
 
   return (

@@ -247,6 +247,8 @@ export type SpotLineTheme =
   | "date" | "travel" | "walk" | "hangout"
   | "food-tour" | "cafe-tour" | "culture";
 
+export type FeedSort = "popular" | "newest";
+
 // QR Partner System (Phase 8)
 export type PartnerTier = "basic" | "premium";
 

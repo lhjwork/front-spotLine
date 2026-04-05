@@ -383,12 +383,16 @@ export const fetchFeedSpots = async (
   area?: string,
   category?: string,
   page = 0,
-  size = 20
+  size = 20,
+  sort?: string,
+  keyword?: string
 ): Promise<PaginatedResponse<SpotDetailResponse>> => {
   try {
     const params: Record<string, string | number> = { page, size };
     if (area) params.area = area;
     if (category) params.category = category;
+    if (sort) params.sort = sort;
+    if (keyword) params.keyword = keyword;
     const response = await apiV2.get<PaginatedResponse<SpotDetailResponse>>("/spots", { params, timeout: 5000 });
     return response.data;
   } catch (error) {

@@ -4,9 +4,10 @@ import Layout from "@/components/layout/Layout";
 import Breadcrumb from "@/components/seo/Breadcrumb";
 import ThemeHero from "@/components/theme/ThemeHero";
 import ThemeSpotLines from "@/components/theme/ThemeSpotLines";
+import ThemeSpots from "@/components/theme/ThemeSpots";
 import ThemeNavigation from "@/components/theme/ThemeNavigation";
-import { THEMES, findThemeBySlug } from "@/constants/themes";
-import { fetchFeedSpotLines } from "@/lib/api";
+import { THEMES, findThemeBySlug, THEME_CATEGORY_MAP } from "@/constants/themes";
+import { fetchFeedSpots, fetchFeedSpotLines } from "@/lib/api";
 
 export const revalidate = 3600;
 
@@ -44,8 +45,16 @@ export default async function ThemePage({ params }: ThemePageProps) {
   if (!theme) notFound();
 
   const emptyPage = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 0, last: true, first: true };
-  const spotLinesResult = await fetchFeedSpotLines(undefined, theme.theme, 0, 10)
-    .catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedSpotLines>>);
+  const categories = THEME_CATEGORY_MAP[theme.theme] || [];
+
+  const [spotLinesResult, spotsResult] = await Promise.all([
+    fetchFeedSpotLines(undefined, theme.theme, 0, 10)
+      .catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedSpotLines>>),
+    categories.length > 0
+      ? fetchFeedSpots(undefined, categories[0], 0, 12)
+          .catch(() => emptyPage as Awaited<ReturnType<typeof fetchFeedSpots>>)
+      : Promise.resolve(emptyPage as Awaited<ReturnType<typeof fetchFeedSpots>>),
+  ]);
 
   return (
     <Layout showFooter>
@@ -53,6 +62,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
         <Breadcrumb items={[{ name: theme.name }]} />
         <ThemeHero theme={theme} />
         <ThemeSpotLines spotLines={spotLinesResult.content} />
+        <ThemeSpots spots={spotsResult.content} />
         <ThemeNavigation currentSlug={theme.slug} />
       </div>
     </Layout>

@@ -12,3 +12,13 @@ export const THEMES: ThemeInfo[] = [
 
 export const findThemeBySlug = (slug: string): ThemeInfo | undefined =>
   THEMES.find((t) => t.slug === slug);
+
+export const THEME_CATEGORY_MAP: Record<string, string[]> = {
+  date: ["cafe", "restaurant", "culture"],
+  travel: ["culture", "nature", "walk"],
+  walk: ["walk", "nature", "cafe"],
+  hangout: ["activity", "bar", "shopping"],
+  "food-tour": ["restaurant"],
+  "cafe-tour": ["cafe"],
+  culture: ["culture", "exhibition"],
+};

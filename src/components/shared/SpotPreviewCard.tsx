@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Star, Eye, Zap } from "lucide-react";
+import { MapPin, Star, Eye, Heart, Zap } from "lucide-react";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import type { SpotDetailResponse } from "@/types";
 
@@ -63,6 +63,12 @@ export default function SpotPreviewCard({ spot }: SpotPreviewCardProps) {
             <Eye className="h-3 w-3" />
             {spot.viewsCount.toLocaleString()}
           </span>
+          {spot.likesCount > 0 && (
+            <span className="flex items-center gap-0.5">
+              <Heart className="h-3 w-3" />
+              {spot.likesCount}
+            </span>
+          )}
         </div>
       </div>
     </Link>
