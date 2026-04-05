@@ -27,6 +27,9 @@ import {
   ReplicateSpotLineResponse,
   MySpotLine,
   UserProfile,
+  CreateSpotLineRequest,
+  UpdateSpotLineRequest,
+  SpotSearchParams,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -1207,4 +1210,65 @@ export async function fetchAllSpotLineSlugs(): Promise<SlugEntry[]> {
   } catch {
     return [];
   }
+}
+
+// ==================== SpotLine Builder API ====================
+
+/** SpotLine 생성 */
+export async function createSpotLine(
+  request: CreateSpotLineRequest
+): Promise<SpotLineDetailResponse> {
+  const { data } = await apiV2.post<SpotLineDetailResponse>(
+    "/spotlines",
+    request,
+    {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      timeout: 10000,
+    }
+  );
+  return data;
+}
+
+/** SpotLine 수정 */
+export async function updateSpotLine(
+  slug: string,
+  request: UpdateSpotLineRequest
+): Promise<SpotLineDetailResponse> {
+  const { data } = await apiV2.put<SpotLineDetailResponse>(
+    `/spotlines/${slug}`,
+    request,
+    {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      timeout: 10000,
+    }
+  );
+  return data;
+}
+
+/** SpotLine 삭제 */
+export async function deleteSpotLine(slug: string): Promise<void> {
+  await apiV2.delete(`/spotlines/${slug}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+}
+
+/** Spot 검색 (Builder용) */
+export async function searchSpots(
+  params: SpotSearchParams
+): Promise<PaginatedResponse<SpotDetailResponse>> {
+  const { data } = await apiV2.get<PaginatedResponse<SpotDetailResponse>>(
+    "/spots",
+    {
+      params: {
+        keyword: params.keyword || undefined,
+        area: params.area || undefined,
+        category: params.category?.toUpperCase() || undefined,
+        page: params.page ?? 0,
+        size: params.size ?? 20,
+      },
+      timeout: 5000,
+    }
+  );
+  return data;
 }

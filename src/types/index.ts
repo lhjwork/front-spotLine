@@ -653,3 +653,57 @@ export interface CreateCommentRequest {
 export interface UpdateCommentRequest {
   content: string;
 }
+
+// ============================================================
+// SpotLine Builder 타입 (User SpotLine Experience)
+// ============================================================
+
+/** Builder에서 관리하는 개별 Spot 상태 */
+export interface SpotLineBuilderSpot {
+  spot: SpotDetailResponse;
+  order: number;
+  suggestedTime: string | null;
+  stayDuration: number | null;
+  transitionNote: string | null;
+  walkingTimeToNext: number | null;
+  distanceToNext: number | null;
+}
+
+/** Spot 검색 파라미터 */
+export interface SpotSearchParams {
+  keyword?: string;
+  area?: string;
+  category?: SpotCategory;
+  page?: number;
+  size?: number;
+}
+
+/** SpotLine 생성 요청 */
+export interface CreateSpotLineRequest {
+  title: string;
+  description?: string;
+  theme: string;
+  area: string;
+  parentSpotLineId?: string;
+  creatorName?: string;
+  spots: CreateSpotLineSpotRequest[];
+}
+
+export interface CreateSpotLineSpotRequest {
+  spotId: string;
+  order: number;
+  suggestedTime?: string;
+  stayDuration?: number;
+  walkingTimeToNext?: number;
+  distanceToNext?: number;
+  transitionNote?: string;
+}
+
+/** SpotLine 수정 요청 */
+export interface UpdateSpotLineRequest {
+  title?: string;
+  description?: string;
+  theme?: string;
+  area?: string;
+  spots?: CreateSpotLineSpotRequest[];
+}

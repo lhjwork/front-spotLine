@@ -7,6 +7,60 @@
 
 ---
 
+## [2026-04-05] - User SpotLine Experience v1.0.0
+
+**Feature**: User-driven SpotLine creation, fork, and social sharing
+
+**PDCA Cycle**: #2 — Plan (1d) → Design (1d) → Do (2d) → Check v0.1 (93% match)
+
+**Match Rate**: 93%
+
+### Added
+
+- **SpotLine Builder Page** (`/create-spotline`): Spot search + DnD composition + metadata form. Desktop 2-column, mobile tab switching. Max 10 Spots per course.
+- **Builder Components** (10 total): SpotLineBuilder, SpotSearchPanel, SpotSearchCard, SelectedSpotList, SelectedSpotCard, SpotLineMetaForm, ForkBadge, ShareSheet, AuthGuard, FloatingCreateButton
+- **Builder Store** (`useSpotLineBuilderStore`): Full CRUD state + 15 actions, max 10 spots, auto-area-inference, duplicate prevention
+- **Fork Flow**: `/create-spotline?fork={slug}` with original Spots pre-loaded, attribution badge, variationsCount tracking
+- **Edit Flow**: `/spotline/{slug}/edit` with full Spot CRUD, PUT API integration
+- **Share Options**: Link copy, Kakao talk, Web Share API (graceful degradation)
+- **Entry Points**: FloatingCreateButton, Spot detail CTA, SpotLine fork/share buttons
+- **Utilities**: `lib/geo.ts` (Haversine, walking time), `lib/share.ts` (clipboard, native share, Kakao)
+- **API Functions** (4): createSpotLine, updateSpotLine, deleteSpotLine, searchSpots
+- **Types** (5): SpotLineBuilderSpot, CreateSpotLineRequest, UpdateSpotLineRequest, SpotSearchParams, and embedded state types
+
+### Changed
+
+- `SpotLineBottomBar` — [📤 공유] + [🔀 내 버전] buttons
+- `SpotBottomBar` — "이 Spot으로 코스 만들기" button
+- `layout.tsx` — FloatingCreateButton added globally
+- Spot search category auto-uppercase for backend enum
+
+### Fixed
+
+- DnD smooth on touch (PointerSensor distance:8)
+- Area inference from Spot locations (most frequent)
+- Walking time calculation (4km/h baseline)
+
+### Metrics
+
+- **Files Created**: 15 (10 components, 1 store, 2 utilities, 2 pages)
+- **Files Modified**: 5
+- **Match Rate**: 93% (77/82 items)
+- **FCP**: ~1.6s (target <2s)
+- **Search API**: ~350ms (target <500ms)
+- **TypeScript**: 0 errors, ESLint: 0 new violations
+
+### Known Limitations
+
+- FeedPage CTA card deferred (Phase 4 enhancement)
+- Toast notifications planned (currently alert)
+- Kakao SDK fallback pending (minor)
+- Area "기타" option missing (patch)
+
+**Completion Report**: [user-spotline-experience.report.md](user-spotline-experience.report.md)
+
+---
+
 ## [2026-03-15] - Location-Based Discovery v2.0.0
 
 **Feature**: Location-based Spot discovery landing page (2-block layout)
