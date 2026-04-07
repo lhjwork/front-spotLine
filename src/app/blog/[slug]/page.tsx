@@ -8,6 +8,7 @@ import BlogSpotLineOverview from "@/components/blog/BlogSpotLineOverview";
 import BlogSpotBlock from "@/components/blog/BlogSpotBlock";
 import BlogTransitionBlock from "@/components/blog/BlogTransitionBlock";
 import CommentSection from "@/components/comment/CommentSection";
+import ViewTracker from "@/components/common/ViewTracker";
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -55,7 +56,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   return (
     <main className="min-h-screen bg-white pb-20">
       <JsonLd data={generateBlogJsonLd(blog)} />
-      {/* TODO: blog view tracking — ViewTracker only supports spot/spotline */}
+      <ViewTracker type="blog" id={blog.id} />
 
       <div className="mx-auto max-w-2xl">
         {/* Hero */}

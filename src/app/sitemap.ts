@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { fetchAllSpotSlugs, fetchAllSpotLineSlugs } from "@/lib/api";
+import { fetchAllSpotSlugs, fetchAllSpotLineSlugs, fetchBlogSlugs } from "@/lib/api";
 import { CITIES } from "@/constants/cities";
 import { THEMES } from "@/constants/themes";
 
@@ -28,9 +28,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const [spotSlugs, spotLineSlugs] = await Promise.all([
+  const [spotSlugs, spotLineSlugs, blogSlugs] = await Promise.all([
     fetchAllSpotSlugs(),
     fetchAllSpotLineSlugs(),
+    fetchBlogSlugs(),
   ]);
 
   const spotPages: MetadataRoute.Sitemap = spotSlugs.map((entry) => ({
@@ -47,5 +48,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...cityPages, ...themePages, ...spotPages, ...spotLinePages];
+  const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+    url: `${siteUrl}/blog/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticPages, ...cityPages, ...themePages, ...spotPages, ...spotLinePages, ...blogPages];
 }

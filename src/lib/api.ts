@@ -1214,6 +1214,14 @@ export async function incrementSpotLineView(spotLineId: string): Promise<void> {
   }
 }
 
+export async function incrementBlogView(blogId: string): Promise<void> {
+  try {
+    await apiV2.post(`/blogs/${blogId}/view`, null, { timeout: 3000 });
+  } catch {
+    // fire-and-forget: 에러 무시
+  }
+}
+
 // ==================== Sitemap API (v2 — slug 목록) ====================
 
 export interface SlugEntry {
