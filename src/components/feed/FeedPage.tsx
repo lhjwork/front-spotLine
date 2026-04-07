@@ -14,6 +14,7 @@ import FeedFilterReset from "./FeedFilterReset";
 import FeedSpotLineSection from "./FeedSpotLineSection";
 import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
+import FollowingFeed from "./FollowingFeed";
 import ExploreNavBar from "@/components/shared/ExploreNavBar";
 
 export default function FeedPage() {
@@ -24,6 +25,7 @@ export default function FeedPage() {
   const initializedRef = useRef(false);
   const {
     area, category, sort, keyword,
+    feedTab, setFeedTab,
     spots, spotsPage, hasMoreSpots, spotLines,
     isLoading, error,
     setArea, setCategory, setSort, setKeyword, resetFilters,
@@ -147,36 +149,62 @@ export default function FeedPage() {
   return (
     <div className="pb-8">
       <ExploreNavBar activeTab="feed" />
-      <FeedAreaTabs selected={area} onSelect={setArea} />
-      <FeedCategoryChips selected={category} onSelect={setCategory} />
 
-      {/* Search + Sort row */}
-      <div className="flex items-center gap-2 px-4 py-2">
-        <FeedSearchBar value={keyword} onChange={setKeyword} />
-        <FeedSortDropdown selected={sort} onSelect={setSort} />
+      {/* Feed tab: 전체 / 팔로잉 */}
+      <div className="flex gap-2 border-b border-gray-100 px-4 py-2">
+        {(["all", "following"] as const).map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setFeedTab(tab)}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+              feedTab === tab
+                ? "bg-gray-900 text-white"
+                : "text-gray-500 hover:bg-gray-100"
+            )}
+          >
+            {tab === "all" ? "전체" : "팔로잉"}
+          </button>
+        ))}
       </div>
 
-      <FeedFilterReset
-        area={area}
-        category={category}
-        sort={sort}
-        keyword={keyword}
-        onReset={resetFilters}
-      />
+      {feedTab === "following" ? (
+        <FollowingFeed />
+      ) : (
+        <>
+          <FeedAreaTabs selected={area} onSelect={setArea} />
+          <FeedCategoryChips selected={category} onSelect={setCategory} />
 
-      <div ref={contentRef} />
-      <FeedSpotLineSection spotLines={spotLines} />
-      <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>
-        <FeedSpotGrid
-          spots={spots}
-          hasMore={hasMoreSpots}
-          onLoadMore={handleLoadMore}
-          isLoading={isLoading}
-          onResetArea={() => setArea(null)}
-          keyword={keyword}
-          onResetFilters={resetFilters}
-        />
-      </div>
+          {/* Search + Sort row */}
+          <div className="flex items-center gap-2 px-4 py-2">
+            <FeedSearchBar value={keyword} onChange={setKeyword} />
+            <FeedSortDropdown selected={sort} onSelect={setSort} />
+          </div>
+
+          <FeedFilterReset
+            area={area}
+            category={category}
+            sort={sort}
+            keyword={keyword}
+            onReset={resetFilters}
+          />
+
+          <div ref={contentRef} />
+          <FeedSpotLineSection spotLines={spotLines} />
+          <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>
+            <FeedSpotGrid
+              spots={spots}
+              hasMore={hasMoreSpots}
+              onLoadMore={handleLoadMore}
+              isLoading={isLoading}
+              onResetArea={() => setArea(null)}
+              keyword={keyword}
+              onResetFilters={resetFilters}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

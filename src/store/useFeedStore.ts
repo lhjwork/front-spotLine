@@ -12,6 +12,9 @@ interface FeedState {
   setKeyword: (keyword: string) => void;
   resetFilters: () => void;
 
+  feedTab: "all" | "following";
+  setFeedTab: (tab: "all" | "following") => void;
+
   spots: SpotDetailResponse[];
   spotsPage: number;
   hasMoreSpots: boolean;
@@ -35,6 +38,7 @@ export const useFeedStore = create<FeedState>((set) => ({
   category: null,
   sort: "popular",
   keyword: "",
+  feedTab: "all",
   spots: [],
   spotsPage: 0,
   hasMoreSpots: true,
@@ -60,6 +64,15 @@ export const useFeedStore = create<FeedState>((set) => ({
   setKeyword: (keyword) => set((state) => {
     if (state.keyword === keyword) return state;
     return { keyword, spots: [], spotsPage: 0, hasMoreSpots: true, error: null };
+  }),
+
+  setFeedTab: (feedTab) => set({
+    feedTab,
+    spots: [],
+    spotsPage: 0,
+    hasMoreSpots: true,
+    spotLines: [],
+    error: null,
   }),
 
   resetFilters: () => set({

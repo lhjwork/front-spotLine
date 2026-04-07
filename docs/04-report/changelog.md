@@ -7,6 +7,50 @@
 
 ---
 
+## [2026-04-07] - Social Features v1.0.0
+
+**Feature**: Card-level social interactions, Following feed, Spot sharing, Profile data
+
+**PDCA Cycle**: #3 — Plan (1d) → Design (1d) → Do (1d) → Check v2 (1d) → Report
+
+**Match Rate**: 96%
+
+### Added
+
+- **SocialActionButtons** component: Reusable Heart/Bookmark toggles for cards (sizes: sm/md, auth guard, optimistic updates)
+- **FollowingFeed** component: Tab showing followed user crew list (3 states: unauthenticated, 0 following, crew cards)
+- **SpotShareSheet** component: Bottom sheet for Spot sharing (Kakao talk, link copy, native Web Share API)
+- **FeedPage feed tabs**: "all" vs "following" pill-style tabs above FeedAreaTabs
+- **ProfileTabs "my-spots" tab**: User-created Spots via fetchMySpots API
+- **Enhanced ProfileTabs**: Integrated fetchMySpots, fetchUserLikedSpots, fetchUserSavedSpotLines data
+- **useFeedStore.feedTab**: State management for current feed tab
+- **useSocialStore.batchInitSocialStatus**: Initialize social counts on card render
+
+### Changed
+
+- `SpotPreviewCard` — Integrated SocialActionButtons (replaced standalone Heart)
+- `SpotLinePreviewCard` — Integrated SocialActionButtons
+- `SpotBottomBar` — SpotShareSheet for Spot-level sharing
+- `FeedPage` — Conditional FollowingFeed vs traditional feed rendering
+- `api.ts` — Added fetchMySpots(page, size) function
+
+### Fixed
+
+- Social state sync between cards and detail pages via useSocialStore
+- Event propagation in nested card buttons (stopPropagation + preventDefault)
+
+### Metrics
+
+- **Files Created**: 3 (SocialActionButtons, FollowingFeed, SpotShareSheet)
+- **Files Modified**: 6 (cards, page, stores, API)
+- **Match Rate**: 96% (21.5/22 items)
+- **FRs**: 11/11 (100%)
+- **TypeScript**: 0 errors, ESLint: 0 violations
+
+**Completion Report**: [social-features.report.md](social-features.report.md)
+
+---
+
 ## [2026-04-05] - User SpotLine Experience v1.0.0
 
 **Feature**: User-driven SpotLine creation, fork, and social sharing

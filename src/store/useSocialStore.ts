@@ -36,6 +36,10 @@ interface SocialState {
   toggleSave: (type: "spot" | "spotline", id: string) => Promise<void>;
   getItem: (type: "spot" | "spotline", id: string) => SocialItem | undefined;
 
+  batchInitSocialStatus: (
+    items: Array<{ type: "spot" | "spotline"; id: string; likesCount: number; savesCount: number }>
+  ) => void;
+
   initFollowStatus: (userId: string, isFollowing: boolean, followersCount: number) => void;
   toggleFollow: (userId: string) => Promise<void>;
   getFollowStatus: (userId: string) => FollowItem | undefined;
@@ -126,6 +130,24 @@ export const useSocialStore = create<SocialState>((set, get) => ({
 
   getItem: (type, id) => {
     return get().items[makeKey(type, id)];
+  },
+
+  batchInitSocialStatus: (items) => {
+    set((state) => {
+      const newItems = { ...state.items };
+      for (const item of items) {
+        const key = makeKey(item.type, item.id);
+        if (!newItems[key]) {
+          newItems[key] = {
+            liked: false,
+            saved: false,
+            likesCount: item.likesCount,
+            savesCount: item.savesCount,
+          };
+        }
+      }
+      return { items: newItems };
+    });
   },
 
   initFollowStatus: (userId, isFollowing, followersCount) => {

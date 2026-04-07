@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
+import SpotShareSheet from "@/components/spot/SpotShareSheet";
 import ExternalMapButtons from "@/components/map/ExternalMapButtons";
 import type { SpotDetailResponse } from "@/types";
 
@@ -23,6 +24,7 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
   const [showMap, setShowMap] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
+  const [showShareSheet, setShowShareSheet] = useState(false);
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
@@ -46,23 +48,8 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
     toggleSave("spot", spot.id);
   };
 
-  const handleShare = async () => {
-    const shareData = {
-      title: spot.title,
-      text: spot.crewNote || spot.description || spot.title,
-      url: window.location.href,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        // 공유 취소
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      alert("링크가 복사되었습니다!");
-    }
+  const handleShare = () => {
+    setShowShareSheet(true);
   };
 
   return (
@@ -151,6 +138,12 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
         isOpen={showLogin}
         onClose={() => setShowLogin(false)}
         message={loginMessage}
+      />
+
+      <SpotShareSheet
+        isOpen={showShareSheet}
+        onClose={() => setShowShareSheet(false)}
+        spot={spot}
       />
     </>
   );

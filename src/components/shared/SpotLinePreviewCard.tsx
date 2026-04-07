@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Route, Clock, MapPin, Heart } from "lucide-react";
+import { Route, Clock, MapPin } from "lucide-react";
 import { formatWalkingTime } from "@/lib/utils";
+import SocialActionButtons from "@/components/shared/SocialActionButtons";
 import type { SpotLinePreview } from "@/types";
 
 const themeLabels: Record<string, string> = {
@@ -46,19 +47,24 @@ export default function SpotLinePreviewCard({ spotLine }: SpotLinePreviewCardPro
           <h3 className="truncate text-sm font-bold text-gray-900">
             {spotLine.title}
           </h3>
-          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-0.5">
-              <MapPin className="h-3 w-3" />
-              {spotLine.spotCount}곳
-            </span>
-            <span className="flex items-center gap-0.5">
-              <Clock className="h-3 w-3" />
-              {formatWalkingTime(spotLine.totalDuration)}
-            </span>
-            <span className="flex items-center gap-0.5">
-              <Heart className="h-3 w-3" />
-              {spotLine.likesCount}
-            </span>
+          <div className="mt-1 flex items-center justify-between">
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span className="flex items-center gap-0.5">
+                <MapPin className="h-3 w-3" />
+                {spotLine.spotCount}곳
+              </span>
+              <span className="flex items-center gap-0.5">
+                <Clock className="h-3 w-3" />
+                {formatWalkingTime(spotLine.totalDuration)}
+              </span>
+            </div>
+            <SocialActionButtons
+              type="spotline"
+              id={spotLine.id}
+              initialLikesCount={spotLine.likesCount}
+              initialSavesCount={0}
+              size="sm"
+            />
           </div>
         </div>
       </div>

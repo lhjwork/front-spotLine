@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Heart, Bookmark, MapPin } from "lucide-react";
+import { Heart, Bookmark, MapPin, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines } from "@/lib/api";
+import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots } from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
 import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
 import type { SpotDetailResponse, SpotLinePreview, MySpotLine } from "@/types";
@@ -13,12 +13,13 @@ interface ProfileTabsProps {
   isMe?: boolean;
 }
 
-type TabKey = "likes" | "saves" | "spotlines";
+type TabKey = "likes" | "saves" | "spotlines" | "my-spots";
 
-const TABS: { key: TabKey; label: string; icon: typeof Heart }[] = [
+const TABS: { key: TabKey; label: string; icon: typeof Heart; meOnly?: boolean }[] = [
   { key: "likes", label: "좋아요", icon: Heart },
   { key: "saves", label: "저장", icon: Bookmark },
-  { key: "spotlines", label: "SpotLine", icon: MapPin },
+  { key: "spotlines", label: "SpotLine", icon: MapPin, meOnly: true },
+  { key: "my-spots", label: "내 Spot", icon: Map, meOnly: true },
 ];
 
 export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) {
@@ -26,6 +27,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
   const [likedSpots, setLikedSpots] = useState<SpotDetailResponse[] | null>(null);
   const [savedSpotLines, setSavedSpotLines] = useState<SpotLinePreview[] | null>(null);
   const [mySpotLines, setMySpotLines] = useState<MySpotLine[] | null>(null);
+  const [mySpots, setMySpots] = useState<SpotDetailResponse[] | null>(null);
   const [loading, setLoading] = useState(false);
 
   const loadTabData = useCallback(async (tab: TabKey) => {
@@ -40,13 +42,16 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
       } else if (tab === "spotlines" && isMe && !mySpotLines) {
         const res = await fetchMySpotLines();
         setMySpotLines(res.items);
+      } else if (tab === "my-spots" && isMe && !mySpots) {
+        const res = await fetchMySpots();
+        setMySpots(res.content);
       }
     } catch {
       // 데이터 로딩 실패 시 빈 상태 유지
     } finally {
       setLoading(false);
     }
-  }, [userId, isMe, likedSpots, savedSpotLines, mySpotLines]);
+  }, [userId, isMe, likedSpots, savedSpotLines, mySpotLines, mySpots]);
 
   useEffect(() => {
     loadTabData(activeTab);
@@ -56,7 +61,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
     setActiveTab(tab);
   };
 
-  const filteredTabs = isMe ? TABS : TABS.filter((t) => t.key !== "spotlines");
+  const filteredTabs = isMe ? TABS : TABS.filter((t) => !t.meOnly);
 
   return (
     <div>
@@ -113,10 +118,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
           mySpotLines && mySpotLines.length > 0 ? (
             <div className="space-y-3">
               {mySpotLines.map((spotLine) => (
-                <div
-                  key={spotLine.id}
-                  className="rounded-xl border border-gray-200 p-4"
-                >
+                <div key={spotLine.id} className="rounded-xl border border-gray-200 p-4">
                   <h3 className="font-medium">{spotLine.title}</h3>
                   <p className="mt-1 text-sm text-gray-500">
                     {spotLine.area} · {spotLine.spotsCount}개 Spot
@@ -136,6 +138,18 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
             </div>
           ) : (
             <EmptyState message="아직 복제한 SpotLine이 없습니다" />
+          )
+        )}
+
+        {!loading && activeTab === "my-spots" && isMe && (
+          mySpots && mySpots.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              {mySpots.map((spot) => (
+                <SpotPreviewCard key={spot.id} spot={spot} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="아직 등록한 Spot이 없습니다" />
           )
         )}
       </div>

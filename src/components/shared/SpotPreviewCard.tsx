@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { MapPin, Star, Eye, Heart, Zap } from "lucide-react";
+import { MapPin, Star, Eye, Zap } from "lucide-react";
 import OptimizedImage from "@/components/common/OptimizedImage";
+import SocialActionButtons from "@/components/shared/SocialActionButtons";
 import type { SpotDetailResponse } from "@/types";
 
 const categoryLabels: Record<string, string> = {
@@ -52,23 +53,26 @@ export default function SpotPreviewCard({ spot }: SpotPreviewCardProps) {
         {spot.crewNote && (
           <p className="mt-0.5 truncate text-xs text-gray-500">{spot.crewNote}</p>
         )}
-        <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-400">
-          {spot.placeInfo?.rating && (
-            <span className="flex items-center gap-0.5 text-yellow-600">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              {spot.placeInfo.rating.toFixed(1)}
-            </span>
-          )}
-          <span className="flex items-center gap-0.5">
-            <Eye className="h-3 w-3" />
-            {spot.viewsCount.toLocaleString()}
-          </span>
-          {spot.likesCount > 0 && (
+        <div className="mt-1.5 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            {spot.placeInfo?.rating && (
+              <span className="flex items-center gap-0.5 text-yellow-600">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                {spot.placeInfo.rating.toFixed(1)}
+              </span>
+            )}
             <span className="flex items-center gap-0.5">
-              <Heart className="h-3 w-3" />
-              {spot.likesCount}
+              <Eye className="h-3 w-3" />
+              {spot.viewsCount.toLocaleString()}
             </span>
-          )}
+          </div>
+          <SocialActionButtons
+            type="spot"
+            id={spot.id}
+            initialLikesCount={spot.likesCount}
+            initialSavesCount={spot.savesCount}
+            size="sm"
+          />
         </div>
       </div>
     </Link>
