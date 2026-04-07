@@ -415,12 +415,16 @@ export const fetchFeedSpotLines = async (
   area?: string,
   theme?: string,
   page = 0,
-  size = 10
+  size = 10,
+  keyword?: string,
+  sort?: string
 ): Promise<PaginatedResponse<SpotLinePreview>> => {
   try {
     const params: Record<string, string | number> = { page, size };
     if (area) params.area = area;
     if (theme) params.theme = theme.replace(/-/g, "_");
+    if (keyword) params.keyword = keyword;
+    if (sort) params.sort = sort;
     const response = await apiV2.get<PaginatedResponse<SpotLinePreview>>("/spotlines/popular", { params, timeout: 5000 });
     return response.data;
   } catch (error) {

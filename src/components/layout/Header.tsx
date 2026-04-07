@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { QrCode, ArrowLeft } from 'lucide-react';
+import { QrCode, ArrowLeft, Search } from 'lucide-react';
 
 interface HeaderProps {
   showBackButton?: boolean;
@@ -42,8 +42,16 @@ export default function Header({ showBackButton = false, title }: HeaderProps) {
             </div>
           )}
 
-          {/* 오른쪽: 여백 또는 추가 액션 */}
-          <div className="w-16"></div>
+          {/* 오른쪽: 검색 아이콘 */}
+          <div className="w-16 flex justify-end">
+            <Link
+              href="/search"
+              className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label="검색"
+            >
+              <Search className="h-5 w-5" />
+            </Link>
+          </div>
         </div>
       </div>
     </header>

@@ -19,3 +19,4 @@
 | spotline-replication-ux | 100% | 2026-04-07 | plan, design, analysis, report |
 | blog-sort-filter | 100% | 2026-04-07 | plan, design, analysis, report |
 | admin-blog-management | 100% | 2026-04-07 | plan, design, analysis, report |
+| global-search | 99% | 2026-04-07 | plan, design, analysis, report |
