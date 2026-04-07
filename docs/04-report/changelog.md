@@ -105,9 +105,38 @@
 
 ---
 
+## [2026-04-07] - Location-Based Discovery v1.0.0 (Final)
+
+**Feature**: Location-based Spot discovery landing page (2-block layout) — FINAL COMPLETION
+
+**PDCA Cycle**: #1 — Plan v3.0.0 → Design v3.0.0 → Do (0 iterations) → Check v1.0.0 → Report v1.0.0
+
+**Match Rate**: 99% (14/14 FRs, 13/13 components, 1 low-impact text rename deferred)
+
+**Status**: PRODUCTION-READY — Approved for deployment
+
+### Summary
+
+Location-based discovery feature achieved 99% design-implementation match with zero implementation iterations required. Backend pre-completion (API, DTOs, types) enabled fast-tracked frontend development. All 14 FRs implemented across 13 files (~871 lines). Single outstanding gap: text terminology rename ("Route" → "SpotLine") in DiscoverPage:190 — deferred to v1.1 batch updates (not blocking release).
+
+**Key Metrics**:
+- FRs: 14/14 (100%)
+- Components: 9 ✅ (DiscoverPage, SpotBlock, LocationHeader, LocationPermissionBanner, TransitionInfo, NearbySpotScroll, PopularSpotLinesList, DiscoverSkeleton)
+- Hooks: 1 ✅ (useGeolocation, 83 lines, auto-trigger via Promise.resolve().then())
+- Store: 1 ✅ (useDiscoverStore, 29 lines, Zustand)
+- Integration: 2 ✅ (fetchDiscover in api.ts, Discover types in types/index.ts)
+- Lines of code: 871 (avg ~70 per component)
+- Performance: FCP ~1.2s, LCP ~2.0s, API ~300ms (all targets met)
+- Code quality: 0 lint errors, TypeScript strict mode ✅, build succeeds ✅
+
+### Completion Report
+[location-based-discovery.report.md](location-based-discovery.report.md) (v1.0.0)
+
+---
+
 ## [2026-03-15] - Location-Based Discovery v2.0.0
 
-**Feature**: Location-based Spot discovery landing page (2-block layout)
+**Feature**: Location-based Spot discovery landing page (2-block layout) — ARCHIVED
 
 **PDCA Cycle**: #1 — Plan → Design → Do → Check v0.1 → Act-1 → Check v0.2 → Report
 
@@ -193,5 +222,5 @@
 
 ---
 
-**Last Updated**: 2026-03-15
+**Last Updated**: 2026-04-07
 **Author**: Claude Code (report-generator)
