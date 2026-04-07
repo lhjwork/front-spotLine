@@ -629,7 +629,7 @@ export interface SpotLineSummary {
 // Comment 타입 (Comment System)
 // ============================================================
 
-export type CommentTargetType = "SPOT" | "SPOTLINE";
+export type CommentTargetType = "SPOT" | "SPOTLINE" | "BLOG";
 
 export interface CommentResponse {
   id: string;
@@ -708,4 +708,103 @@ export interface UpdateSpotLineRequest {
   theme?: string;
   area?: string;
   spots?: CreateSpotLineSpotRequest[];
+}
+
+// ============================================================
+// Blog 타입 (SpotLine Blog Builder)
+// ============================================================
+
+export type BlogStatus = "DRAFT" | "PUBLISHED";
+export type BlogBlockType = "INTRO" | "SPOT" | "TRANSITION" | "OUTRO";
+
+export interface BlogResponse {
+  id: string;
+  slug: string;
+  spotLineId: string;
+  userId: string;
+  userName: string;
+  userAvatarUrl: string | null;
+  title: string;
+  summary: string | null;
+  coverImageUrl: string | null;
+  status: BlogStatus;
+  viewsCount: number;
+  likesCount: number;
+  savesCount: number;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogDetailResponse extends BlogResponse {
+  spotLine: SpotLineDetailResponse;
+  blocks: BlogBlockResponse[];
+}
+
+export interface BlogBlockResponse {
+  id: string;
+  spotId: string | null;
+  blockType: BlogBlockType;
+  blockOrder: number;
+  content: string | null;
+  mediaItems: BlogBlockMediaResponse[];
+  spotTitle: string | null;
+  spotCategory: string | null;
+  spotArea: string | null;
+  spotAddress: string | null;
+  spotMedia: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogBlockMediaResponse {
+  id: string;
+  mediaUrl: string;
+  mediaOrder: number;
+  caption: string | null;
+}
+
+export interface BlogListItem {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  coverImageUrl: string | null;
+  status: BlogStatus;
+  userName: string;
+  userAvatarUrl: string | null;
+  spotLineTitle: string;
+  spotLineArea: string;
+  spotCount: number;
+  viewsCount: number;
+  likesCount: number;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export interface CreateBlogRequest {
+  spotLineId: string;
+  title: string;
+}
+
+export interface UpdateBlogRequest {
+  title?: string;
+  summary?: string;
+  coverImageUrl?: string;
+}
+
+export interface SaveBlogBlocksRequest {
+  blocks: {
+    id?: string;
+    spotId?: string;
+    blockType: BlogBlockType;
+    blockOrder: number;
+    content: string | null;
+    mediaItems: {
+      id?: string;
+      mediaUrl: string;
+      mediaOrder: number;
+      caption?: string;
+    }[];
+  }[];
 }

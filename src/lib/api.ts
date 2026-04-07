@@ -30,6 +30,15 @@ import {
   CreateSpotLineRequest,
   UpdateSpotLineRequest,
   SpotSearchParams,
+  BlogDetailResponse,
+  BlogResponse,
+  BlogListItem,
+  BlogBlockResponse,
+} from "@/types";
+import type {
+  CreateBlogRequest,
+  UpdateBlogRequest,
+  SaveBlogBlocksRequest,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -955,6 +964,22 @@ export const fetchMySpotLines = async (
   }
 };
 
+// 내 Spot 목록 조회
+export const fetchMySpots = async (
+  page = 0,
+  size = 20
+): Promise<PaginatedResponse<SpotDetailResponse>> => {
+  try {
+    const response = await apiV2.get<PaginatedResponse<SpotDetailResponse>>(
+      "/users/me/spots",
+      { params: { page, size }, headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+    );
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "내 Spot을 불러올 수 없습니다");
+  }
+};
+
 // 내 SpotLine 상태 변경 (완주/취소)
 export const updateMySpotLineStatus = async (
   mySpotLineId: string,
@@ -1273,6 +1298,145 @@ export async function searchSpots(
       },
       timeout: 5000,
     }
+  );
+  return data;
+}
+
+// ============================================================
+// Blog API (SpotLine Blog Builder)
+// ============================================================
+
+/** 블로그 생성 (초안 + 블록 자동 생성) */
+export async function createBlog(
+  request: CreateBlogRequest
+): Promise<BlogDetailResponse> {
+  const { data } = await apiV2.post<BlogDetailResponse>("/blogs", request, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return data;
+}
+
+/** 블로그 상세 조회 (slug) */
+export async function getBlogBySlug(
+  slug: string
+): Promise<BlogDetailResponse | null> {
+  try {
+    const token = typeof window !== "undefined" ? getAuthToken() : null;
+    const { data } = await apiV2.get<BlogDetailResponse>(`/blogs/${slug}`, {
+      ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
+      timeout: 5000,
+    });
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+/** 블로그 메타 수정 (제목, 소개, 커버) */
+export async function updateBlog(
+  slug: string,
+  request: UpdateBlogRequest
+): Promise<BlogResponse> {
+  const { data } = await apiV2.put<BlogResponse>(`/blogs/${slug}`, request, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return data;
+}
+
+/** 블로그 삭제 (soft delete) */
+export async function deleteBlog(slug: string): Promise<void> {
+  await apiV2.delete(`/blogs/${slug}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+}
+
+/** 블로그 발행 */
+export async function publishBlog(slug: string): Promise<BlogResponse> {
+  const { data } = await apiV2.patch<BlogResponse>(
+    `/blogs/${slug}/publish`,
+    null,
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return data;
+}
+
+/** 블로그 비공개 전환 */
+export async function unpublishBlog(slug: string): Promise<BlogResponse> {
+  const { data } = await apiV2.patch<BlogResponse>(
+    `/blogs/${slug}/unpublish`,
+    null,
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return data;
+}
+
+/** 공개 블로그 목록 */
+export async function fetchBlogs(
+  page = 0,
+  size = 20,
+  area?: string
+): Promise<PaginatedResponse<BlogListItem>> {
+  const { data } = await apiV2.get<PaginatedResponse<BlogListItem>>("/blogs", {
+    params: { page, size, area: area || undefined },
+    timeout: 5000,
+  });
+  return data;
+}
+
+/** 내 블로그 목록 */
+export async function fetchMyBlogs(
+  status?: string,
+  page = 0,
+  size = 20
+): Promise<PaginatedResponse<BlogListItem>> {
+  const { data } = await apiV2.get<PaginatedResponse<BlogListItem>>(
+    "/blogs/me",
+    {
+      params: { status: status || undefined, page, size },
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      timeout: 5000,
+    }
+  );
+  return data;
+}
+
+/** 블로그 slug 목록 (SSR/sitemap) */
+export async function fetchBlogSlugs(): Promise<string[]> {
+  const { data } = await apiV2.get<string[]>("/blogs/slugs", {
+    timeout: 5000,
+  });
+  return data;
+}
+
+/** S3 Presigned URL 생성 (이미지 업로드용) */
+export async function getPresignedUrl(
+  fileName: string,
+  contentType: string
+): Promise<{ uploadUrl: string; fileUrl: string }> {
+  const { data } = await apiV2.post<{
+    uploadUrl: string;
+    s3Key: string;
+    publicUrl: string;
+    mediaType: string;
+  }>("/media/presigned-url", { fileName, contentType }, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return { uploadUrl: data.uploadUrl, fileUrl: data.publicUrl };
+}
+
+/** 블록 일괄 저장 (자동 저장) */
+export async function saveBlogBlocks(
+  blogId: string,
+  request: SaveBlogBlocksRequest
+): Promise<BlogBlockResponse[]> {
+  const { data } = await apiV2.put<BlogBlockResponse[]>(
+    `/blogs/${blogId}/blocks`,
+    request,
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 10000 }
   );
   return data;
 }

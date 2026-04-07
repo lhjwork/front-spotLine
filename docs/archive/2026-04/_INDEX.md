@@ -7,3 +7,4 @@
 | supabase-auth-migration | 97% | 2026-04-03 | plan, design, analysis, report |
 | user-spotline-experience | 93% | 2026-04-05 | plan, design, analysis, report |
 | feed-hub-refinement | 98% | 2026-04-05 | plan, design, analysis, report |
+| spotline-blog-builder | 92% | 2026-04-07 | plan, design, analysis, report |
