@@ -6,7 +6,6 @@ import { X, CalendarPlus, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMySpotLinesStore } from "@/store/useMySpotLinesStore";
 import { replicateSpotLine } from "@/lib/api";
-import type { MySpotLine } from "@/types";
 
 interface ReplicateSpotLineSheetProps {
   isOpen: boolean;
@@ -19,8 +18,6 @@ interface ReplicateSpotLineSheetProps {
     spotsCount: number;
   };
 }
-
-const LOCAL_STORAGE_KEY = "spotline_my_spotlines";
 
 const getQuickDates = () => {
   const today = new Date();
@@ -56,7 +53,7 @@ export default function ReplicateSpotLineSheet({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showDateInput, setShowDateInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const quickDates = getQuickDates();
 
@@ -103,27 +100,10 @@ export default function ReplicateSpotLineSheet({
     try {
       const response = await replicateSpotLine(spotLine.id, date);
       addSpotLine(response.mySpotLine);
-      setToast("내 일정에 추가되었습니다");
+      setToast({ message: "내 일정에 추가되었습니다", type: "success" });
       onClose();
     } catch {
-      // localStorage fallback
-      const localSpotLine: MySpotLine = {
-        id: `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        spotLineId: spotLine.id,
-        spotLineSlug: spotLine.slug,
-        title: spotLine.title,
-        area: spotLine.area,
-        spotsCount: spotLine.spotsCount,
-        scheduledDate: date,
-        status: "scheduled",
-        completedAt: null,
-        parentSpotLineId: spotLine.id,
-        createdAt: new Date().toISOString(),
-      };
-      addSpotLine(localSpotLine);
-      console.warn("복제 API 실패 — localStorage에 저장");
-      setToast("내 일정에 추가되었습니다");
-      onClose();
+      setToast({ message: "일정 추가에 실패했습니다. 다시 시도해주세요", type: "error" });
     } finally {
       setIsSubmitting(false);
     }
@@ -250,8 +230,11 @@ export default function ReplicateSpotLineSheet({
 
       {/* Toast */}
       {toast && (
-        <div className="fixed left-1/2 top-8 z-[60] -translate-x-1/2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-lg">
-          {toast}
+        <div className={cn(
+          "fixed left-1/2 top-8 z-[60] -translate-x-1/2 rounded-xl px-5 py-3 text-sm font-medium text-white shadow-lg",
+          toast.type === "error" ? "bg-red-600" : "bg-gray-900"
+        )}>
+          {toast.message}
         </div>
       )}
     </>,

@@ -7,6 +7,55 @@
 
 ---
 
+## [2026-04-07] - SpotLine Replication Error Handling v1.0.0
+
+**Feature**: Removed localStorage fallback ghost data, implemented proper error handling with retry UX
+
+**PDCA Cycle**: #7 — Plan (0.5d) → Design (0.5d) → Do (same day) → Check v1.0.0 → Report
+
+**Match Rate**: 100%
+
+**Status**: PRODUCTION-READY — Eliminates data integrity risk
+
+### Added
+
+- **Error Toast State**: Toast now distinguishes success (bg-gray-900) vs error (bg-red-600) via type field
+- **Retry UX**: Sheet stays open on error, allowing immediate retry without re-entering date
+- **Error Message**: "일정 추가에 실패했습니다. 다시 시도해주세요" (proper user feedback)
+
+### Fixed
+
+- **Critical Data Issue**: Removed localStorage fallback that masked API failures
+- **Ghost Data**: API failures no longer create local replicated SpotLine records
+- **Data Integrity**: Server is now Single Source of Truth for all replicated SpotLines
+- **Multi-device Sync**: Replicated items only appear after server confirmation
+
+### Removed
+
+- `LOCAL_STORAGE_KEY` constant (unused)
+- `import type { MySpotLine }` (no longer needed in component)
+- 12-line localStorage fallback in catch block (replaced with 1-line error toast)
+- `addSpotLine()` call on error (prevents cache pollution)
+- `onClose()` call on error (enables sheet-open retry UX)
+
+### Changed
+
+- `ReplicateSpotLineSheet.tsx` — Toast state structure: string|null → { message, type: "success"|"error" }|null
+- Error handling: Silent failure + cache pollution → User-visible error + retry opportunity
+
+### Metrics
+
+- **Files Modified**: 1 (Frontend only)
+- **Lines Changed**: ~15 (catch block: 12 lines → 1 line + type updates)
+- **FRs**: 4/4 (100%)
+- **Match Rate**: 100% (10/10 checklist items)
+- **Iterations**: 0 (first-pass 100%)
+- **Build**: pnpm type-check + pnpm build both PASS
+
+**Completion Report**: [spotline-replication-ux.report.md](spotline-replication-ux.report.md)
+
+---
+
 ## [2026-04-07] - Feed SpotLine Cover Image v1.0.0
 
 **Feature**: SpotLinePreviewCard visual enhancement — cover image display with icon fallback
