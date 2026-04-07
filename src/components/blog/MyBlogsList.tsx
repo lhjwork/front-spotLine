@@ -4,25 +4,28 @@ import { useState, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchMyBlogs } from "@/lib/api";
-import type { BlogListItem } from "@/types";
+import FeedSortDropdown from "@/components/feed/FeedSortDropdown";
+import type { BlogListItem, FeedSort } from "@/types";
 import BlogCard from "./BlogCard";
 
 type Tab = "all" | "DRAFT" | "PUBLISHED";
 
 export default function MyBlogsList() {
   const [activeTab, setActiveTab] = useState<Tab>("all");
+  const [sort, setSort] = useState<FeedSort>("newest");
   const [blogs, setBlogs] = useState<BlogListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  const loadBlogs = useCallback(async (pageNum: number, status?: string) => {
+  const loadBlogs = useCallback(async (pageNum: number, status?: string, sortBy?: string) => {
     setIsLoading(true);
     try {
       const result = await fetchMyBlogs(
         status === "all" ? undefined : status,
         pageNum,
-        20
+        20,
+        sortBy
       );
       if (pageNum === 0) {
         setBlogs(result.content);
@@ -39,8 +42,12 @@ export default function MyBlogsList() {
 
   useEffect(() => {
     setPage(0);
-    loadBlogs(0, activeTab);
-  }, [activeTab, loadBlogs]);
+    loadBlogs(0, activeTab, sort);
+  }, [activeTab, sort, loadBlogs]);
+
+  const handleSortChange = useCallback((newSort: FeedSort) => {
+    setSort(newSort);
+  }, []);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "all", label: "전체" },
@@ -50,22 +57,25 @@ export default function MyBlogsList() {
 
   return (
     <div>
-      {/* Tabs */}
-      <div className="flex gap-2 border-b px-4 py-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-              activeTab === tab.key
-                ? "bg-blue-600 text-white"
-                : "text-gray-500 hover:bg-gray-100"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* Tabs + Sort */}
+      <div className="flex items-center justify-between border-b px-4 py-2">
+        <div className="flex gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                activeTab === tab.key
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <FeedSortDropdown selected={sort} onSelect={handleSortChange} />
       </div>
 
       {/* Blog grid */}
@@ -92,7 +102,7 @@ export default function MyBlogsList() {
             onClick={() => {
               const next = page + 1;
               setPage(next);
-              loadBlogs(next, activeTab);
+              loadBlogs(next, activeTab, sort);
             }}
             disabled={isLoading}
             className="rounded-lg border border-gray-200 px-6 py-2 text-sm text-gray-600 hover:bg-gray-50"

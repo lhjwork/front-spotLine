@@ -1435,10 +1435,11 @@ export async function unpublishBlog(slug: string): Promise<BlogResponse> {
 export async function fetchBlogs(
   page = 0,
   size = 20,
-  area?: string
+  area?: string,
+  sort?: string
 ): Promise<PaginatedResponse<BlogListItem>> {
   const { data } = await apiV2.get<PaginatedResponse<BlogListItem>>("/blogs", {
-    params: { page, size, area: area || undefined },
+    params: { page, size, area: area || undefined, sort: sort || undefined },
     timeout: 5000,
   });
   return data;
@@ -1448,12 +1449,13 @@ export async function fetchBlogs(
 export async function fetchMyBlogs(
   status?: string,
   page = 0,
-  size = 20
+  size = 20,
+  sort?: string
 ): Promise<PaginatedResponse<BlogListItem>> {
   const { data } = await apiV2.get<PaginatedResponse<BlogListItem>>(
     "/blogs/me",
     {
-      params: { status: status || undefined, page, size },
+      params: { status: status || undefined, page, size, sort: sort || undefined },
       headers: { Authorization: `Bearer ${getAuthToken()}` },
       timeout: 5000,
     }

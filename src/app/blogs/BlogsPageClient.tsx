@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { RotateCcw } from "lucide-react";
 import { fetchBlogs } from "@/lib/api";
 import BlogCard from "@/components/blog/BlogCard";
 import FeedAreaTabs from "@/components/feed/FeedAreaTabs";
-import type { BlogListItem } from "@/types";
+import FeedSortDropdown from "@/components/feed/FeedSortDropdown";
+import type { BlogListItem, FeedSort } from "@/types";
 
 interface BlogsPageClientProps {
   initialBlogs: BlogListItem[];
@@ -12,8 +15,14 @@ interface BlogsPageClientProps {
 }
 
 export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsPageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [blogs, setBlogs] = useState(initialBlogs);
-  const [area, setArea] = useState<string | null>(null);
+  const [area, setArea] = useState<string | null>(searchParams.get("area"));
+  const [sort, setSort] = useState<FeedSort>(
+    (searchParams.get("sort") as FeedSort) || "popular"
+  );
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -26,8 +35,33 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
     setHasMore(true);
   }, []);
 
+  const handleSortChange = useCallback((newSort: FeedSort) => {
+    setSort(newSort);
+    setPage(0);
+    setBlogs([]);
+    setHasMore(true);
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setArea(null);
+    setSort("popular");
+    setPage(0);
+    setBlogs([]);
+    setHasMore(true);
+  }, []);
+
+  // URL 동기화
   useEffect(() => {
-    if (area === null && page === 0 && initialBlogs.length > 0) {
+    const params = new URLSearchParams();
+    if (area) params.set("area", area);
+    if (sort !== "popular") params.set("sort", sort);
+    const query = params.toString();
+    router.replace(`/blogs${query ? `?${query}` : ""}`, { scroll: false });
+  }, [area, sort, router]);
+
+  // 데이터 로드
+  useEffect(() => {
+    if (area === null && sort === "popular" && page === 0 && initialBlogs.length > 0) {
       setBlogs(initialBlogs);
       setHasMore(initialHasMore);
       return;
@@ -37,7 +71,7 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
     const load = async () => {
       setLoading(true);
       try {
-        const result = await fetchBlogs(page, 20, area || undefined);
+        const result = await fetchBlogs(page, 20, area || undefined, sort);
         if (!cancelled) {
           setBlogs((prev) => page === 0 ? result.content : [...prev, ...result.content]);
           setHasMore(!result.last);
@@ -50,8 +84,9 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
     };
     load();
     return () => { cancelled = true; };
-  }, [area, page, initialBlogs, initialHasMore]);
+  }, [area, sort, page, initialBlogs, initialHasMore]);
 
+  // Infinite scroll
   useEffect(() => {
     if (!observerRef.current || !hasMore) return;
     const observer = new IntersectionObserver(
@@ -70,11 +105,29 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
     <div className="min-h-screen bg-white pb-20">
       <div className="mx-auto max-w-2xl">
         <div className="px-4 pt-6 pb-2">
-          <h1 className="text-xl font-bold text-gray-900">블로그</h1>
-          <p className="mt-1 text-sm text-gray-500">경험이 담긴 이야기를 만나보세요</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">블로그</h1>
+              <p className="mt-1 text-sm text-gray-500">경험이 담긴 이야기를 만나보세요</p>
+            </div>
+            <FeedSortDropdown selected={sort} onSelect={handleSortChange} />
+          </div>
         </div>
 
         <FeedAreaTabs selected={area} onSelect={handleAreaChange} />
+
+        {(area || sort !== "popular") && (
+          <div className="px-4 py-1">
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
+            >
+              <RotateCcw className="h-3 w-3" />
+              필터 초기화
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3 px-4 py-4">
           {blogs.map((blog) => (
