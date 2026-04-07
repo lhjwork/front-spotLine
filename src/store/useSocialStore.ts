@@ -26,18 +26,18 @@ interface SocialState {
   followStatus: Record<string, FollowItem>;
 
   initSocialStatus: (
-    type: "spot" | "spotline",
+    type: "spot" | "spotline" | "blog",
     id: string,
     status: SocialStatus,
     likesCount: number,
     savesCount: number
   ) => void;
-  toggleLike: (type: "spot" | "spotline", id: string) => Promise<void>;
-  toggleSave: (type: "spot" | "spotline", id: string) => Promise<void>;
-  getItem: (type: "spot" | "spotline", id: string) => SocialItem | undefined;
+  toggleLike: (type: "spot" | "spotline" | "blog", id: string) => Promise<void>;
+  toggleSave: (type: "spot" | "spotline" | "blog", id: string) => Promise<void>;
+  getItem: (type: "spot" | "spotline" | "blog", id: string) => SocialItem | undefined;
 
   batchInitSocialStatus: (
-    items: Array<{ type: "spot" | "spotline"; id: string; likesCount: number; savesCount: number }>
+    items: Array<{ type: "spot" | "spotline" | "blog"; id: string; likesCount: number; savesCount: number }>
   ) => void;
 
   initFollowStatus: (userId: string, isFollowing: boolean, followersCount: number) => void;
@@ -45,7 +45,7 @@ interface SocialState {
   getFollowStatus: (userId: string) => FollowItem | undefined;
 }
 
-const makeKey = (type: "spot" | "spotline", id: string) => `${type}:${id}`;
+const makeKey = (type: "spot" | "spotline" | "blog", id: string) => `${type}:${id}`;
 
 export const useSocialStore = create<SocialState>((set, get) => ({
   items: {},

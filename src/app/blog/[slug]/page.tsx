@@ -9,6 +9,8 @@ import BlogSpotBlock from "@/components/blog/BlogSpotBlock";
 import BlogTransitionBlock from "@/components/blog/BlogTransitionBlock";
 import CommentSection from "@/components/comment/CommentSection";
 import ViewTracker from "@/components/common/ViewTracker";
+import SocialHydrator from "@/components/social/SocialHydrator";
+import BlogSocialBar from "@/components/blog/BlogSocialBar";
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -57,10 +59,19 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     <main className="min-h-screen bg-white pb-20">
       <JsonLd data={generateBlogJsonLd(blog)} />
       <ViewTracker type="blog" id={blog.id} />
+      <SocialHydrator
+        type="blog"
+        id={blog.id}
+        likesCount={blog.likesCount}
+        savesCount={blog.savesCount}
+      />
 
       <div className="mx-auto max-w-2xl">
         {/* Hero */}
         <BlogHero blog={blog} />
+
+        {/* Social actions */}
+        <BlogSocialBar blogId={blog.id} />
 
         {/* SpotLine overview */}
         <div className="mt-6 px-4">
@@ -87,7 +98,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
         {/* Comments */}
         <div className="mt-8 px-4">
-          <CommentSection targetType="BLOG" targetId={blog.id} commentsCount={0} />
+          <CommentSection targetType="BLOG" targetId={blog.id} commentsCount={blog.commentsCount ?? 0} />
         </div>
       </div>
     </main>

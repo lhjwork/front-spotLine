@@ -731,6 +731,7 @@ export interface BlogResponse {
   viewsCount: number;
   likesCount: number;
   savesCount: number;
+  commentsCount: number;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;

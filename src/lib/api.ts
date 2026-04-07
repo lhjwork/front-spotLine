@@ -888,10 +888,10 @@ const getAuthToken = (): string => {
 
 // 좋아요 토글
 export const toggleLike = async (
-  type: "spot" | "spotline",
+  type: "spot" | "spotline" | "blog",
   id: string
 ): Promise<SocialToggleResponse> => {
-  const path = type === "spotline" ? "spotlines" : "spots";
+  const path = type === "blog" ? "blogs" : type === "spotline" ? "spotlines" : "spots";
   const response = await apiV2.post<SocialToggleResponse>(
     `/${path}/${id}/like`,
     {},
@@ -902,10 +902,10 @@ export const toggleLike = async (
 
 // 저장 토글
 export const toggleSave = async (
-  type: "spot" | "spotline",
+  type: "spot" | "spotline" | "blog",
   id: string
 ): Promise<SocialToggleResponse> => {
-  const path = type === "spotline" ? "spotlines" : "spots";
+  const path = type === "blog" ? "blogs" : type === "spotline" ? "spotlines" : "spots";
   const response = await apiV2.post<SocialToggleResponse>(
     `/${path}/${id}/save`,
     {},
@@ -916,11 +916,11 @@ export const toggleSave = async (
 
 // 소셜 상태 조회 (로그인 사용자)
 export const fetchSocialStatus = async (
-  type: "spot" | "spotline",
+  type: "spot" | "spotline" | "blog",
   id: string
 ): Promise<SocialStatus> => {
   try {
-    const path = type === "spotline" ? "spotlines" : "spots";
+    const path = type === "blog" ? "blogs" : type === "spotline" ? "spotlines" : "spots";
     const response = await apiV2.get<SocialStatus>(
       `/${path}/${id}/social`,
       { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }

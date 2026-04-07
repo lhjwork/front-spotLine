@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { fetchSocialStatus } from "@/lib/api";
 
 interface SocialHydratorProps {
-  type: "spot" | "spotline";
+  type: "spot" | "spotline" | "blog";
   id: string;
   likesCount: number;
   savesCount: number;
