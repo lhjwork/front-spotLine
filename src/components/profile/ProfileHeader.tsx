@@ -9,6 +9,7 @@ interface ProfileHeaderProps {
   isMe: boolean;
   isFollowing: boolean;
   onFollow: () => void;
+  onEdit?: () => void;
   onShowFollowers: () => void;
   onShowFollowing: () => void;
 }
@@ -18,6 +19,7 @@ export default function ProfileHeader({
   isMe,
   isFollowing,
   onFollow,
+  onEdit,
   onShowFollowers,
   onShowFollowing,
 }: ProfileHeaderProps) {
@@ -45,7 +47,16 @@ export default function ProfileHeader({
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-bold">{profile.nickname}</h1>
-            {!isMe && (
+            {isMe ? (
+              onEdit && (
+                <button
+                  onClick={onEdit}
+                  className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  프로필 편집
+                </button>
+              )
+            ) : (
               <button
                 onClick={onFollow}
                 className={cn(

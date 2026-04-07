@@ -7,6 +7,7 @@ import { fetchUserProfile } from "@/lib/api";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileTabs from "@/components/profile/ProfileTabs";
 import FollowListSheet from "@/components/profile/FollowListSheet";
+import ProfileEditSheet from "@/components/profile/ProfileEditSheet";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
 import type { UserProfile } from "@/types";
 
@@ -18,14 +19,15 @@ export default function MyProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFollowList, setShowFollowList] = useState<"followers" | "following" | null>(null);
+  const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.instagramId) {
+    if (!isAuthenticated || !user?.id) {
       setLoading(false);
       return;
     }
 
-    const userId = user.instagramId;
+    const userId = user.id;
     fetchUserProfile(userId).then((p) => {
       setProfile(p);
       if (p) {
@@ -63,6 +65,7 @@ export default function MyProfilePage() {
         isMe={true}
         isFollowing={false}
         onFollow={() => {}}
+        onEdit={() => setShowEdit(true)}
         onShowFollowers={() => setShowFollowList("followers")}
         onShowFollowing={() => setShowFollowList("following")}
       />
@@ -77,6 +80,13 @@ export default function MyProfilePage() {
           type={showFollowList}
         />
       )}
+
+      <ProfileEditSheet
+        isOpen={showEdit}
+        onClose={() => setShowEdit(false)}
+        profile={profile}
+        onSave={(updated) => setProfile(updated)}
+      />
     </div>
   );
 }

@@ -24,7 +24,7 @@ export default function ProfileClient({ profile }: ProfileClientProps) {
   const [showFollowList, setShowFollowList] = useState<"followers" | "following" | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
-  const isMe = user?.instagramId === profile.id;
+  const isMe = user?.id === profile.id;
   const isFollowing = followItem?.isFollowing ?? false;
 
   useEffect(() => {

@@ -29,9 +29,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const [spotSlugs, spotLineSlugs, blogSlugs] = await Promise.all([
-    fetchAllSpotSlugs(),
-    fetchAllSpotLineSlugs(),
-    fetchBlogSlugs(),
+    fetchAllSpotSlugs().catch(() => []),
+    fetchAllSpotLineSlugs().catch(() => []),
+    fetchBlogSlugs().catch(() => []),
   ]);
 
   const spotPages: MetadataRoute.Sitemap = spotSlugs.map((entry) => ({

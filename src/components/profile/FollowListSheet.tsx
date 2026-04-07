@@ -99,7 +99,7 @@ export default function FollowListSheet({ isOpen, onClose, userId, type }: Follo
                 <UserRow
                   key={u.id}
                   user={u}
-                  isMe={currentUser?.instagramId === u.id}
+                  isMe={currentUser?.id === u.id}
                   isAuthenticated={isAuthenticated}
                   toggleFollow={toggleFollow}
                   initFollowStatus={initFollowStatus}

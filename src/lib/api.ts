@@ -1087,6 +1087,43 @@ export const fetchFollowStatus = async (userId: string): Promise<{ isFollowing: 
   }
 };
 
+// ==================== Profile Edit API (v2 — 프로필 수정) ====================
+
+/** 내 프로필 수정 (partial update) */
+export async function updateMyProfile(request: {
+  nickname?: string;
+  bio?: string;
+  instagramId?: string;
+}): Promise<UserProfile> {
+  const { data } = await apiV2.put<UserProfile>("/users/me/profile", request, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return data;
+}
+
+/** 아바타 업로드 URL 생성 */
+export async function requestAvatarUploadUrl(
+  filename: string,
+  contentType: string
+): Promise<{ presignedUrl: string; avatarKey: string; avatarUrl: string }> {
+  const { data } = await apiV2.post<{ presignedUrl: string; avatarKey: string; avatarUrl: string }>(
+    "/users/me/avatar",
+    { filename, contentType },
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 },
+  );
+  return data;
+}
+
+/** 아바타 삭제 */
+export async function deleteMyAvatar(): Promise<UserProfile> {
+  const { data } = await apiV2.delete<UserProfile>("/users/me/avatar", {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+  return data;
+}
+
 // 유저의 좋아요 Spot 목록 (공개 프로필용)
 export const fetchUserLikedSpots = async (
   userId: string,
