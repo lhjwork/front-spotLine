@@ -142,6 +142,7 @@ export default function FollowingFeed() {
               totalDistance: 0,
               spotCount: item.spotCount || 0,
               likesCount: item.likesCount,
+              coverImageUrl: item.coverImageUrl || undefined,
             }}
           />
         ) : (

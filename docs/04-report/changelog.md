@@ -7,6 +7,50 @@
 
 ---
 
+## [2026-04-07] - Feed SpotLine Cover Image v1.0.0
+
+**Feature**: SpotLinePreviewCard visual enhancement — cover image display with icon fallback
+
+**PDCA Cycle**: #6 — Plan (0.5d) → Design (0.5d) → Do (0.5d) → Check v1.0.0 → Report
+
+**Match Rate**: 100%
+
+**Status**: PRODUCTION-READY — Enhances feed visual appeal
+
+### Added
+
+- **SpotLinePreviewCard image layout**: Conditional dual-layout rendering (image card vs icon card)
+- **coverImageUrl field**: Added to SpotLinePreview type (optional, S3 URL from backend)
+- **Image display**: aspect-[2/1] OptimizedImage component with lazy loading + retry
+- **Graceful fallback**: Icon card layout when coverImageUrl absent (no broken states)
+- **Feed integration**: FollowingFeed updated to pass coverImageUrl data
+
+### Changed
+
+- `SpotLinePreviewCard.tsx` — Added conditional rendering (image vs icon layout)
+- `SpotLinePreview type` — Extended with optional coverImageUrl field
+- `FollowingFeed.tsx` — Data mapping includes coverImageUrl pass-through
+
+### Metrics
+
+- **Files Modified**: 3 (types, component, feed)
+- **Lines Added**: ~35 (minimal surface area)
+- **Match Rate**: 100% (31/31 items)
+- **FRs**: 3/3 (100%)
+- **TypeScript**: 0 errors, Build: PASS
+- **Iterations**: 0 (zero-gap implementation)
+
+### Design Highlights
+
+- Single component supports two distinct layouts without duplication
+- Reuses existing OptimizedImage component (5th usage in app)
+- Backend API field already available (no coordination needed)
+- Pure visual enhancement (no logic changes, no new dependencies)
+
+**Completion Report**: [feed-spotline-cover-image.report.md](feed-spotline-cover-image.report.md)
+
+---
+
 ## [2026-04-07] - Blog Public Feed v1.0.0
 
 **Feature**: Public blog discovery pathways — feed section, dedicated /blogs page, profile tab

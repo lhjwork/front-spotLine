@@ -414,6 +414,7 @@ export interface SpotLinePreview {
   totalDistance: number; // meters
   spotCount: number;
   likesCount: number;
+  coverImageUrl?: string;
 }
 
 export interface DiscoverResponse {
