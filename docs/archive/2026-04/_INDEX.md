@@ -18,3 +18,4 @@
 | feed-spotline-cover-image | 100% | 2026-04-07 | plan, design, analysis, report |
 | spotline-replication-ux | 100% | 2026-04-07 | plan, design, analysis, report |
 | blog-sort-filter | 100% | 2026-04-07 | plan, design, analysis, report |
+| admin-blog-management | 100% | 2026-04-07 | plan, design, analysis, report |
