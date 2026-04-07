@@ -34,6 +34,7 @@ import {
   BlogResponse,
   BlogListItem,
   BlogBlockResponse,
+  FollowingFeedItem,
 } from "@/types";
 import type {
   CreateBlogRequest,
@@ -1070,6 +1071,18 @@ export const fetchFollowing = async (
   const res = await apiV2.get<PaginatedResponse<UserProfile>>(
     `/users/${userId}/following`,
     { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 팔로잉 피드 (콘텐츠)
+export const fetchFollowingFeed = async (
+  page = 0,
+  size = 20
+): Promise<PaginatedResponse<FollowingFeedItem>> => {
+  const res = await apiV2.get<PaginatedResponse<FollowingFeedItem>>(
+    "/feed/following",
+    { params: { page, size }, timeout: 5000 }
   );
   return res.data;
 };

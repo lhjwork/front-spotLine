@@ -1,40 +1,72 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Users, Search } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
-import { fetchFollowing } from "@/lib/api";
-import type { UserProfile } from "@/types";
+import { fetchFollowingFeed } from "@/lib/api";
+import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
+import BlogCard from "@/components/blog/BlogCard";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
+import type { FollowingFeedItem } from "@/types";
 
 export default function FollowingFeed() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const user = useAuthStore((s) => s.user);
 
-  const [followingUsers, setFollowingUsers] = useState<UserProfile[] | null>(null);
+  const [items, setItems] = useState<FollowingFeedItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
+    if (!isAuthenticated) {
+      setInitialLoading(false);
+      return;
+    }
     let cancelled = false;
 
-    const loadFollowing = async () => {
+    const load = async () => {
       setLoading(true);
       try {
-        const res = await fetchFollowing(user.id, 1, 50);
-        if (!cancelled) setFollowingUsers(res.content);
+        const res = await fetchFollowingFeed(page, 20);
+        if (!cancelled) {
+          setItems((prev) => (page === 0 ? res.content : [...prev, ...res.content]));
+          setHasMore(!res.last);
+        }
       } catch {
-        if (!cancelled) setFollowingUsers([]);
+        // non-critical
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setInitialLoading(false);
+        }
       }
     };
-    loadFollowing();
+    load();
     return () => { cancelled = true; };
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, page]);
 
+  // IntersectionObserver for infinite scroll
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      if (entries[0].isIntersecting && !loading && hasMore) {
+        setPage((p) => p + 1);
+      }
+    },
+    [loading, hasMore]
+  );
+
+  useEffect(() => {
+    if (!observerRef.current || !hasMore) return;
+    const observer = new IntersectionObserver(handleObserver, { threshold: 0.5 });
+    observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, handleObserver]);
+
+  // --- Unauthenticated state ---
   if (!isAuthenticated) {
     return (
       <>
@@ -63,7 +95,8 @@ export default function FollowingFeed() {
     );
   }
 
-  if (loading) {
+  // --- Initial loading ---
+  if (initialLoading) {
     return (
       <div className="flex justify-center py-16">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
@@ -71,15 +104,16 @@ export default function FollowingFeed() {
     );
   }
 
-  if (!followingUsers || followingUsers.length === 0) {
+  // --- Empty state ---
+  if (!loading && items.length === 0) {
     return (
       <div className="flex flex-col items-center px-4 py-16 text-center">
         <Search className="mb-3 h-10 w-10 text-gray-300" />
         <p className="text-sm font-medium text-gray-700">
-          아직 팔로우한 크루가 없어요
+          팔로우한 크루의 콘텐츠가 없어요
         </p>
         <p className="mt-1 text-xs text-gray-500">
-          다양한 크루를 탐색해보세요
+          다양한 크루를 탐색하고 팔로우해보세요
         </p>
         <Link
           href="/"
@@ -91,35 +125,55 @@ export default function FollowingFeed() {
     );
   }
 
+  // --- Content feed ---
   return (
-    <section className="px-4 py-4">
-      <h2 className="mb-3 text-lg font-bold text-gray-900">팔로잉 중인 크루</h2>
-      <div className="flex flex-col gap-2">
-        {followingUsers.map((u) => (
-          <Link
-            key={u.id}
-            href={`/profile/${u.id}`}
-            className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 transition-shadow hover:shadow-md"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 text-sm font-bold text-gray-500">
-              {u.avatar ? (
-                <img src={u.avatar} alt={u.nickname} className="h-10 w-10 rounded-full object-cover" />
-              ) : (
-                u.nickname.charAt(0).toUpperCase()
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-gray-900">
-                {u.nickname}
-              </p>
-              <p className="text-xs text-gray-500">
-                팔로워 {u.stats?.followers ?? 0}명
-                {u.stats?.spotlines != null && ` · SpotLine ${u.stats.spotlines}개`}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
+    <div className="space-y-4 px-4 py-4">
+      {items.map((item) =>
+        item.type === "SPOTLINE" ? (
+          <SpotLinePreviewCard
+            key={`sl-${item.id}`}
+            spotLine={{
+              id: item.id,
+              slug: item.slug,
+              title: item.title,
+              theme: item.theme || "",
+              area: item.area || "",
+              totalDuration: item.totalDuration || 0,
+              totalDistance: 0,
+              spotCount: item.spotCount || 0,
+              likesCount: item.likesCount,
+            }}
+          />
+        ) : (
+          <BlogCard
+            key={`blog-${item.id}`}
+            blog={{
+              id: item.id,
+              slug: item.slug,
+              title: item.title,
+              summary: item.summary,
+              coverImageUrl: item.coverImageUrl,
+              status: "PUBLISHED",
+              userName: item.userName,
+              userAvatarUrl: item.userAvatar,
+              spotLineTitle: "",
+              spotLineArea: item.area || "",
+              spotCount: item.spotCount || 0,
+              viewsCount: item.viewsCount,
+              likesCount: item.likesCount,
+              publishedAt: item.createdAt,
+              createdAt: item.createdAt,
+            }}
+          />
+        )
+      )}
+
+      {loading && (
+        <div className="flex justify-center py-4">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        </div>
+      )}
+      {hasMore && <div ref={observerRef} className="h-10" />}
+    </div>
   );
 }

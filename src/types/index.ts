@@ -783,6 +783,27 @@ export interface BlogListItem {
   createdAt: string;
 }
 
+export interface FollowingFeedItem {
+  type: "SPOTLINE" | "BLOG";
+  id: string;
+  slug: string;
+  title: string;
+  area: string | null;
+  coverImageUrl: string | null;
+  likesCount: number;
+  viewsCount: number;
+  // SpotLine specific
+  theme: string | null;
+  spotCount: number | null;
+  totalDuration: number | null;
+  // Blog specific
+  summary: string | null;
+  // Creator
+  userName: string;
+  userAvatar: string | null;
+  createdAt: string;
+}
+
 export interface CreateBlogRequest {
   spotLineId: string;
   title: string;
