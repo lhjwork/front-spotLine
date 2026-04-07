@@ -13,3 +13,4 @@
 | blog-seo-tracking | 100% | 2026-04-07 | plan, design, analysis, report |
 | profile-edit-fix | 100% | 2026-04-07 | plan, design, analysis, report |
 | blog-social-actions | 100% | 2026-04-07 | plan, design, analysis, report |
+| blog-public-feed | 100% | 2026-04-07 | plan, design, analysis, report |

@@ -3,15 +3,16 @@
 import { useEffect, useCallback, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFeedStore } from "@/store/useFeedStore";
-import { fetchFeedSpots, fetchFeedSpotLines } from "@/lib/api";
+import { fetchFeedSpots, fetchFeedSpotLines, fetchBlogs } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { SpotCategory, FeedSort } from "@/types";
+import type { SpotCategory, FeedSort, BlogListItem } from "@/types";
 import FeedAreaTabs from "./FeedAreaTabs";
 import FeedCategoryChips from "./FeedCategoryChips";
 import FeedSearchBar from "./FeedSearchBar";
 import FeedSortDropdown from "./FeedSortDropdown";
 import FeedFilterReset from "./FeedFilterReset";
 import FeedSpotLineSection from "./FeedSpotLineSection";
+import FeedBlogSection from "./FeedBlogSection";
 import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
 import FollowingFeed from "./FollowingFeed";
@@ -22,6 +23,7 @@ export default function FeedPage() {
   const router = useRouter();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [blogs, setBlogs] = useState<BlogListItem[]>([]);
   const initializedRef = useRef(false);
   const {
     area, category, sort, keyword,
@@ -80,6 +82,22 @@ export default function FeedPage() {
     loadSpotLines();
     return () => { cancelled = true; };
   }, [area, setSpotLines]);
+
+  // Load blogs when area changes
+  useEffect(() => {
+    if (!initializedRef.current) return;
+    let cancelled = false;
+    const loadBlogs = async () => {
+      try {
+        const result = await fetchBlogs(0, 4, area || undefined);
+        if (!cancelled) setBlogs(result.content);
+      } catch {
+        // Blogs are non-critical, don't block
+      }
+    };
+    loadBlogs();
+    return () => { cancelled = true; };
+  }, [area]);
 
   // Load spots when filters/page change
   useEffect(() => {
@@ -192,6 +210,7 @@ export default function FeedPage() {
 
           <div ref={contentRef} />
           <FeedSpotLineSection spotLines={spotLines} />
+          <FeedBlogSection blogs={blogs} />
           <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>
             <FeedSpotGrid
               spots={spots}

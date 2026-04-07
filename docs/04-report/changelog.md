@@ -7,6 +7,88 @@
 
 ---
 
+## [2026-04-07] - Blog Public Feed v1.0.0
+
+**Feature**: Public blog discovery pathways — feed section, dedicated /blogs page, profile tab
+
+**PDCA Cycle**: #5 — Plan (0.5d) → Design (0.5d) → Do (0.5d) → Check v1.0.0 → Report
+
+**Match Rate**: 100%
+
+**Status**: PRODUCTION-READY — Completes content discovery loop
+
+### Added
+
+- **FeedBlogSection** component: Blog cards section in main feed (2x2 grid, "더보기" link, 0-guard)
+- **/blogs page**: Server component with SSR initial data, ISR revalidation (3600s), SEO metadata
+- **BlogsPageClient** component: Client-side infinite scroll, area filtering via FeedAreaTabs, pagination state
+- **Profile "블로그" tab**: Tab entry in ProfileTabs (meOnly: true, routes to /my-blogs)
+- **fetchBlogs API integration**: Previously dead code, now actively called in FeedPage + BlogsPageClient
+
+### Changed
+
+- `src/components/feed/FeedPage.tsx` — Added blogs state + useEffect(area) + FeedBlogSection render
+- `src/components/profile/ProfileTabs.tsx` — Added "블로그" tab with BookOpen icon, router.push("/my-blogs")
+
+### Metrics
+
+- **Files Created**: 3 (FeedBlogSection.tsx, blogs/page.tsx, BlogsPageClient.tsx)
+- **Files Modified**: 2 (FeedPage.tsx, ProfileTabs.tsx)
+- **Match Rate**: 100% (59/59 items)
+- **FRs**: 6/6 (100%)
+- **Lines Added**: ~160
+- **TypeScript**: 0 errors, Build: PASS
+- **Iterations**: 0 (first-pass 100%)
+
+### Design Highlights
+
+- FeedBlogSection mirrors FeedSpotLineSection pattern (exact structure reuse)
+- /blogs page uses SSR + client infinite scroll (FeedPage pattern)
+- ISR caching (revalidate: 3600) ensures build stability
+- ProfileTabs blog tab navigates without data loading (existing /my-blogs page used)
+- Zero backend changes (reuses existing GET /api/v2/blogs endpoint)
+
+**Completion Report**: [blog-public-feed.report.md](blog-public-feed.report.md)
+
+---
+
+## [2026-04-07] - Profile Edit Fix v1.0.0
+
+**Feature**: Critical bug fixes for profile system + profile editing UI
+
+**PDCA Cycle**: #4 — Plan (0.5d) → Design (0.5d) → Do (same day) → Check v1.0.0 → Report
+
+**Match Rate**: 100%
+
+**Status**: PRODUCTION-READY — Unblocks social features
+
+### Added
+
+- **ProfileEditSheet** component: Bottom sheet for profile editing (nickname, bio, Instagram, avatar)
+- **Avatar presigned URL upload**: Direct S3 upload with presigned URL (no server relay)
+- **API Functions** (3): `updateMyProfile()`, `requestAvatarUploadUrl()`, `deleteMyAvatar()`
+- **ProfileHeader edit button**: "프로필 편집" button visible when `isMe=true`
+
+### Fixed
+
+- **Critical Bug**: `profile/me/page.tsx` — `user.instagramId` → `user.id` (blocked profile access for 90% of users without Instagram)
+- **Bug**: `ProfileClient.tsx` — `user?.instagramId === profile.id` → `user?.id === profile.id` (isMe comparison always false)
+- **Bug**: `FollowListSheet.tsx` — `currentUser?.instagramId === u.id` → `currentUser?.id === u.id` (self-detection broken)
+
+### Metrics
+
+- **Files Modified**: 6
+- **Files Created**: 1 (ProfileEditSheet)
+- **Lines Changed**: ~220
+- **FRs**: 10/10 (100%)
+- **Match Rate**: 100%
+- **Iterations**: 0 (first-pass 100%)
+- **TypeScript**: 0 errors, ESLint: 0 violations
+
+**Completion Report**: [profile-edit-fix.report.md](profile-edit-fix.report.md)
+
+---
+
 ## [2026-04-07] - Social Features v1.0.0
 
 **Feature**: Card-level social interactions, Following feed, Spot sharing, Profile data

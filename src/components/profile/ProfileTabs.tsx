@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Heart, Bookmark, MapPin, Map } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, Bookmark, MapPin, Map, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots } from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
@@ -13,16 +14,18 @@ interface ProfileTabsProps {
   isMe?: boolean;
 }
 
-type TabKey = "likes" | "saves" | "spotlines" | "my-spots";
+type TabKey = "likes" | "saves" | "spotlines" | "my-spots" | "blogs";
 
 const TABS: { key: TabKey; label: string; icon: typeof Heart; meOnly?: boolean }[] = [
   { key: "likes", label: "좋아요", icon: Heart },
   { key: "saves", label: "저장", icon: Bookmark },
   { key: "spotlines", label: "SpotLine", icon: MapPin, meOnly: true },
   { key: "my-spots", label: "내 Spot", icon: Map, meOnly: true },
+  { key: "blogs", label: "블로그", icon: BookOpen, meOnly: true },
 ];
 
 export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabKey>("likes");
   const [likedSpots, setLikedSpots] = useState<SpotDetailResponse[] | null>(null);
   const [savedSpotLines, setSavedSpotLines] = useState<SpotLinePreview[] | null>(null);
@@ -58,6 +61,10 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
   }, [activeTab, loadTabData]);
 
   const handleTabChange = (tab: TabKey) => {
+    if (tab === "blogs") {
+      router.push("/my-blogs");
+      return;
+    }
     setActiveTab(tab);
   };
 
