@@ -830,6 +830,29 @@ export interface UpdateBlogRequest {
   coverImageUrl?: string;
 }
 
+// ============================================================
+// Notification
+// ============================================================
+
+export type NotificationType = "FOLLOW" | "SPOT_LIKE" | "SPOTLINE_LIKE" | "BLOG_LIKE" | "COMMENT" | "FORK";
+
+export interface NotificationItem {
+  id: string;
+  type: NotificationType;
+  targetType: string | null;
+  targetId: string | null;
+  targetSlug: string | null;
+  isRead: boolean;
+  createdAt: string;
+  actorId: string;
+  actorNickname: string;
+  actorAvatar: string | null;
+}
+
+// ============================================================
+// Blog Blocks
+// ============================================================
+
 export interface SaveBlogBlocksRequest {
   blocks: {
     id?: string;

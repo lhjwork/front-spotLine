@@ -22,3 +22,4 @@
 | global-search | 99% | 2026-04-07 | plan, design, analysis, report |
 | admin-user-management | 100% | 2026-04-07 | plan, design, analysis, report |
 | spot-detail-enhancement | 100% | 2026-04-12 | plan, design, analysis, report |
+| notification-inbox | 100% | 2026-04-12 | plan, design, analysis, report |

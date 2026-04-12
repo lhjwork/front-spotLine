@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { QrCode, ArrowLeft, Search } from 'lucide-react';
+import NotificationBell from '@/components/notification/NotificationBell';
 
 interface HeaderProps {
   showBackButton?: boolean;
   title?: string;
+  userId?: string | null;
 }
 
-export default function Header({ showBackButton = false, title }: HeaderProps) {
+export default function Header({ showBackButton = false, title, userId }: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,8 +44,9 @@ export default function Header({ showBackButton = false, title }: HeaderProps) {
             </div>
           )}
 
-          {/* 오른쪽: 검색 아이콘 */}
-          <div className="w-16 flex justify-end">
+          {/* 오른쪽: 알림 + 검색 */}
+          <div className="flex items-center gap-1">
+            <NotificationBell userId={userId ?? null} />
             <Link
               href="/search"
               className="p-2 text-gray-500 hover:text-gray-700 transition-colors"

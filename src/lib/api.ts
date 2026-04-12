@@ -40,6 +40,7 @@ import type {
   CreateBlogRequest,
   UpdateBlogRequest,
   SaveBlogBlocksRequest,
+  NotificationItem,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -1503,4 +1504,48 @@ export async function saveBlogBlocks(
     { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 10000 }
   );
   return data;
+}
+
+// ==================== Notification API ====================
+
+export async function fetchNotifications(
+  page = 0,
+  size = 20
+): Promise<PaginatedResponse<NotificationItem>> {
+  const { data } = await apiV2.get<PaginatedResponse<NotificationItem>>(
+    "/notifications",
+    { params: { page, size }, headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return data;
+}
+
+export async function fetchUnreadCount(): Promise<number> {
+  const { data } = await apiV2.get<{ count: number }>(
+    "/notifications/unread-count",
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return data.count;
+}
+
+export async function markNotificationAsRead(id: string): Promise<void> {
+  await apiV2.put(`/notifications/${id}/read`, null, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
+}
+
+export async function markAllNotificationsAsRead(): Promise<{ updated: number }> {
+  const { data } = await apiV2.put<{ updated: number }>(
+    "/notifications/read-all",
+    null,
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return data;
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+  await apiV2.delete(`/notifications/${id}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
 }
