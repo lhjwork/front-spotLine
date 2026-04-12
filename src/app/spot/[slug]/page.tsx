@@ -11,6 +11,10 @@ import SpotImageGallery from "@/components/spot/SpotImageGallery";
 import SpotSpotLines from "@/components/spot/SpotSpotLines";
 import SpotNearby from "@/components/spot/SpotNearby";
 import SpotBottomBar from "@/components/spot/SpotBottomBar";
+import SpotBusinessStatus from "@/components/spot/SpotBusinessStatus";
+import SpotMenu from "@/components/spot/SpotMenu";
+import SpotMapPreview from "@/components/spot/SpotMapPreview";
+import SpotFacilities from "@/components/spot/SpotFacilities";
 import SocialHydrator from "@/components/social/SocialHydrator";
 import QrBanner from "@/components/qr/QrBanner";
 import QrAnalytics from "@/components/qr/QrAnalytics";
@@ -105,6 +109,21 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         {spot.placeInfo && (
           <SpotPlaceInfo placeInfo={spot.placeInfo} />
         )}
+
+        {spot.placeInfo?.facilities && spot.placeInfo.facilities.length > 0 && (
+          <SpotFacilities facilities={spot.placeInfo.facilities} />
+        )}
+
+        {spot.placeInfo?.menuItems && spot.placeInfo.menuItems.length > 0 && (
+          <SpotMenu menuItems={spot.placeInfo.menuItems} placeUrl={spot.placeInfo.url} />
+        )}
+
+        <SpotMapPreview
+          latitude={spot.latitude}
+          longitude={spot.longitude}
+          title={spot.title}
+          kakaoPlaceId={spot.placeInfo?.placeId ?? null}
+        />
 
         {allPhotos.length > 1 && (
           <SpotImageGallery photos={allPhotos} title={spot.title} />

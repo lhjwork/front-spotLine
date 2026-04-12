@@ -402,6 +402,20 @@ export interface DiscoverPlaceInfo {
   reviewCount: number | null;
   photos: string[] | null;
   url: string | null;
+  dailyHours: PlaceDailyHour[] | null;
+  menuItems: PlaceMenuItem[] | null;
+  facilities: string[] | null;
+}
+
+export interface PlaceDailyHour {
+  day: string;
+  timeSE: string;
+}
+
+export interface PlaceMenuItem {
+  name: string;
+  price: string;
+  photo: string | null;
 }
 
 export interface SpotLinePreview {

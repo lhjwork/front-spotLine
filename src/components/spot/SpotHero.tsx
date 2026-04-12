@@ -2,6 +2,7 @@ import { ArrowLeft, MapPin, Star, Eye } from "lucide-react";
 import Link from "next/link";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import PartnerBadge from "@/components/spot/PartnerBadge";
+import SpotBusinessStatus from "@/components/spot/SpotBusinessStatus";
 import type { SpotDetailResponse } from "@/types";
 
 const categoryLabels: Record<string, string> = {
@@ -64,6 +65,12 @@ export default function SpotHero({ spot }: SpotHeroProps) {
             </span>
             {spot.partner?.isPartner && (
               <PartnerBadge partner={spot.partner} />
+            )}
+            {spot.placeInfo?.dailyHours && (
+              <SpotBusinessStatus
+                dailyHours={spot.placeInfo.dailyHours}
+                businessHours={spot.placeInfo.businessHours}
+              />
             )}
             <span className="text-xs text-gray-400">{spot.area}</span>
           </div>

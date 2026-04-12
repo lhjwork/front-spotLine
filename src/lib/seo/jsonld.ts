@@ -55,8 +55,46 @@ export function generateSpotJsonLd(spot: SpotDetailResponse): Record<string, unk
     if (spot.placeInfo.phone) {
       jsonLd.telephone = spot.placeInfo.phone;
     }
-    if (spot.placeInfo.businessHours) {
+    if (spot.placeInfo.dailyHours) {
+      const dayMap: Record<string, string> = {
+        "월": "Monday", "화": "Tuesday", "수": "Wednesday",
+        "목": "Thursday", "금": "Friday", "토": "Saturday", "일": "Sunday",
+      };
+      jsonLd.openingHoursSpecification = spot.placeInfo.dailyHours
+        .filter((h) => h.timeSE)
+        .map((h) => {
+          const match = h.timeSE.match(/(\d{1,2}:\d{2})~(\d{1,2}:\d{2})/);
+          return match
+            ? {
+                "@type": "OpeningHoursSpecification",
+                dayOfWeek: dayMap[h.day] || h.day,
+                opens: match[1],
+                closes: match[2],
+              }
+            : null;
+        })
+        .filter(Boolean);
+    } else if (spot.placeInfo.businessHours) {
       jsonLd.openingHours = spot.placeInfo.businessHours;
+    }
+    if (spot.placeInfo.menuItems?.length) {
+      jsonLd.hasMenu = {
+        "@type": "Menu",
+        hasMenuSection: {
+          "@type": "MenuSection",
+          hasMenuItem: spot.placeInfo.menuItems.slice(0, 5).map((m) => ({
+            "@type": "MenuItem",
+            name: m.name,
+            ...(m.price && {
+              offers: {
+                "@type": "Offer",
+                price: m.price.replace(/[^0-9]/g, ""),
+                priceCurrency: "KRW",
+              },
+            }),
+          })),
+        },
+      };
     }
     if (spot.placeInfo.rating != null && spot.placeInfo.reviewCount != null && spot.placeInfo.reviewCount > 0) {
       jsonLd.aggregateRating = {
