@@ -898,6 +898,7 @@ export interface CreateSpotRequest {
   blogUrl?: string;
   instagramUrl?: string;
   websiteUrl?: string;
+  mediaItems?: MediaItemRequest[];
 }
 
 /** Spot 생성 응답 */

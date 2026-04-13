@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 import CategorySelector from "./CategorySelector";
 import AddressSearch from "./AddressSearch";
 import TagInput from "./TagInput";
-import type { SpotCategory, CreateSpotRequest } from "@/types";
+import CreateFormPhotoUpload from "./CreateFormPhotoUpload";
+import type { SpotCategory, CreateSpotRequest, MediaItemRequest } from "@/types";
 
 interface AddressData {
   address: string;
@@ -32,6 +33,7 @@ export default function SpotCreateForm() {
   const [instagramUrl, setInstagramUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
 
+  const [mediaItems, setMediaItems] = useState<MediaItemRequest[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -66,6 +68,7 @@ export default function SpotCreateForm() {
         ...(blogUrl.trim() && { blogUrl: blogUrl.trim() }),
         ...(instagramUrl.trim() && { instagramUrl: instagramUrl.trim() }),
         ...(websiteUrl.trim() && { websiteUrl: websiteUrl.trim() }),
+        ...(mediaItems.length > 0 && { mediaItems }),
       };
 
       const result = await createSpot(request);
@@ -131,6 +134,18 @@ export default function SpotCreateForm() {
           className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
         />
         <p className="mt-1 text-right text-xs text-gray-400">{description.length}/500</p>
+      </div>
+
+      {/* 사진 */}
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-900">사진</label>
+        <CreateFormPhotoUpload
+          mediaItems={mediaItems}
+          onMediaItemsChange={setMediaItems}
+        />
+        <p className="mt-1 text-xs text-gray-400">
+          JPEG, PNG, WebP · 최대 10MB · 최대 5장
+        </p>
       </div>
 
       {/* 태그 */}
