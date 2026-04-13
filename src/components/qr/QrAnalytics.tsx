@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { logPageEnter, recordQrScan, generateSessionId } from "@/lib/api";
+import { logPageEnter, recordQrScan, recordPartnerEvent, generateSessionId } from "@/lib/api";
 
 interface QrAnalyticsProps {
   spotId: string;
   qrId: string;
+  isPartner?: boolean;
 }
 
-export default function QrAnalytics({ spotId, qrId }: QrAnalyticsProps) {
+export default function QrAnalytics({ spotId, qrId, isPartner }: QrAnalyticsProps) {
   const logged = useRef(false);
 
   useEffect(() => {
@@ -21,7 +22,12 @@ export default function QrAnalytics({ spotId, qrId }: QrAnalyticsProps) {
     // v2 스캔 기록 (파트너 QR 분석용, fire-and-forget)
     const sessionId = generateSessionId();
     recordQrScan(qrId, sessionId);
-  }, [spotId, qrId]);
+
+    // 파트너 매장일 때 혜택 배너 노출 이벤트
+    if (isPartner) {
+      recordPartnerEvent(qrId, "benefit_view", sessionId);
+    }
+  }, [spotId, qrId, isPartner]);
 
   return null;
 }

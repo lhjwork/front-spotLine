@@ -540,6 +540,22 @@ export const recordQrScan = async (qrId: string, sessionId: string): Promise<voi
   }
 };
 
+// 파트너 혜택 전환 이벤트 기록 (fire-and-forget)
+export const recordPartnerEvent = async (
+  qrId: string,
+  eventType: "benefit_view" | "benefit_click",
+  sessionId: string,
+): Promise<void> => {
+  try {
+    await apiV2.post(`/qr/${qrId}/event`, null, {
+      params: { sessionId, eventType },
+      timeout: 3000,
+    });
+  } catch {
+    // fire-and-forget: 실패해도 사용자 경험에 영향 없음
+  }
+};
+
 // 근처 매장 검색
 export const getNearbyStores = async (params: NearbyStoreParams): Promise<Store[]> => {
   try {

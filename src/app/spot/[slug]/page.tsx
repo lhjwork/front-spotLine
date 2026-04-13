@@ -18,6 +18,7 @@ import SpotFacilities from "@/components/spot/SpotFacilities";
 import SocialHydrator from "@/components/social/SocialHydrator";
 import QrBanner from "@/components/qr/QrBanner";
 import QrAnalytics from "@/components/qr/QrAnalytics";
+import { PartnerQrBannerWrapper } from "@/components/qr/PartnerQrBanner";
 import AreaCta from "@/components/shared/AreaCta";
 import PartnerBenefit from "@/components/spot/PartnerBenefit";
 import CommentSection from "@/components/comment/CommentSection";
@@ -93,8 +94,17 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
       <div className="mx-auto max-w-lg px-4">
         {isQrMode && (
           <>
-            <QrBanner storeName={spot.title} />
-            <QrAnalytics spotId={spot.id} qrId={qrId!} />
+            {spot.partner?.isPartner && spot.partner.benefitText ? (
+              <PartnerQrBannerWrapper
+                storeName={spot.title}
+                partner={spot.partner}
+                spotId={spot.id}
+                qrId={qrId!}
+              />
+            ) : (
+              <QrBanner storeName={spot.title} />
+            )}
+            <QrAnalytics spotId={spot.id} qrId={qrId!} isPartner={!!spot.partner?.isPartner} />
           </>
         )}
 
@@ -103,7 +113,9 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         )}
 
         {spot.partner?.isPartner && spot.partner.benefitText && (
-          <PartnerBenefit partner={spot.partner} />
+          <div id="partner-benefit">
+            <PartnerBenefit partner={spot.partner} />
+          </div>
         )}
 
         {spot.placeInfo && (
