@@ -25,7 +25,8 @@ export default function BlogCoverEditor({
     try {
       const { uploadUrl, fileUrl } = await getPresignedUrl(
         file.name,
-        file.type
+        file.type,
+        file.size
       );
       await fetch(uploadUrl, {
         method: "PUT",

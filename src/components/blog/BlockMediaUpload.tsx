@@ -31,7 +31,8 @@ export default function BlockMediaUpload({
     try {
       const { uploadUrl, fileUrl } = await getPresignedUrl(
         file.name,
-        file.type
+        file.type,
+        file.size
       );
 
       await fetch(uploadUrl, {

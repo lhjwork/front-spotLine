@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistance, formatWalkingTime } from "@/lib/utils";
 import { useSpotLineBuilderStore } from "@/store/useSpotLineBuilderStore";
-import type { SpotLineBuilderSpot } from "@/types";
+import SpotPhotoUpload from "./SpotPhotoUpload";
+import type { SpotLineBuilderSpot, SpotMediaItem } from "@/types";
 
 interface SelectedSpotCardProps {
   builderSpot: SpotLineBuilderSpot;
@@ -34,6 +36,9 @@ export default function SelectedSpotCard({
 }: SelectedSpotCardProps) {
   const removeSpot = useSpotLineBuilderStore((s) => s.removeSpot);
   const updateSpotMeta = useSpotLineBuilderStore((s) => s.updateSpotMeta);
+  const [mediaItems, setMediaItems] = useState<SpotMediaItem[]>(
+    builderSpot.spot.mediaItems || []
+  );
 
   const {
     attributes,
@@ -121,6 +126,13 @@ export default function SelectedSpotCard({
                 />
               </label>
             </div>
+
+            {/* Photo Upload */}
+            <SpotPhotoUpload
+              spotId={spot.id}
+              mediaItems={mediaItems}
+              onMediaUpdate={setMediaItems}
+            />
           </div>
 
           {/* Remove */}

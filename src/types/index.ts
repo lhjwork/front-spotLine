@@ -364,6 +364,14 @@ export interface SpotMediaItem {
   displayOrder: number;
 }
 
+export interface MediaItemRequest {
+  s3Key: string;
+  mediaType: "IMAGE";
+  displayOrder: number;
+  fileSizeBytes: number;
+  mimeType: string;
+}
+
 export interface DiscoverSpot {
   id: string;
   slug: string;
@@ -867,4 +875,37 @@ export interface SaveBlogBlocksRequest {
       caption?: string;
     }[];
   }[];
+}
+
+// ============================================================
+// User Spot Creation
+// ============================================================
+
+/** Spot 생성 요청 (유저용) */
+export interface CreateSpotRequest {
+  title: string;
+  category: SpotCategory;
+  source: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  area: string;
+  sido?: string;
+  sigungu?: string;
+  dong?: string;
+  description?: string;
+  tags?: string[];
+  blogUrl?: string;
+  instagramUrl?: string;
+  websiteUrl?: string;
+}
+
+/** Spot 생성 응답 */
+export interface CreateSpotResponse {
+  id: string;
+  slug: string;
+  title: string;
+  category: SpotCategory;
+  address: string;
+  createdAt: string;
 }

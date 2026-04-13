@@ -41,6 +41,8 @@ import type {
   UpdateBlogRequest,
   SaveBlogBlocksRequest,
   NotificationItem,
+  CreateSpotRequest,
+  CreateSpotResponse,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -1304,6 +1306,23 @@ export async function fetchAllSpotLineSlugs(): Promise<SlugEntry[]> {
   }
 }
 
+// ==================== User Spot Creation API ====================
+
+/** Spot 생성 (유저용) */
+export async function createSpot(
+  request: CreateSpotRequest
+): Promise<CreateSpotResponse> {
+  const { data } = await apiV2.post<CreateSpotResponse>(
+    "/spots",
+    request,
+    {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      timeout: 10000,
+    }
+  );
+  return data;
+}
+
 // ==================== SpotLine Builder API ====================
 
 /** SpotLine 생성 */
@@ -1478,19 +1497,31 @@ export async function fetchBlogSlugs(): Promise<string[]> {
 
 /** S3 Presigned URL 생성 (이미지 업로드용) */
 export async function getPresignedUrl(
-  fileName: string,
-  contentType: string
-): Promise<{ uploadUrl: string; fileUrl: string }> {
+  filename: string,
+  contentType: string,
+  contentLength: number
+): Promise<{ uploadUrl: string; fileUrl: string; s3Key: string }> {
   const { data } = await apiV2.post<{
     uploadUrl: string;
     s3Key: string;
     publicUrl: string;
     mediaType: string;
-  }>("/media/presigned-url", { fileName, contentType }, {
+  }>("/media/presigned-url", { filename, contentType, contentLength }, {
     headers: { Authorization: `Bearer ${getAuthToken()}` },
     timeout: 5000,
   });
-  return { uploadUrl: data.uploadUrl, fileUrl: data.publicUrl };
+  return { uploadUrl: data.uploadUrl, fileUrl: data.publicUrl, s3Key: data.s3Key };
+}
+
+/** Spot 미디어 업데이트 */
+export async function updateSpotMedia(
+  spotId: string,
+  mediaItems: import("@/types").MediaItemRequest[]
+): Promise<void> {
+  await apiV2.put(`/spots/${spotId}`, { mediaItems }, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 10000,
+  });
 }
 
 /** 블록 일괄 저장 (자동 저장) */
