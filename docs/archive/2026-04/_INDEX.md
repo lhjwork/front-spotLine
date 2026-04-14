@@ -1,7 +1,5 @@
 # Archive Index — 2026-04
 
-| Feature | Match Rate | Iterations | Archived |
-|---------|:----------:|:----------:|----------|
-| spotline-create-form-photo | 100% | 0 | 2026-04-13 |
-| partner-qr-system | 100% | 0 | 2026-04-13 |
-| explore-map-view | 100% | 0 | 2026-04-13 |
+| Feature | Date | Match Rate | Files | Status |
+|---------|------|:----------:|-------|--------|
+| user-visit-checkin | 2026-04-14 | 100% | 17 (3 NEW, 14 MODIFY) | Completed |
