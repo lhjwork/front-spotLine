@@ -10,23 +10,24 @@ interface SocialHydratorProps {
   id: string;
   likesCount: number;
   savesCount: number;
+  visitedCount?: number;
 }
 
-export default function SocialHydrator({ type, id, likesCount, savesCount }: SocialHydratorProps) {
+export default function SocialHydrator({ type, id, likesCount, savesCount, visitedCount }: SocialHydratorProps) {
   const initSocialStatus = useSocialStore((s) => s.initSocialStatus);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     // 기본 카운트로 초기화
-    initSocialStatus(type, id, { isLiked: false, isSaved: false }, likesCount, savesCount);
+    initSocialStatus(type, id, { isLiked: false, isSaved: false, isVisited: false }, likesCount, savesCount, visitedCount);
 
     // 로그인 시 사용자별 소셜 상태 조회
     if (isAuthenticated) {
       fetchSocialStatus(type, id).then((status) => {
-        initSocialStatus(type, id, status, likesCount, savesCount);
+        initSocialStatus(type, id, status, likesCount, savesCount, visitedCount);
       });
     }
-  }, [type, id, likesCount, savesCount, isAuthenticated, initSocialStatus]);
+  }, [type, id, likesCount, savesCount, visitedCount, isAuthenticated, initSocialStatus]);
 
   return null;
 }

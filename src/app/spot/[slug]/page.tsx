@@ -157,7 +157,7 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
       </div>
 
       <ViewTracker type="spot" id={spot.id} />
-      <SocialHydrator type="spot" id={spot.id} likesCount={spot.likesCount} savesCount={spot.savesCount} />
+      <SocialHydrator type="spot" id={spot.id} likesCount={spot.likesCount} savesCount={spot.savesCount} visitedCount={spot.visitedCount} />
       <SpotBottomBar spot={spot} />
     </main>
   );

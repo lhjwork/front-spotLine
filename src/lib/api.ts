@@ -951,8 +951,33 @@ export const fetchSocialStatus = async (
     );
     return response.data;
   } catch {
-    return { isLiked: false, isSaved: false };
+    return { isLiked: false, isSaved: false, isVisited: false };
   }
+};
+
+// 방문 토글 (Spot 전용)
+export const toggleVisit = async (
+  id: string
+): Promise<SocialToggleResponse> => {
+  const response = await apiV2.post<SocialToggleResponse>(
+    `/spots/${id}/visit`,
+    {},
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
+// 방문한 Spot 목록 조회
+export const fetchVisitedSpots = async (
+  userId: string,
+  page: number = 0,
+  size: number = 20
+): Promise<PaginatedResponse<SpotDetailResponse>> => {
+  const response = await apiV2.get<PaginatedResponse<SpotDetailResponse>>(
+    `/users/${userId}/visited-spots`,
+    { params: { page, size }, headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 10000 }
+  );
+  return response.data;
 };
 
 // ==================== Replication API (v2 — SpotLine 복제/내 일정) ====================

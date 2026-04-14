@@ -286,6 +286,7 @@ export interface SpotDetailResponse {
   mediaItems: SpotMediaItem[];
   likesCount: number;
   savesCount: number;
+  visitedCount: number;
   viewsCount: number;
   commentsCount: number;
   creatorType: string;
@@ -469,14 +470,17 @@ export interface HealthCheckResponse {
 export interface SocialStatus {
   isLiked: boolean;
   isSaved: boolean;
+  isVisited: boolean;
 }
 
 // 소셜 토글 API 응답
 export interface SocialToggleResponse {
   liked?: boolean;
   saved?: boolean;
+  visited?: boolean;
   likesCount: number;
   savesCount: number;
+  visitedCount: number;
 }
 
 // ============================================================

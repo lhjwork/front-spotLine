@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Bookmark, Share2, Navigation2, ChevronDown, ChevronUp, Route } from "lucide-react";
+import { Heart, Bookmark, MapPinCheck, Share2, Navigation2, ChevronDown, ChevronUp, Route } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -19,6 +19,7 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
   const item = useSocialStore((s) => s.getItem("spot", spot.id));
   const toggleLike = useSocialStore((s) => s.toggleLike);
   const toggleSave = useSocialStore((s) => s.toggleSave);
+  const toggleVisit = useSocialStore((s) => s.toggleVisit);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [showMap, setShowMap] = useState(false);
@@ -28,6 +29,7 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
+  const visited = item?.visited ?? false;
   const likesCount = item?.likesCount ?? spot.likesCount;
 
   const handleLike = () => {
@@ -46,6 +48,15 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
       return;
     }
     toggleSave("spot", spot.id);
+  };
+
+  const handleVisit = () => {
+    if (!isAuthenticated) {
+      setLoginMessage("로그인하고 방문 기록을 남겨보세요");
+      setShowLogin(true);
+      return;
+    }
+    toggleVisit(spot.id);
   };
 
   const handleShare = () => {
@@ -80,6 +91,19 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
           >
             <Bookmark className={cn("h-4 w-4", saved && "fill-amber-500")} />
             <span>{saved ? "저장됨" : "저장"}</span>
+          </button>
+
+          <button
+            onClick={handleVisit}
+            className={cn(
+              "flex items-center gap-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+              visited
+                ? "bg-green-50 text-green-600"
+                : "text-gray-600 hover:bg-gray-100"
+            )}
+          >
+            <MapPinCheck className={cn("h-4 w-4", visited && "fill-green-500")} />
+            <span>{visited ? "가봤어요" : "방문"}</span>
           </button>
 
           <button

@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, Bookmark, MapPin, Map, BookOpen } from "lucide-react";
+import { Heart, Bookmark, MapPinCheck, MapPin, Map, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots } from "@/lib/api";
+import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots, fetchVisitedSpots } from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
 import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
 import type { SpotDetailResponse, SpotLinePreview, MySpotLine } from "@/types";
@@ -14,11 +14,12 @@ interface ProfileTabsProps {
   isMe?: boolean;
 }
 
-type TabKey = "likes" | "saves" | "spotlines" | "my-spots" | "blogs";
+type TabKey = "likes" | "saves" | "visited" | "spotlines" | "my-spots" | "blogs";
 
 const TABS: { key: TabKey; label: string; icon: typeof Heart; meOnly?: boolean }[] = [
   { key: "likes", label: "좋아요", icon: Heart },
   { key: "saves", label: "저장", icon: Bookmark },
+  { key: "visited", label: "방문", icon: MapPinCheck },
   { key: "spotlines", label: "SpotLine", icon: MapPin, meOnly: true },
   { key: "my-spots", label: "내 Spot", icon: Map, meOnly: true },
   { key: "blogs", label: "블로그", icon: BookOpen, meOnly: true },
@@ -30,6 +31,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
   const [likedSpots, setLikedSpots] = useState<SpotDetailResponse[] | null>(null);
   const [savedSpotLines, setSavedSpotLines] = useState<SpotLinePreview[] | null>(null);
   const [mySpotLines, setMySpotLines] = useState<MySpotLine[] | null>(null);
+  const [visitedSpots, setVisitedSpots] = useState<SpotDetailResponse[] | null>(null);
   const [mySpots, setMySpots] = useState<SpotDetailResponse[] | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -42,6 +44,9 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
       } else if (tab === "saves" && !savedSpotLines) {
         const res = await fetchUserSavedSpotLines(userId);
         setSavedSpotLines(res.content);
+      } else if (tab === "visited" && !visitedSpots) {
+        const res = await fetchVisitedSpots(userId);
+        setVisitedSpots(res.content);
       } else if (tab === "spotlines" && isMe && !mySpotLines) {
         const res = await fetchMySpotLines();
         setMySpotLines(res.items);
@@ -54,7 +59,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
     } finally {
       setLoading(false);
     }
-  }, [userId, isMe, likedSpots, savedSpotLines, mySpotLines, mySpots]);
+  }, [userId, isMe, likedSpots, savedSpotLines, visitedSpots, mySpotLines, mySpots]);
 
   useEffect(() => {
     loadTabData(activeTab);
@@ -118,6 +123,18 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
             </div>
           ) : (
             <EmptyState message="아직 저장한 SpotLine이 없습니다" />
+          )
+        )}
+
+        {!loading && activeTab === "visited" && (
+          visitedSpots && visitedSpots.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              {visitedSpots.map((spot) => (
+                <SpotPreviewCard key={spot.id} spot={spot} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="아직 방문한 Spot이 없습니다" />
           )
         )}
 

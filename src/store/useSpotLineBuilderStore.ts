@@ -113,6 +113,7 @@ function spotLineSpotDetailToBuilderSpot(
       mediaItems: [],
       likesCount: 0,
       savesCount: 0,
+      visitedCount: 0,
       viewsCount: 0,
       commentsCount: 0,
       creatorType: "crew",

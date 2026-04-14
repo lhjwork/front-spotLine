@@ -4,6 +4,7 @@ import { create } from "zustand";
 import {
   toggleLike as apiToggleLike,
   toggleSave as apiToggleSave,
+  toggleVisit as apiToggleVisit,
   followUser as apiFollow,
   unfollowUser as apiUnfollow,
 } from "@/lib/api";
@@ -12,8 +13,10 @@ import type { SocialStatus } from "@/types";
 interface SocialItem {
   liked: boolean;
   saved: boolean;
+  visited: boolean;
   likesCount: number;
   savesCount: number;
+  visitedCount: number;
 }
 
 interface FollowItem {
@@ -30,14 +33,16 @@ interface SocialState {
     id: string,
     status: SocialStatus,
     likesCount: number,
-    savesCount: number
+    savesCount: number,
+    visitedCount?: number
   ) => void;
   toggleLike: (type: "spot" | "spotline" | "blog", id: string) => Promise<void>;
   toggleSave: (type: "spot" | "spotline" | "blog", id: string) => Promise<void>;
+  toggleVisit: (id: string) => Promise<void>;
   getItem: (type: "spot" | "spotline" | "blog", id: string) => SocialItem | undefined;
 
   batchInitSocialStatus: (
-    items: Array<{ type: "spot" | "spotline" | "blog"; id: string; likesCount: number; savesCount: number }>
+    items: Array<{ type: "spot" | "spotline" | "blog"; id: string; likesCount: number; savesCount: number; visitedCount?: number }>
   ) => void;
 
   initFollowStatus: (userId: string, isFollowing: boolean, followersCount: number) => void;
@@ -51,7 +56,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
   items: {},
   followStatus: {},
 
-  initSocialStatus: (type, id, status, likesCount, savesCount) => {
+  initSocialStatus: (type, id, status, likesCount, savesCount, visitedCount) => {
     const key = makeKey(type, id);
     set((state) => ({
       items: {
@@ -59,8 +64,10 @@ export const useSocialStore = create<SocialState>((set, get) => ({
         [key]: {
           liked: status.isLiked,
           saved: status.isSaved,
+          visited: status.isVisited,
           likesCount,
           savesCount,
+          visitedCount: visitedCount ?? 0,
         },
       },
     }));
@@ -128,6 +135,35 @@ export const useSocialStore = create<SocialState>((set, get) => ({
     }
   },
 
+  toggleVisit: async (id) => {
+    const key = makeKey("spot", id);
+    const prev = get().items[key];
+    if (!prev) return;
+
+    const optimistic: SocialItem = {
+      ...prev,
+      visited: !prev.visited,
+      visitedCount: prev.visitedCount + (prev.visited ? -1 : 1),
+    };
+    set((state) => ({ items: { ...state.items, [key]: optimistic } }));
+
+    try {
+      const response = await apiToggleVisit(id);
+      set((state) => ({
+        items: {
+          ...state.items,
+          [key]: {
+            ...state.items[key],
+            visited: response.visited ?? optimistic.visited,
+            visitedCount: response.visitedCount,
+          },
+        },
+      }));
+    } catch {
+      console.warn(`방문 API 실패 (spot:${id}) — 로컬 상태 유지`);
+    }
+  },
+
   getItem: (type, id) => {
     return get().items[makeKey(type, id)];
   },
@@ -141,8 +177,10 @@ export const useSocialStore = create<SocialState>((set, get) => ({
           newItems[key] = {
             liked: false,
             saved: false,
+            visited: false,
             likesCount: item.likesCount,
             savesCount: item.savesCount,
+            visitedCount: item.visitedCount ?? 0,
           };
         }
       }
