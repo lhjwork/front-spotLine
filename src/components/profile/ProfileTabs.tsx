@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Heart, Bookmark, MapPinCheck, MapPin, Map, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots, fetchVisitedSpots } from "@/lib/api";
+import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots, fetchVisitedSpots, fetchMyCheckins } from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
 import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
-import type { SpotDetailResponse, SpotLinePreview, MySpotLine } from "@/types";
+import type { SpotDetailResponse, SpotLinePreview, MySpotLine, CheckinListItem } from "@/types";
 
 interface ProfileTabsProps {
   userId: string;
@@ -19,7 +20,7 @@ type TabKey = "likes" | "saves" | "visited" | "spotlines" | "my-spots" | "blogs"
 const TABS: { key: TabKey; label: string; icon: typeof Heart; meOnly?: boolean }[] = [
   { key: "likes", label: "좋아요", icon: Heart },
   { key: "saves", label: "저장", icon: Bookmark },
-  { key: "visited", label: "방문", icon: MapPinCheck },
+  { key: "visited", label: "체크인", icon: MapPinCheck },
   { key: "spotlines", label: "SpotLine", icon: MapPin, meOnly: true },
   { key: "my-spots", label: "내 Spot", icon: Map, meOnly: true },
   { key: "blogs", label: "블로그", icon: BookOpen, meOnly: true },
@@ -32,6 +33,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
   const [savedSpotLines, setSavedSpotLines] = useState<SpotLinePreview[] | null>(null);
   const [mySpotLines, setMySpotLines] = useState<MySpotLine[] | null>(null);
   const [visitedSpots, setVisitedSpots] = useState<SpotDetailResponse[] | null>(null);
+  const [checkins, setCheckins] = useState<CheckinListItem[] | null>(null);
   const [mySpots, setMySpots] = useState<SpotDetailResponse[] | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +46,10 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
       } else if (tab === "saves" && !savedSpotLines) {
         const res = await fetchUserSavedSpotLines(userId);
         setSavedSpotLines(res.content);
-      } else if (tab === "visited" && !visitedSpots) {
+      } else if (tab === "visited" && isMe && !checkins) {
+        const res = await fetchMyCheckins();
+        setCheckins(res.content);
+      } else if (tab === "visited" && !isMe && !visitedSpots) {
         const res = await fetchVisitedSpots(userId);
         setVisitedSpots(res.content);
       } else if (tab === "spotlines" && isMe && !mySpotLines) {
@@ -59,7 +64,7 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
     } finally {
       setLoading(false);
     }
-  }, [userId, isMe, likedSpots, savedSpotLines, visitedSpots, mySpotLines, mySpots]);
+  }, [userId, isMe, likedSpots, savedSpotLines, visitedSpots, checkins, mySpotLines, mySpots]);
 
   useEffect(() => {
     loadTabData(activeTab);
@@ -126,7 +131,15 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
           )
         )}
 
-        {!loading && activeTab === "visited" && (
+        {!loading && activeTab === "visited" && isMe && (
+          checkins && checkins.length > 0 ? (
+            <CheckinHistoryList checkins={checkins} />
+          ) : (
+            <EmptyState message="아직 체크인한 Spot이 없습니다" />
+          )
+        )}
+
+        {!loading && activeTab === "visited" && !isMe && (
           visitedSpots && visitedSpots.length > 0 ? (
             <div className="grid grid-cols-2 gap-3">
               {visitedSpots.map((spot) => (
@@ -177,6 +190,48 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
           )
         )}
       </div>
+    </div>
+  );
+}
+
+function CheckinHistoryList({ checkins }: { checkins: CheckinListItem[] }) {
+  const grouped: [string, CheckinListItem[]][] = useMemo(() => {
+    const map: Record<string, CheckinListItem[]> = {};
+    for (const item of checkins) {
+      const date = new Date(item.createdAt).toLocaleDateString("ko-KR", {
+        year: "numeric", month: "long", day: "numeric",
+      });
+      if (!map[date]) map[date] = [];
+      map[date].push(item);
+    }
+    return Object.entries(map);
+  }, [checkins]);
+
+  return (
+    <div className="space-y-4">
+      {grouped.map(([date, items]) => (
+        <div key={date}>
+          <h4 className="mb-2 text-xs font-medium text-gray-500">{date}</h4>
+          <div className="space-y-2">
+            {items.map((item) => (
+              <Link
+                key={item.id}
+                href={item.spotSlug ? `/spot/${item.spotSlug}` : "#"}
+                className="flex items-center gap-3 rounded-lg border border-gray-100 p-3 hover:bg-gray-50"
+              >
+                <MapPinCheck className={cn("h-5 w-5 shrink-0", item.verified ? "text-green-500" : "text-gray-400")} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-gray-900">{item.spotTitle ?? "Spot"}</p>
+                  {item.memo && <p className="truncate text-xs text-gray-500">{item.memo}</p>}
+                </div>
+                {item.verified && (
+                  <span className="shrink-0 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600">GPS 인증</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

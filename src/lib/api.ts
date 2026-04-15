@@ -980,6 +980,43 @@ export const fetchVisitedSpots = async (
   return response.data;
 };
 
+// ==================== Checkin API (GPS 기반 체크인) ====================
+
+export const checkinSpot = async (
+  spotId: string,
+  data: { latitude?: number; longitude?: number; memo?: string }
+): Promise<import("@/types").CheckinResponse> => {
+  const response = await apiV2.post<import("@/types").CheckinResponse>(
+    `/spots/${spotId}/checkin`,
+    data,
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
+export const fetchMyCheckins = async (
+  page: number = 0,
+  size: number = 20
+): Promise<import("@/types").PaginatedResponse<import("@/types").CheckinListItem>> => {
+  const response = await apiV2.get<import("@/types").PaginatedResponse<import("@/types").CheckinListItem>>(
+    `/me/checkins`,
+    { params: { page, size }, headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 10000 }
+  );
+  return response.data;
+};
+
+export const fetchSpotCheckins = async (
+  spotId: string,
+  page: number = 0,
+  size: number = 20
+): Promise<import("@/types").PaginatedResponse<import("@/types").CheckinListItem>> => {
+  const response = await apiV2.get<import("@/types").PaginatedResponse<import("@/types").CheckinListItem>>(
+    `/spots/${spotId}/checkins`,
+    { params: { page, size }, timeout: 10000 }
+  );
+  return response.data;
+};
+
 // ==================== Replication API (v2 — SpotLine 복제/내 일정) ====================
 
 // SpotLine 복제

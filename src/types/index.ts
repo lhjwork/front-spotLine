@@ -484,6 +484,38 @@ export interface SocialToggleResponse {
 }
 
 // ============================================================
+// Checkin 타입 (GPS 기반 체크인)
+// ============================================================
+
+export interface CheckinRequest {
+  latitude?: number;
+  longitude?: number;
+  memo?: string;
+}
+
+export interface CheckinResponse {
+  id: string;
+  spotId: string;
+  verified: boolean;
+  memo?: string;
+  visitedCount: number;
+  myCheckinCount: number;
+  createdAt: string;
+}
+
+export interface CheckinListItem {
+  id: string;
+  userId: string;
+  memo?: string;
+  verified: boolean;
+  createdAt: string;
+  spotId?: string;
+  spotTitle?: string;
+  spotSlug?: string;
+  spotThumbnail?: string;
+}
+
+// ============================================================
 // Feed / City / Theme 타입 (Experience Feed - Phase 4)
 // ============================================================
 

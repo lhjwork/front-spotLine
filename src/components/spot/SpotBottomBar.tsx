@@ -8,6 +8,7 @@ import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
 import SpotShareSheet from "@/components/spot/SpotShareSheet";
+import CheckinMemoModal from "@/components/spot/CheckinMemoModal";
 import ExternalMapButtons from "@/components/map/ExternalMapButtons";
 import type { SpotDetailResponse } from "@/types";
 
@@ -19,13 +20,14 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
   const item = useSocialStore((s) => s.getItem("spot", spot.id));
   const toggleLike = useSocialStore((s) => s.toggleLike);
   const toggleSave = useSocialStore((s) => s.toggleSave);
-  const toggleVisit = useSocialStore((s) => s.toggleVisit);
+  const checkin = useSocialStore((s) => s.checkin);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [showMap, setShowMap] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [showCheckinModal, setShowCheckinModal] = useState(false);
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
@@ -50,13 +52,18 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
     toggleSave("spot", spot.id);
   };
 
-  const handleVisit = () => {
+  const handleCheckin = () => {
     if (!isAuthenticated) {
-      setLoginMessage("로그인하고 방문 기록을 남겨보세요");
+      setLoginMessage("로그인하고 체크인 해보세요");
       setShowLogin(true);
       return;
     }
-    toggleVisit(spot.id);
+    setShowCheckinModal(true);
+  };
+
+  const handleCheckinSubmit = async (data: { latitude?: number; longitude?: number; memo?: string }) => {
+    await checkin(spot.id, data);
+    setShowCheckinModal(false);
   };
 
   const handleShare = () => {
@@ -94,7 +101,7 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
           </button>
 
           <button
-            onClick={handleVisit}
+            onClick={handleCheckin}
             className={cn(
               "flex items-center gap-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
               visited
@@ -103,7 +110,7 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
             )}
           >
             <MapPinCheck className={cn("h-4 w-4", visited && "fill-green-500")} />
-            <span>{visited ? "가봤어요" : "방문"}</span>
+            <span>체크인</span>
           </button>
 
           <button
@@ -169,6 +176,14 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
         onClose={() => setShowShareSheet(false)}
         spot={spot}
       />
+
+      {showCheckinModal && (
+        <CheckinMemoModal
+          spotTitle={spot.title}
+          onSubmit={handleCheckinSubmit}
+          onClose={() => setShowCheckinModal(false)}
+        />
+      )}
     </>
   );
 }

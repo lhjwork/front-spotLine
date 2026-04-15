@@ -5,10 +5,11 @@ import {
   toggleLike as apiToggleLike,
   toggleSave as apiToggleSave,
   toggleVisit as apiToggleVisit,
+  checkinSpot as apiCheckin,
   followUser as apiFollow,
   unfollowUser as apiUnfollow,
 } from "@/lib/api";
-import type { SocialStatus } from "@/types";
+import type { SocialStatus, CheckinResponse } from "@/types";
 
 interface SocialItem {
   liked: boolean;
@@ -39,6 +40,7 @@ interface SocialState {
   toggleLike: (type: "spot" | "spotline" | "blog", id: string) => Promise<void>;
   toggleSave: (type: "spot" | "spotline" | "blog", id: string) => Promise<void>;
   toggleVisit: (id: string) => Promise<void>;
+  checkin: (id: string, data: { latitude?: number; longitude?: number; memo?: string }) => Promise<CheckinResponse>;
   getItem: (type: "spot" | "spotline" | "blog", id: string) => SocialItem | undefined;
 
   batchInitSocialStatus: (
@@ -162,6 +164,27 @@ export const useSocialStore = create<SocialState>((set, get) => ({
     } catch {
       console.warn(`방문 API 실패 (spot:${id}) — 로컬 상태 유지`);
     }
+  },
+
+  checkin: async (id, data) => {
+    const key = makeKey("spot", id);
+    const response = await apiCheckin(id, data);
+    // Update store with server response
+    set((state) => {
+      const prev = state.items[key];
+      if (!prev) return state;
+      return {
+        items: {
+          ...state.items,
+          [key]: {
+            ...prev,
+            visited: true,
+            visitedCount: response.visitedCount,
+          },
+        },
+      };
+    });
+    return response;
   },
 
   getItem: (type, id) => {
