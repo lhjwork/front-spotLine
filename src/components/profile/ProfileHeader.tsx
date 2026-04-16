@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/types";
 
@@ -23,7 +24,24 @@ export default function ProfileHeader({
   onShowFollowers,
   onShowFollowing,
 }: ProfileHeaderProps) {
-  const postsCount = profile.stats.liked + profile.stats.recommended;
+  const handleShare = async () => {
+    const url = `${window.location.origin}/profile/${profile.id}`;
+    const shareData = {
+      title: `${profile.nickname}의 프로필`,
+      text: profile.bio || `${profile.nickname}의 Spotline 프로필을 확인해보세요`,
+      url,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // share cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("프로필 링크가 복사되었습니다");
+    }
+  };
 
   return (
     <div className="px-4 py-5">
@@ -47,28 +65,37 @@ export default function ProfileHeader({
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-bold">{profile.nickname}</h1>
-            {isMe ? (
-              onEdit && (
-                <button
-                  onClick={onEdit}
-                  className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  프로필 편집
-                </button>
-              )
-            ) : (
+            <div className="flex items-center gap-2">
               <button
-                onClick={onFollow}
-                className={cn(
-                  "rounded-lg px-4 py-1.5 text-sm font-medium transition-colors",
-                  isFollowing
-                    ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                )}
+                onClick={handleShare}
+                className="rounded-lg border border-gray-300 p-1.5 text-gray-500 hover:bg-gray-50"
+                aria-label="프로필 공유"
               >
-                {isFollowing ? "팔로잉" : "팔로우"}
+                <Share2 className="h-4 w-4" />
               </button>
-            )}
+              {isMe ? (
+                onEdit && (
+                  <button
+                    onClick={onEdit}
+                    className="rounded-lg border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    프로필 편집
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={onFollow}
+                  className={cn(
+                    "rounded-lg px-4 py-1.5 text-sm font-medium transition-colors",
+                    isFollowing
+                      ? "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  )}
+                >
+                  {isFollowing ? "팔로잉" : "팔로우"}
+                </button>
+              )}
+            </div>
           </div>
 
           {profile.instagramId && (
@@ -83,8 +110,12 @@ export default function ProfileHeader({
 
       <div className="mt-4 flex justify-around border-t border-gray-100 pt-4">
         <div className="text-center">
-          <p className="text-base font-bold">{postsCount}</p>
-          <p className="text-xs text-gray-500">게시물</p>
+          <p className="text-base font-bold">{profile.stats.spotLinesCount}</p>
+          <p className="text-xs text-gray-500">SpotLine</p>
+        </div>
+        <div className="text-center">
+          <p className="text-base font-bold">{profile.stats.spotsCount}</p>
+          <p className="text-xs text-gray-500">Spot</p>
         </div>
         <button onClick={onShowFollowers} className="text-center">
           <p className="text-base font-bold">{profile.stats.followers}</p>

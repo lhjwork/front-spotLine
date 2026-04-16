@@ -15,9 +15,25 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
     return { title: "프로필을 찾을 수 없습니다" };
   }
 
+  const title = `${profile.nickname}의 프로필`;
+  const description = profile.bio ||
+    `SpotLine ${profile.stats.spotLinesCount}개 · Spot ${profile.stats.spotsCount}개 · 팔로워 ${profile.stats.followers}명`;
+
   return {
-    title: `${profile.nickname}의 프로필`,
-    description: profile.bio || `${profile.nickname}의 Spotline 프로필`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      ...(profile.avatar && { images: [{ url: profile.avatar, width: 200, height: 200 }] }),
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      ...(profile.avatar && { images: [profile.avatar] }),
+    },
   };
 }
 

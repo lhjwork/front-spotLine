@@ -15,7 +15,7 @@ export const MOCK_USERS: UserProfile[] = [
     avatar: "https://picsum.photos/seed/avatar1/100/100",
     bio: "서울의 숨겨진 카페를 찾아다니는 커피 러버",
     joinedAt: "2025-11-15",
-    stats: { visited: 42, liked: 28, recommended: 12, spotlines: 3, followers: 48, following: 23 },
+    stats: { visited: 42, liked: 28, recommended: 12, spotlines: 3, spotsCount: 0, spotLinesCount: 0, blogsCount: 0, followers: 48, following: 23 },
   },
   {
     id: "user-2",
@@ -23,7 +23,7 @@ export const MOCK_USERS: UserProfile[] = [
     avatar: "https://picsum.photos/seed/avatar2/100/100",
     bio: "걸으며 발견하는 서울의 매력",
     joinedAt: "2025-12-01",
-    stats: { visited: 67, liked: 45, recommended: 23, spotlines: 5, followers: 120, following: 56 },
+    stats: { visited: 67, liked: 45, recommended: 23, spotlines: 5, spotsCount: 0, spotLinesCount: 0, blogsCount: 0, followers: 120, following: 56 },
   },
   {
     id: "user-3",
@@ -31,7 +31,7 @@ export const MOCK_USERS: UserProfile[] = [
     avatar: "https://picsum.photos/seed/avatar3/100/100",
     bio: "현대미술과 갤러리를 사랑합니다",
     joinedAt: "2026-01-10",
-    stats: { visited: 31, liked: 22, recommended: 8, spotlines: 2, followers: 35, following: 18 },
+    stats: { visited: 31, liked: 22, recommended: 8, spotlines: 2, spotsCount: 0, spotLinesCount: 0, blogsCount: 0, followers: 35, following: 18 },
   },
   {
     id: "user-4",
@@ -39,7 +39,7 @@ export const MOCK_USERS: UserProfile[] = [
     avatar: "https://picsum.photos/seed/avatar4/100/100",
     bio: "로컬 맛집만 골라 다니는 미식가",
     joinedAt: "2026-01-20",
-    stats: { visited: 55, liked: 38, recommended: 19, spotlines: 4, followers: 89, following: 42 },
+    stats: { visited: 55, liked: 38, recommended: 19, spotlines: 4, spotsCount: 0, spotLinesCount: 0, blogsCount: 0, followers: 89, following: 42 },
   },
   {
     id: "user-5",
@@ -47,7 +47,7 @@ export const MOCK_USERS: UserProfile[] = [
     avatar: "https://picsum.photos/seed/avatar5/100/100",
     bio: "사진 찍기 좋은 곳을 찾아다닙니다",
     joinedAt: "2026-02-05",
-    stats: { visited: 23, liked: 15, recommended: 6, spotlines: 2, followers: 15, following: 31 },
+    stats: { visited: 23, liked: 15, recommended: 6, spotlines: 2, spotsCount: 0, spotLinesCount: 0, blogsCount: 0, followers: 15, following: 31 },
   },
 ];
 

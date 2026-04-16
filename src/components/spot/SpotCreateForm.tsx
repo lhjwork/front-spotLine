@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { createSpot } from "@/lib/api";
+import { createSpot, updateSpot } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import CategorySelector from "./CategorySelector";
 import AddressSearch from "./AddressSearch";
 import TagInput from "./TagInput";
 import CreateFormPhotoUpload from "./CreateFormPhotoUpload";
-import type { SpotCategory, CreateSpotRequest, MediaItemRequest } from "@/types";
+import type { SpotCategory, SpotDetailResponse, CreateSpotRequest, MediaItemRequest } from "@/types";
 
 interface AddressData {
   address: string;
@@ -21,19 +21,40 @@ interface AddressData {
   dong: string;
 }
 
-export default function SpotCreateForm() {
+interface SpotCreateFormProps {
+  editData?: SpotDetailResponse;
+}
+
+export default function SpotCreateForm({ editData }: SpotCreateFormProps) {
   const router = useRouter();
+  const isEditMode = !!editData;
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<SpotCategory | null>(null);
-  const [addressData, setAddressData] = useState<AddressData | null>(null);
-  const [description, setDescription] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [blogUrl, setBlogUrl] = useState("");
-  const [instagramUrl, setInstagramUrl] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [title, setTitle] = useState(editData?.title || "");
+  const [category, setCategory] = useState<SpotCategory | null>(
+    editData?.category || null
+  );
+  const [addressData, setAddressData] = useState<AddressData | null>(
+    editData
+      ? {
+          address: editData.address,
+          latitude: editData.latitude,
+          longitude: editData.longitude,
+          area: editData.area,
+          sido: editData.sido || "",
+          sigungu: editData.sigungu || "",
+          dong: editData.dong || "",
+        }
+      : null
+  );
+  const [description, setDescription] = useState(editData?.description || "");
+  const [tags, setTags] = useState<string[]>(editData?.tags || []);
+  const [blogUrl, setBlogUrl] = useState(editData?.blogUrl || "");
+  const [instagramUrl, setInstagramUrl] = useState(editData?.instagramUrl || "");
+  const [websiteUrl, setWebsiteUrl] = useState(editData?.websiteUrl || "");
 
-  const [mediaItems, setMediaItems] = useState<MediaItemRequest[]>([]);
+  const [mediaItems, setMediaItems] = useState<MediaItemRequest[]>(
+    editData?.mediaItems?.map((m) => ({ url: m.url, mediaType: m.mediaType })) || []
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -71,10 +92,15 @@ export default function SpotCreateForm() {
         ...(mediaItems.length > 0 && { mediaItems }),
       };
 
-      const result = await createSpot(request);
-      router.push(`/spot/${result.slug}`);
+      if (isEditMode) {
+        await updateSpot(editData.slug, request);
+        router.push(`/my-spots`);
+      } else {
+        const result = await createSpot(request);
+        router.push(`/spot/${result.slug}`);
+      }
     } catch (err: any) {
-      const message = err?.response?.data?.message || "Spot 등록에 실패했습니다. 다시 시도해주세요.";
+      const message = err?.response?.data?.message || (isEditMode ? "Spot 수정에 실패했습니다. 다시 시도해주세요." : "Spot 등록에 실패했습니다. 다시 시도해주세요.");
       alert(message);
     } finally {
       setIsSubmitting(false);
@@ -188,10 +214,10 @@ export default function SpotCreateForm() {
         {isSubmitting ? (
           <span className="flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            등록 중...
+            {isEditMode ? "수정 중..." : "등록 중..."}
           </span>
         ) : (
-          "Spot 등록하기"
+          isEditMode ? "Spot 수정하기" : "Spot 등록하기"
         )}
       </button>
     </form>

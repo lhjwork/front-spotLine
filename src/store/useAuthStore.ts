@@ -66,7 +66,7 @@ function sessionToUserProfile(session: Session): UserProfile {
     avatar: meta.avatar_url || meta.picture || "",
     email: user.email,
     joinedAt: user.created_at,
-    stats: { visited: 0, liked: 0, recommended: 0, spotlines: 0, followers: 0, following: 0 },
+    stats: { visited: 0, liked: 0, recommended: 0, spotlines: 0, spotsCount: 0, spotLinesCount: 0, blogsCount: 0, followers: 0, following: 0 },
   };
 }
 

@@ -1,40 +1,51 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, Bookmark, MapPinCheck, MapPin, Map, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { fetchUserLikedSpots, fetchUserSavedSpotLines, fetchMySpotLines, fetchMySpots, fetchVisitedSpots, fetchMyCheckins } from "@/lib/api";
+import {
+  fetchUserLikedSpots,
+  fetchUserSavedSpotLines,
+  fetchMySpotLines,
+  fetchMySpots,
+  fetchVisitedSpots,
+  fetchMyCheckins,
+  fetchUserSpotLines,
+  fetchUserSpots,
+  fetchUserBlogs,
+} from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
 import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
-import type { SpotDetailResponse, SpotLinePreview, MySpotLine, CheckinListItem } from "@/types";
+import type { SpotDetailResponse, SpotLinePreview, MySpotLine, CheckinListItem, BlogListItem } from "@/types";
 
 interface ProfileTabsProps {
   userId: string;
   isMe?: boolean;
 }
 
-type TabKey = "likes" | "saves" | "visited" | "spotlines" | "my-spots" | "blogs";
+type TabKey = "spotlines" | "my-spots" | "blogs" | "likes" | "saves" | "visited";
 
-const TABS: { key: TabKey; label: string; icon: typeof Heart; meOnly?: boolean }[] = [
+const TABS: { key: TabKey; label: string; icon: typeof Heart }[] = [
+  { key: "spotlines", label: "SpotLine", icon: MapPin },
+  { key: "my-spots", label: "Spot", icon: Map },
+  { key: "blogs", label: "블로그", icon: BookOpen },
   { key: "likes", label: "좋아요", icon: Heart },
   { key: "saves", label: "저장", icon: Bookmark },
   { key: "visited", label: "체크인", icon: MapPinCheck },
-  { key: "spotlines", label: "SpotLine", icon: MapPin, meOnly: true },
-  { key: "my-spots", label: "내 Spot", icon: Map, meOnly: true },
-  { key: "blogs", label: "블로그", icon: BookOpen, meOnly: true },
 ];
 
 export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabKey>("likes");
+  const [activeTab, setActiveTab] = useState<TabKey>("spotlines");
   const [likedSpots, setLikedSpots] = useState<SpotDetailResponse[] | null>(null);
   const [savedSpotLines, setSavedSpotLines] = useState<SpotLinePreview[] | null>(null);
   const [mySpotLines, setMySpotLines] = useState<MySpotLine[] | null>(null);
+  const [userSpotLines, setUserSpotLines] = useState<SpotLinePreview[] | null>(null);
   const [visitedSpots, setVisitedSpots] = useState<SpotDetailResponse[] | null>(null);
   const [checkins, setCheckins] = useState<CheckinListItem[] | null>(null);
   const [mySpots, setMySpots] = useState<SpotDetailResponse[] | null>(null);
+  const [userSpots, setUserSpots] = useState<SpotDetailResponse[] | null>(null);
+  const [userBlogs, setUserBlogs] = useState<BlogListItem[] | null>(null);
   const [loading, setLoading] = useState(false);
 
   const loadTabData = useCallback(async (tab: TabKey) => {
@@ -55,38 +66,37 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
       } else if (tab === "spotlines" && isMe && !mySpotLines) {
         const res = await fetchMySpotLines();
         setMySpotLines(res.items);
+      } else if (tab === "spotlines" && !isMe && !userSpotLines) {
+        const res = await fetchUserSpotLines(userId);
+        setUserSpotLines(res.items);
       } else if (tab === "my-spots" && isMe && !mySpots) {
         const res = await fetchMySpots();
         setMySpots(res.content);
+      } else if (tab === "my-spots" && !isMe && !userSpots) {
+        const res = await fetchUserSpots(userId);
+        setUserSpots(res.items);
+      } else if (tab === "blogs" && !userBlogs) {
+        const res = await fetchUserBlogs(userId);
+        setUserBlogs(res.items);
       }
     } catch {
       // 데이터 로딩 실패 시 빈 상태 유지
     } finally {
       setLoading(false);
     }
-  }, [userId, isMe, likedSpots, savedSpotLines, visitedSpots, checkins, mySpotLines, mySpots]);
+  }, [userId, isMe, likedSpots, savedSpotLines, visitedSpots, checkins, mySpotLines, userSpotLines, mySpots, userSpots, userBlogs]);
 
   useEffect(() => {
     loadTabData(activeTab);
   }, [activeTab, loadTabData]);
 
-  const handleTabChange = (tab: TabKey) => {
-    if (tab === "blogs") {
-      router.push("/my-blogs");
-      return;
-    }
-    setActiveTab(tab);
-  };
-
-  const filteredTabs = isMe ? TABS : TABS.filter((t) => !t.meOnly);
-
   return (
     <div>
       <div className="flex border-b border-gray-200">
-        {filteredTabs.map((tab) => (
+        {TABS.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => handleTabChange(tab.key)}
+            onClick={() => setActiveTab(tab.key)}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors",
               activeTab === tab.key
@@ -174,7 +184,19 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
               ))}
             </div>
           ) : (
-            <EmptyState message="아직 복제한 SpotLine이 없습니다" />
+            <EmptyState message="아직 생성한 SpotLine이 없습니다" />
+          )
+        )}
+
+        {!loading && activeTab === "spotlines" && !isMe && (
+          userSpotLines && userSpotLines.length > 0 ? (
+            <div className="space-y-3">
+              {userSpotLines.map((spotLine) => (
+                <SpotLinePreviewCard key={spotLine.id} spotLine={spotLine} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="아직 생성한 SpotLine이 없습니다" />
           )
         )}
 
@@ -187,6 +209,46 @@ export default function ProfileTabs({ userId, isMe = false }: ProfileTabsProps) 
             </div>
           ) : (
             <EmptyState message="아직 등록한 Spot이 없습니다" />
+          )
+        )}
+
+        {!loading && activeTab === "my-spots" && !isMe && (
+          userSpots && userSpots.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              {userSpots.map((spot) => (
+                <SpotPreviewCard key={spot.id} spot={spot} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="아직 등록한 Spot이 없습니다" />
+          )
+        )}
+
+        {!loading && activeTab === "blogs" && (
+          userBlogs && userBlogs.length > 0 ? (
+            <div className="space-y-3">
+              {userBlogs.map((blog) => (
+                <Link
+                  key={blog.id}
+                  href={`/blog/${blog.slug}`}
+                  className="block rounded-xl border border-gray-200 p-4 hover:bg-gray-50"
+                >
+                  <h3 className="font-medium text-gray-900">{blog.title}</h3>
+                  {blog.summary && (
+                    <p className="mt-1 line-clamp-2 text-sm text-gray-500">{blog.summary}</p>
+                  )}
+                  <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
+                    <span>{blog.spotLineTitle}</span>
+                    <span>조회 {blog.viewsCount}</span>
+                    {blog.publishedAt && (
+                      <span>{new Date(blog.publishedAt).toLocaleDateString("ko-KR")}</span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="아직 작성한 블로그가 없습니다" />
           )
         )}
       </div>

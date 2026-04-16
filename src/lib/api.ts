@@ -43,6 +43,7 @@ import type {
   NotificationItem,
   CreateSpotRequest,
   CreateSpotResponse,
+  SpotStatus,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -1248,6 +1249,45 @@ export const fetchUserSavedSpotLines = async (
   return res.data;
 };
 
+// 사용자 생성 SpotLine 목록 (공개)
+export const fetchUserSpotLines = async (
+  userId: string,
+  page = 1,
+  size = 20
+): Promise<{ items: SpotLinePreview[]; hasMore: boolean }> => {
+  const res = await apiV2.get<{ items: SpotLinePreview[]; hasMore: boolean }>(
+    `/users/${userId}/spotlines-created`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 사용자 생성 Spot 목록 (공개)
+export const fetchUserSpots = async (
+  userId: string,
+  page = 1,
+  size = 20
+): Promise<{ items: SpotDetailResponse[]; hasMore: boolean }> => {
+  const res = await apiV2.get<{ items: SpotDetailResponse[]; hasMore: boolean }>(
+    `/users/${userId}/spots`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
+// 사용자 작성 Blog 목록 (공개)
+export const fetchUserBlogs = async (
+  userId: string,
+  page = 1,
+  size = 20
+): Promise<{ items: BlogListItem[]; hasMore: boolean }> => {
+  const res = await apiV2.get<{ items: BlogListItem[]; hasMore: boolean }>(
+    `/users/${userId}/blogs`,
+    { params: { page: page - 1, size }, timeout: 5000 }
+  );
+  return res.data;
+};
+
 // 내 저장 목록
 export const fetchMySaves = async (
   type: "spot" | "spotline",
@@ -1399,6 +1439,31 @@ export async function createSpot(
     }
   );
   return data;
+}
+
+
+/** Spot 수정 */
+export async function updateSpot(
+  slug: string,
+  request: Partial<CreateSpotRequest>
+): Promise<SpotDetailResponse> {
+  const { data } = await apiV2.put<SpotDetailResponse>(
+    `/spots/${slug}`,
+    request,
+    {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      timeout: 10000,
+    }
+  );
+  return data;
+}
+
+/** Spot 삭제 */
+export async function deleteSpot(slug: string): Promise<void> {
+  await apiV2.delete(`/spots/${slug}`, {
+    headers: { Authorization: `Bearer ${getAuthToken()}` },
+    timeout: 5000,
+  });
 }
 
 // ==================== SpotLine Builder API ====================

@@ -294,6 +294,10 @@ export interface SpotDetailResponse {
   createdAt: string;
   placeInfo: DiscoverPlaceInfo | null;
   partner: SpotPartnerInfo | null;
+  status: string | null;
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
 }
 
 // SpotLine 상세 응답 (GET /api/v2/spotlines/:slug)
@@ -566,6 +570,9 @@ export interface UserProfile {
     liked: number;
     recommended: number;
     spotlines: number; // 참여 중인 SpotLine 수
+    spotsCount: number;
+    spotLinesCount: number;
+    blogsCount: number;
     followers: number;
     following: number;
   };
@@ -573,6 +580,9 @@ export interface UserProfile {
 
 // Spot 소스: SpotLine 제휴 vs 유저 추천
 export type SpotSource = "spotline" | "user";
+
+// Spot 승인 상태
+export type SpotStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 // 유저 활동 타입
 export type UserActivityType = "visit" | "like" | "recommend";
