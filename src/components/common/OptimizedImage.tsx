@@ -13,6 +13,7 @@ interface OptimizedImageProps {
   priority?: boolean;
   type?: 'store' | 'spot';
   fill?: boolean;
+  sizes?: string;
 }
 
 export default function OptimizedImage({
@@ -23,7 +24,8 @@ export default function OptimizedImage({
   className = "",
   priority = false,
   type = 'store',
-  fill = false
+  fill = false,
+  sizes
 }: OptimizedImageProps) {
   // Picsum 이미지 URL 정규화 (캐싱 개선을 위해)
   const normalizeImageUrl = (url: string) => {
@@ -117,7 +119,7 @@ export default function OptimizedImage({
         onError={handleError}
         onLoad={handleLoad}
         onLoadStart={handleLoadStart}
-        sizes={fill ? IMAGE_CONFIG.sizes.mobile : undefined}
+        sizes={sizes || (fill ? IMAGE_CONFIG.sizes.mobile : undefined)}
         unoptimized={isExternalImage(imgSrc)} // 외부 이미지는 최적화 비활성화
         // Picsum 이미지의 CORS 문제 해결을 위한 추가 속성
         crossOrigin="anonymous"

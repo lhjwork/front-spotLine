@@ -370,11 +370,12 @@ export interface SpotMediaItem {
 }
 
 export interface MediaItemRequest {
-  s3Key: string;
-  mediaType: "IMAGE";
-  displayOrder: number;
-  fileSizeBytes: number;
-  mimeType: string;
+  url?: string;
+  s3Key?: string;
+  mediaType: "IMAGE" | "VIDEO";
+  displayOrder?: number;
+  fileSizeBytes?: number;
+  mimeType?: string;
 }
 
 export interface DiscoverSpot {

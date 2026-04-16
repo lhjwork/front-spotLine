@@ -74,10 +74,13 @@ export const useMySpotStore = create<MySpotState>((set, get) => ({
   fetchSpots: async (status) => {
     set({ isLoading: true });
     try {
-      const data = await apiFetchMySpots(status);
-      if (data.items.length > 0) {
-        set({ spots: data.items });
-        syncLocal(data.items);
+      const data = await apiFetchMySpots();
+      if (data.content.length > 0) {
+        const items = status
+          ? data.content.filter((s) => s.status === status)
+          : data.content;
+        set({ spots: items });
+        syncLocal(data.content);
       } else {
         const local = readLocal();
         if (local.length > 0) {
