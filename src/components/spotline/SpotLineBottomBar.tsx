@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, Share2, Bookmark, CalendarPlus, GitFork } from "lucide-react";
+import { Heart, Share2, Bookmark, CalendarPlus, GitFork, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
 import ReplicateSpotLineSheet from "@/components/spotline/ReplicateSpotLineSheet";
+import ReportModal from "@/components/comment/ReportModal";
 import ShareSheet from "@/components/spotline/ShareSheet";
 import type { SpotLineDetailResponse } from "@/types";
 
@@ -21,11 +22,14 @@ export default function SpotLineBottomBar({ spotLine }: SpotLineBottomBarProps) 
   const toggleLike = useSocialStore((s) => s.toggleLike);
   const toggleSave = useSocialStore((s) => s.toggleSave);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const session = useAuthStore((s) => s.session);
+  const isOwner = session?.user?.id === spotLine.creatorId;
 
   const [showLogin, setShowLogin] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const [showReplicate, setShowReplicate] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
@@ -103,6 +107,16 @@ export default function SpotLineBottomBar({ spotLine }: SpotLineBottomBarProps) 
             <Share2 className="h-4 w-4" />
           </button>
 
+          {isAuthenticated && !isOwner && (
+            <button
+              onClick={() => setShowReport(true)}
+              className="flex items-center rounded-xl px-2 py-2.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+              title="신고"
+            >
+              <Flag className="h-4 w-4" />
+            </button>
+          )}
+
           <button
             onClick={handleFork}
             className="flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50 px-3 py-2 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100"
@@ -132,6 +146,15 @@ export default function SpotLineBottomBar({ spotLine }: SpotLineBottomBarProps) 
         onClose={() => setShowShare(false)}
         spotLine={spotLine}
       />
+
+      {showReport && (
+        <ReportModal
+          targetType="SPOTLINE"
+          targetId={spotLine.id}
+          onClose={() => setShowReport(false)}
+          onSuccess={() => setShowReport(false)}
+        />
+      )}
 
       <ReplicateSpotLineSheet
         isOpen={showReplicate}

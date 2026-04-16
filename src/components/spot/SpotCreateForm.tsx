@@ -9,6 +9,7 @@ import CategorySelector from "./CategorySelector";
 import AddressSearch from "./AddressSearch";
 import TagInput from "./TagInput";
 import CreateFormPhotoUpload from "./CreateFormPhotoUpload";
+import SpotContentGuide from "./SpotContentGuide";
 import type { SpotCategory, SpotDetailResponse, CreateSpotRequest, MediaItemRequest } from "@/types";
 
 interface AddressData {
@@ -109,6 +110,8 @@ export default function SpotCreateForm({ editData }: SpotCreateFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex-1 space-y-6 overflow-y-auto p-4">
+      {!isEditMode && <SpotContentGuide />}
+
       {/* 장소 이름 */}
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-900">

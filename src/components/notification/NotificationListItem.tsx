@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { markNotificationAsRead } from "@/lib/api";
 import type { NotificationItem, NotificationType } from "@/types";
-import { UserPlus, Heart, MessageCircle, Copy, type LucideIcon } from "lucide-react";
+import { UserPlus, Heart, MessageCircle, Copy, CheckCircle, XCircle, type LucideIcon } from "lucide-react";
 
 interface NotificationListItemProps {
   notification: NotificationItem;
@@ -44,6 +44,16 @@ const NOTIFICATION_CONFIG: Record<
     icon: Copy,
     color: "text-purple-500",
     getMessage: (a) => `${a}님이 회원님의 SpotLine을 복제했습니다`,
+  },
+  SPOT_APPROVED: {
+    icon: CheckCircle,
+    color: "text-green-500",
+    getMessage: () => `회원님의 Spot이 승인되었습니다`,
+  },
+  SPOT_REJECTED: {
+    icon: XCircle,
+    color: "text-red-500",
+    getMessage: () => `회원님의 Spot이 반려되었습니다`,
   },
 };
 
@@ -123,6 +133,11 @@ export default function NotificationListItem({
         <p className="text-sm text-gray-900 leading-snug">
           {config.getMessage(notification.actorNickname)}
         </p>
+        {notification.message && (
+          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+            {notification.message}
+          </p>
+        )}
         <p className="text-xs text-gray-400 mt-0.5">
           {getRelativeTime(notification.createdAt)}
         </p>

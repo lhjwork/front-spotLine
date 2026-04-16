@@ -289,6 +289,7 @@ export interface SpotDetailResponse {
   visitedCount: number;
   viewsCount: number;
   commentsCount: number;
+  creatorId: string | null;
   creatorType: string;
   creatorName: string | null;
   createdAt: string;
@@ -316,6 +317,7 @@ export interface SpotLineDetailResponse {
   replicationsCount: number;
   completionsCount: number;
   commentsCount: number;
+  creatorId: string | null;
   creatorType: string;
   creatorName: string | null;
   parentSpotLineId: string | null;
@@ -889,7 +891,7 @@ export interface UpdateBlogRequest {
 // Notification
 // ============================================================
 
-export type NotificationType = "FOLLOW" | "SPOT_LIKE" | "SPOTLINE_LIKE" | "BLOG_LIKE" | "COMMENT" | "FORK";
+export type NotificationType = "FOLLOW" | "SPOT_LIKE" | "SPOTLINE_LIKE" | "BLOG_LIKE" | "COMMENT" | "FORK" | "SPOT_APPROVED" | "SPOT_REJECTED";
 
 export interface NotificationItem {
   id: string;
@@ -902,6 +904,7 @@ export interface NotificationItem {
   actorId: string;
   actorNickname: string;
   actorAvatar: string | null;
+  message: string | null;
 }
 
 // ============================================================

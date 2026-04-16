@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Bookmark, MapPinCheck, Share2, Navigation2, ChevronDown, ChevronUp, Route } from "lucide-react";
+import { Heart, Bookmark, MapPinCheck, Share2, Navigation2, ChevronDown, ChevronUp, Route, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,6 +10,7 @@ import LoginBottomSheet from "@/components/auth/LoginBottomSheet";
 import SpotShareSheet from "@/components/spot/SpotShareSheet";
 import CheckinMemoModal from "@/components/spot/CheckinMemoModal";
 import ExternalMapButtons from "@/components/map/ExternalMapButtons";
+import ReportModal from "@/components/comment/ReportModal";
 import type { SpotDetailResponse } from "@/types";
 
 interface SpotBottomBarProps {
@@ -22,12 +23,15 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
   const toggleSave = useSocialStore((s) => s.toggleSave);
   const checkin = useSocialStore((s) => s.checkin);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const session = useAuthStore((s) => s.session);
+  const isOwner = session?.user?.id === spot.creatorId;
 
   const [showMap, setShowMap] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [showCheckinModal, setShowCheckinModal] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
@@ -121,6 +125,16 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
             <span>공유</span>
           </button>
 
+          {isAuthenticated && !isOwner && (
+            <button
+              onClick={() => setShowReport(true)}
+              className="flex items-center rounded-xl px-2 py-2.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+              title="신고"
+            >
+              <Flag className="h-4 w-4" />
+            </button>
+          )}
+
           <Link
             href={`/create-spotline?spot=${spot.slug}`}
             className="flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50 px-3 py-2.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100"
@@ -182,6 +196,15 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
           spotTitle={spot.title}
           onSubmit={handleCheckinSubmit}
           onClose={() => setShowCheckinModal(false)}
+        />
+      )}
+
+      {showReport && (
+        <ReportModal
+          targetType="SPOT"
+          targetId={spot.id}
+          onClose={() => setShowReport(false)}
+          onSuccess={() => setShowReport(false)}
         />
       )}
     </>
