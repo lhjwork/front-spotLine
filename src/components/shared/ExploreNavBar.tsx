@@ -11,13 +11,13 @@ interface ExploreNavBarProps {
 }
 
 const TABS = [
-  { key: "discover" as const, label: "발견", href: "/" },
+  { key: "discover" as const, label: "내 주변", href: "/discover" },
   { key: "feed" as const, label: "피드", href: "/feed" },
 ];
 
 export default function ExploreNavBar({ activeTab }: ExploreNavBarProps) {
   const pathname = usePathname();
-  const current = activeTab ?? (pathname === "/feed" ? "feed" : "discover");
+  const current = activeTab ?? (pathname === "/feed" ? "feed" : pathname === "/discover" ? "discover" : "discover");
 
   return (
     <nav className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-100">
