@@ -1080,6 +1080,19 @@ export const updateMySpotLineStatus = async (
   return response.data;
 };
 
+// 내 SpotLine 날짜 수정
+export const updateMySpotLineDate = async (
+  mySpotLineId: string,
+  scheduledDate: string | null
+): Promise<MySpotLine> => {
+  const response = await apiV2.patch<MySpotLine>(
+    `/users/me/spotlines/${mySpotLineId}`,
+    { scheduledDate },
+    { headers: { Authorization: `Bearer ${getAuthToken()}` }, timeout: 5000 }
+  );
+  return response.data;
+};
+
 // 내 SpotLine 삭제
 export const deleteMySpotLine = async (mySpotLineId: string): Promise<void> => {
   await apiV2.delete(`/users/me/spotlines/${mySpotLineId}`, {

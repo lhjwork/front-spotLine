@@ -678,6 +678,20 @@ export interface MySpotLine {
   createdAt: string;
 }
 
+// Spot 체크리스트 아이템
+export interface SpotCheckItem {
+  spotId: string;
+  name: string;
+  checked: boolean;
+}
+
+// 완주 통계
+export interface ScheduleStats {
+  totalCompleted: number;
+  thisMonthCompleted: number;
+  averageSpots: number;
+}
+
 // 복제 요청
 export interface ReplicateSpotLineRequest {
   scheduledDate: string | null;

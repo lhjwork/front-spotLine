@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Check, Trash2, ExternalLink, Calendar } from "lucide-react";
+import { Check, Trash2, ExternalLink, Calendar, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MySpotLine } from "@/types";
+import EditDateSheet from "@/components/spotline/EditDateSheet";
+import SpotChecklist from "@/components/spotline/SpotChecklist";
 
 interface MySpotLineCardProps {
   mySpotLine: MySpotLine;
   onMarkComplete: (id: string) => void;
   onDelete: (id: string) => void;
+  onDateChange: (id: string, date: string | null) => void;
 }
 
 const getDday = (scheduledDate: string | null): string => {
@@ -47,69 +51,125 @@ export default function MySpotLineCard({
   mySpotLine,
   onMarkComplete,
   onDelete,
+  onDateChange,
 }: MySpotLineCardProps) {
   const isCompleted = mySpotLine.status === "completed";
+  const [showEditDate, setShowEditDate] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false);
+
+  // Generate spot list from spotsCount (placeholder names)
+  const spots = Array.from({ length: mySpotLine.spotsCount }, (_, i) => ({
+    spotId: `${mySpotLine.id}_spot_${i}`,
+    name: `Spot ${i + 1}`,
+  }));
+
+  const handleAllChecked = () => {
+    if (!isCompleted && confirm("모든 Spot을 방문했습니다. 완주 처리할까요?")) {
+      onMarkComplete(mySpotLine.id);
+    }
+  };
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      {/* Title row */}
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900">{mySpotLine.title}</h3>
-          <p className="mt-0.5 text-sm text-gray-500">
-            {mySpotLine.area} · {mySpotLine.spotsCount}곳
-          </p>
+    <>
+      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+        {/* Title row */}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">{mySpotLine.title}</h3>
+            <p className="mt-0.5 text-sm text-gray-500">
+              {mySpotLine.area} · {mySpotLine.spotsCount}곳
+            </p>
+          </div>
+          {!isCompleted && (
+            <span
+              className={cn(
+                "ml-2 text-sm font-bold",
+                getDdayColor(mySpotLine.scheduledDate)
+              )}
+            >
+              {getDday(mySpotLine.scheduledDate)}
+            </span>
+          )}
         </div>
-        {!isCompleted && (
-          <span
-            className={cn(
-              "ml-2 text-sm font-bold",
-              getDdayColor(mySpotLine.scheduledDate)
-            )}
-          >
-            {getDday(mySpotLine.scheduledDate)}
-          </span>
-        )}
-      </div>
 
-      {/* Date */}
-      <div className="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
-        <Calendar className="h-3.5 w-3.5" />
-        {isCompleted && mySpotLine.completedAt
-          ? `완주: ${formatDate(mySpotLine.completedAt.split("T")[0])}`
-          : mySpotLine.scheduledDate
-            ? formatDate(mySpotLine.scheduledDate)
-            : "날짜 미정"}
-      </div>
+        {/* Date — tappable for editing */}
+        <button
+          onClick={() => !isCompleted && setShowEditDate(true)}
+          className={cn(
+            "mt-2 flex items-center gap-1.5 text-sm",
+            !isCompleted
+              ? "text-purple-600 hover:text-purple-700"
+              : "text-gray-500 cursor-default"
+          )}
+        >
+          <Calendar className="h-3.5 w-3.5" />
+          {isCompleted && mySpotLine.completedAt
+            ? `완주: ${formatDate(mySpotLine.completedAt.split("T")[0])}`
+            : mySpotLine.scheduledDate
+              ? formatDate(mySpotLine.scheduledDate)
+              : "날짜 미정 — 탭하여 설정"}
+        </button>
 
-      {/* Actions */}
-      <div className="mt-3 flex items-center gap-2">
-        {!isCompleted && (
+        {/* Checklist accordion */}
+        {!isCompleted && mySpotLine.spotsCount > 0 && (
           <button
-            onClick={() => onMarkComplete(mySpotLine.id)}
-            className="flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition-colors hover:bg-green-100"
+            onClick={() => setShowChecklist(!showChecklist)}
+            className="mt-2 flex w-full items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
           >
-            <Check className="h-3.5 w-3.5" />
-            완주
+            <ChevronDown
+              className={cn(
+                "h-3.5 w-3.5 transition-transform",
+                showChecklist && "rotate-180"
+              )}
+            />
+            Spot 체크리스트
           </button>
         )}
 
-        <button
-          onClick={() => onDelete(mySpotLine.id)}
-          className="flex items-center gap-1 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          삭제
-        </button>
+        {showChecklist && !isCompleted && (
+          <SpotChecklist
+            mySpotLineId={mySpotLine.id}
+            spots={spots}
+            onAllChecked={handleAllChecked}
+          />
+        )}
 
-        <Link
-          href={`/spotline/${mySpotLine.spotLineSlug}`}
-          className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-purple-600 transition-colors hover:bg-purple-50"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          원본 보기
-        </Link>
+        {/* Actions */}
+        <div className="mt-3 flex items-center gap-2">
+          {!isCompleted && (
+            <button
+              onClick={() => onMarkComplete(mySpotLine.id)}
+              className="flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition-colors hover:bg-green-100"
+            >
+              <Check className="h-3.5 w-3.5" />
+              완주
+            </button>
+          )}
+
+          <button
+            onClick={() => onDelete(mySpotLine.id)}
+            className="flex items-center gap-1 rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            삭제
+          </button>
+
+          <Link
+            href={`/spotline/${mySpotLine.spotLineSlug}`}
+            className="ml-auto flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-purple-600 transition-colors hover:bg-purple-50"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            원본 보기
+          </Link>
+        </div>
       </div>
-    </div>
+
+      <EditDateSheet
+        isOpen={showEditDate}
+        onClose={() => setShowEditDate(false)}
+        mySpotLine={mySpotLine}
+        onDateChange={onDateChange}
+      />
+    </>
   );
 }

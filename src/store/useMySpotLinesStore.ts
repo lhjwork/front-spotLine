@@ -4,6 +4,7 @@ import { create } from "zustand";
 import {
   fetchMySpotLines as apiFetchMySpotLines,
   updateMySpotLineStatus as apiUpdateStatus,
+  updateMySpotLineDate as apiUpdateDate,
   deleteMySpotLine as apiDeleteSpotLine,
 } from "@/lib/api";
 import type { MySpotLine } from "@/types";
@@ -17,6 +18,7 @@ interface MySpotLinesState {
   setSpotLines: (spotLines: MySpotLine[]) => void;
   addSpotLine: (spotLine: MySpotLine) => void;
   markComplete: (mySpotLineId: string) => Promise<void>;
+  updateScheduledDate: (mySpotLineId: string, scheduledDate: string | null) => Promise<void>;
   removeSpotLine: (mySpotLineId: string) => Promise<void>;
   fetchSpotLines: (status?: "scheduled" | "completed") => Promise<void>;
   clearAll: () => void;
@@ -74,6 +76,22 @@ export const useMySpotLinesStore = create<MySpotLinesState>((set, get) => ({
       await apiUpdateStatus(mySpotLineId, "completed");
     } catch {
       if (process.env.NODE_ENV === "development") console.warn(`완주 마킹 API 실패 (${mySpotLineId}) — 로컬 상태 유지`);
+    }
+  },
+
+  updateScheduledDate: async (mySpotLineId, scheduledDate) => {
+    // Optimistic update
+    set((state) => ({
+      spotLines: state.spotLines.map((r) =>
+        r.id === mySpotLineId ? { ...r, scheduledDate } : r
+      ),
+    }));
+    syncLocal(get().spotLines);
+
+    try {
+      await apiUpdateDate(mySpotLineId, scheduledDate);
+    } catch {
+      if (process.env.NODE_ENV === "development") console.warn(`날짜 수정 API 실패 (${mySpotLineId}) — 로컬 상태 유지`);
     }
   },
 
