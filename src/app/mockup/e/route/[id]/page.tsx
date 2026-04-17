@@ -40,7 +40,7 @@ interface RouteSpot {
   description: string;
   distance: string;
   walkingTime: string;
-  source: "spotline" | "user";
+  source: "CREW" | "USER";
   spotlineName?: string;
   userStats: {
     visitCount: number;
@@ -53,7 +53,7 @@ interface RouteDetail {
   id: string;
   name: string;
   description: string;
-  source: "spotline" | "user";
+  source: "CREW" | "USER";
   spotlineName?: string;
   authorName: string;
   authorAvatar: string;
@@ -110,7 +110,7 @@ function buildSpotlineRoute(sl: SpotLineSummary): RouteDetail {
     id: sl.id,
     name: `${sl.area} ${spots.length}곳 코스`,
     description: sl.description,
-    source: "spotline",
+    source: "CREW",
     spotlineName: sl.name,
     authorName: sl.curatorName,
     authorAvatar: sl.curatorAvatar,
@@ -177,7 +177,7 @@ function buildUserRoute(routeId: string): RouteDetail | null {
     id: routeId,
     name: meta.name,
     description: meta.description,
-    source: "user",
+    source: "USER",
     authorName: user.nickname,
     authorAvatar: user.avatar,
     area: meta.area,
@@ -208,10 +208,10 @@ function SourceBadge({
   source,
   spotlineName,
 }: {
-  source: "spotline" | "user";
+  source: "CREW" | "USER";
   spotlineName?: string;
 }) {
-  if (source === "spotline") {
+  if (source === "CREW") {
     return (
       <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full">
         <Zap className="h-2.5 w-2.5" />
@@ -286,7 +286,7 @@ export default function RouteDetailPage() {
           </div>
 
           <div className="absolute bottom-4 left-4 right-4">
-            {route.source === "spotline" && (
+            {route.source === "CREW" && (
               <span className="inline-flex items-center gap-1 text-xs font-medium text-white bg-blue-600/80 backdrop-blur-sm px-2.5 py-1 rounded-full mb-2">
                 <Zap className="h-3 w-3" />
                 {route.spotlineName}

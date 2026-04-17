@@ -12,7 +12,7 @@ type Tab = "all" | "DRAFT" | "PUBLISHED";
 
 export default function MyBlogsList() {
   const [activeTab, setActiveTab] = useState<Tab>("all");
-  const [sort, setSort] = useState<FeedSort>("newest");
+  const [sort, setSort] = useState<FeedSort>("NEWEST");
   const [blogs, setBlogs] = useState<BlogListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(0);

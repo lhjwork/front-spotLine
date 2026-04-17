@@ -36,7 +36,7 @@ interface FeedState {
 export const useFeedStore = create<FeedState>((set) => ({
   area: null,
   category: null,
-  sort: "popular",
+  sort: "POPULAR",
   keyword: "",
   feedTab: "all",
   spots: [],
@@ -78,7 +78,7 @@ export const useFeedStore = create<FeedState>((set) => ({
   resetFilters: () => set({
     area: null,
     category: null,
-    sort: "popular",
+    sort: "POPULAR",
     keyword: "",
     spots: [],
     spotsPage: 0,

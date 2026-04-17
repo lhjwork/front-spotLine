@@ -21,7 +21,7 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
   const [blogs, setBlogs] = useState(initialBlogs);
   const [area, setArea] = useState<string | null>(searchParams.get("area"));
   const [sort, setSort] = useState<FeedSort>(
-    (searchParams.get("sort") as FeedSort) || "popular"
+    (searchParams.get("sort") as FeedSort) || "POPULAR"
   );
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -44,7 +44,7 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
 
   const handleResetFilters = useCallback(() => {
     setArea(null);
-    setSort("popular");
+    setSort("POPULAR");
     setPage(0);
     setBlogs([]);
     setHasMore(true);
@@ -54,14 +54,14 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
   useEffect(() => {
     const params = new URLSearchParams();
     if (area) params.set("area", area);
-    if (sort !== "popular") params.set("sort", sort);
+    if (sort !== "POPULAR") params.set("sort", sort);
     const query = params.toString();
     router.replace(`/blogs${query ? `?${query}` : ""}`, { scroll: false });
   }, [area, sort, router]);
 
   // 데이터 로드
   useEffect(() => {
-    if (area === null && sort === "popular" && page === 0 && initialBlogs.length > 0) {
+    if (area === null && sort === "POPULAR" && page === 0 && initialBlogs.length > 0) {
       setBlogs(initialBlogs);
       setHasMore(initialHasMore);
       return;
@@ -116,7 +116,7 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
 
         <FeedAreaTabs selected={area} onSelect={handleAreaChange} />
 
-        {(area || sort !== "popular") && (
+        {(area || sort !== "POPULAR") && (
           <div className="px-4 py-1">
             <button
               type="button"

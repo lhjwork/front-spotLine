@@ -12,7 +12,7 @@ interface FeedFilterResetProps {
 }
 
 export default function FeedFilterReset({ area, category, sort, keyword, onReset }: FeedFilterResetProps) {
-  const hasActiveFilter = area || category || sort !== "popular" || keyword;
+  const hasActiveFilter = area || category || sort !== "POPULAR" || keyword;
   if (!hasActiveFilter) return null;
 
   return (

@@ -135,7 +135,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 성동구 성수이로 12길 21",
     lat: 37.5445,
     lng: 127.056,
-    source: "spotline",
+    source: "CREW",
     spotlineAffiliation: {
       spotlineId: "sl-seongsu",
       spotlineName: "성수 크리에이티브 라인",
@@ -173,7 +173,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 중구 을지로 156",
     lat: 37.546,
     lng: 127.059,
-    source: "spotline",
+    source: "CREW",
     spotlineAffiliation: {
       spotlineId: "sl-euljiro",
       spotlineName: "을지로 레트로 라인",
@@ -209,7 +209,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 성동구 뚝섬로 337",
     lat: 37.5435,
     lng: 127.0545,
-    source: "spotline",
+    source: "CREW",
     spotlineAffiliation: {
       spotlineId: "sl-seongsu",
       spotlineName: "성수 크리에이티브 라인",
@@ -246,7 +246,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 성동구 성수이로 7길 15",
     lat: 37.545,
     lng: 127.053,
-    source: "spotline",
+    source: "CREW",
     spotlineAffiliation: {
       spotlineId: "sl-seongsu",
       spotlineName: "성수 크리에이티브 라인",
@@ -280,7 +280,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 마포구 연남로 42",
     lat: 37.5665,
     lng: 126.9235,
-    source: "spotline",
+    source: "CREW",
     spotlineAffiliation: {
       spotlineId: "sl-yeonnam",
       spotlineName: "연남 감성 산책 라인",
@@ -319,7 +319,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 성동구 성수이로 18길 8",
     lat: 37.5442,
     lng: 127.0575,
-    source: "user",
+    source: "USER",
     recommendedBy: {
       id: "user-1",
       nickname: "커피탐험가",
@@ -351,7 +351,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 마포구 연남로1길 28",
     lat: 37.567,
     lng: 126.924,
-    source: "user",
+    source: "USER",
     recommendedBy: {
       id: "user-3",
       nickname: "전시덕후",
@@ -382,7 +382,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 중구 을지로 142 5층",
     lat: 37.5465,
     lng: 127.0585,
-    source: "user",
+    source: "USER",
     recommendedBy: {
       id: "user-4",
       nickname: "맛집헌터",
@@ -414,7 +414,7 @@ export const MOCK_SPOTS: MockupSpot[] = [
     address: "서울 성동구 성수이로 20길 16",
     lat: 37.5448,
     lng: 127.0555,
-    source: "user",
+    source: "USER",
     recommendedBy: {
       id: "user-5",
       nickname: "감성여행자",
@@ -510,12 +510,12 @@ export const MOCK_USER_ACTIVITIES: UserSpotActivity[] = [
 
 /** SpotLine 제휴 Spot만 필터링 */
 export function getSpotlineSpots(): MockupSpot[] {
-  return MOCK_SPOTS.filter((s) => s.source === "spotline");
+  return MOCK_SPOTS.filter((s) => s.source === "CREW");
 }
 
 /** 유저 추천 Spot만 필터링 */
 export function getUserSpots(): MockupSpot[] {
-  return MOCK_SPOTS.filter((s) => s.source === "user");
+  return MOCK_SPOTS.filter((s) => s.source === "USER");
 }
 
 /** 특정 SpotLine에 제휴된 Spot 필터링 */

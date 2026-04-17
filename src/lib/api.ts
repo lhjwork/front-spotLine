@@ -1091,12 +1091,13 @@ export const deleteMySpotLine = async (mySpotLineId: string): Promise<void> => {
 // SpotLine 변형 목록
 export const fetchSpotLineVariations = async (
   spotLineId: string,
-  page: number = 0
+  page: number = 0,
+  sort: "latest" | "popular" = "latest"
 ): Promise<{ items: SpotLinePreview[]; hasMore: boolean }> => {
   try {
     const response = await apiV2.get<{ items: SpotLinePreview[]; hasMore: boolean }>(
       `/spotlines/${spotLineId}/variations`,
-      { params: { page }, timeout: 5000 }
+      { params: { page, sort }, timeout: 5000 }
     );
     return response.data;
   } catch {

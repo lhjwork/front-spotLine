@@ -22,15 +22,15 @@ const AREA_OPTIONS = [
 
 const CATEGORY_OPTIONS: { value: SpotCategory | "all"; label: string }[] = [
   { value: "all", label: "전체" },
-  { value: "cafe", label: "카페" },
-  { value: "restaurant", label: "음식점" },
-  { value: "bar", label: "바" },
-  { value: "culture", label: "문화" },
-  { value: "exhibition", label: "전시" },
-  { value: "walk", label: "산책" },
-  { value: "activity", label: "액티비티" },
-  { value: "shopping", label: "쇼핑" },
-  { value: "nature", label: "자연" },
+  { value: "CAFE", label: "카페" },
+  { value: "RESTAURANT", label: "음식점" },
+  { value: "BAR", label: "바" },
+  { value: "CULTURE", label: "문화" },
+  { value: "EXHIBITION", label: "전시" },
+  { value: "WALK", label: "산책" },
+  { value: "ACTIVITY", label: "액티비티" },
+  { value: "SHOPPING", label: "쇼핑" },
+  { value: "NATURE", label: "자연" },
 ];
 
 export default function SpotSearchPanel() {

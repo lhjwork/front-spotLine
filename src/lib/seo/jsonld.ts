@@ -3,16 +3,16 @@ import type { SpotDetailResponse, SpotLineDetailResponse, SpotCategory } from "@
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
 
 const CATEGORY_SCHEMA_MAP: Record<SpotCategory, string> = {
-  cafe: "CafeOrCoffeeShop",
-  restaurant: "Restaurant",
-  bar: "BarOrPub",
-  nature: "Park",
-  walk: "Park",
-  culture: "Museum",
-  exhibition: "Museum",
-  activity: "TouristAttraction",
-  shopping: "Store",
-  other: "LocalBusiness",
+  CAFE: "CafeOrCoffeeShop",
+  RESTAURANT: "Restaurant",
+  BAR: "BarOrPub",
+  NATURE: "Park",
+  WALK: "Park",
+  CULTURE: "Museum",
+  EXHIBITION: "Museum",
+  ACTIVITY: "TouristAttraction",
+  SHOPPING: "Store",
+  OTHER: "LocalBusiness",
 };
 
 /** Spot → LocalBusiness (또는 하위 타입) JSON-LD */

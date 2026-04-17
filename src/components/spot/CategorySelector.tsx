@@ -4,16 +4,16 @@ import { cn } from "@/lib/utils";
 import type { SpotCategory } from "@/types";
 
 const CATEGORIES: { value: SpotCategory; label: string }[] = [
-  { value: "cafe", label: "카페" },
-  { value: "restaurant", label: "맛집" },
-  { value: "bar", label: "바" },
-  { value: "nature", label: "자연" },
-  { value: "culture", label: "문화" },
-  { value: "exhibition", label: "전시" },
-  { value: "walk", label: "산책" },
-  { value: "activity", label: "활동" },
-  { value: "shopping", label: "쇼핑" },
-  { value: "other", label: "기타" },
+  { value: "CAFE", label: "카페" },
+  { value: "RESTAURANT", label: "맛집" },
+  { value: "BAR", label: "바" },
+  { value: "NATURE", label: "자연" },
+  { value: "CULTURE", label: "문화" },
+  { value: "EXHIBITION", label: "전시" },
+  { value: "WALK", label: "산책" },
+  { value: "ACTIVITY", label: "활동" },
+  { value: "SHOPPING", label: "쇼핑" },
+  { value: "OTHER", label: "기타" },
 ];
 
 interface CategorySelectorProps {

@@ -28,12 +28,12 @@ interface RouteItem {
   id: string;
   name: string;
   description: string;
-  source: "spotline" | "user";
+  source: "CREW" | "USER";
   spotlineName?: string;
   spotlineColor?: string;
   authorName: string;
   authorAvatar: string;
-  spots: { name: string; category: string; source: "spotline" | "user" }[];
+  spots: { name: string; category: string; source: "CREW" | "USER" }[];
   totalDistance: string;
   totalTime: string;
   completionCount: number;
@@ -61,7 +61,7 @@ function spotlineToRoute(sl: SpotLineSummary): RouteItem {
     id: sl.id,
     name: `${sl.area} ${spots.length}곳 코스`,
     description: sl.description,
-    source: "spotline",
+    source: "CREW",
     spotlineName: sl.name,
     spotlineColor: sl.color,
     authorName: sl.curatorName,
@@ -90,7 +90,7 @@ const userRoutes: RouteItem[] = [
     id: "user-route-1",
     name: `${MOCK_USERS[0].nickname}의 숨은 카페 투어`,
     description: "대형 체인 말고, 진짜 로컬들만 아는 카페를 돌아보는 커피 투어",
-    source: "user",
+    source: "USER",
     authorName: MOCK_USERS[0].nickname,
     authorAvatar: MOCK_USERS[0].avatar,
     spots: [
@@ -114,7 +114,7 @@ const userRoutes: RouteItem[] = [
     id: "user-route-2",
     name: `${MOCK_USERS[1].nickname}의 성수 아트 투어`,
     description: "전시와 카페를 번갈아가며 즐기는 문화 코스",
-    source: "user",
+    source: "USER",
     authorName: MOCK_USERS[1].nickname,
     authorAvatar: MOCK_USERS[1].avatar,
     spots: [
@@ -145,8 +145,8 @@ const difficultyColor = {
 };
 
 export default function MockupE() {
-  const officialRoutes = ROUTES.filter((r) => r.source === "spotline");
-  const communityRoutes = ROUTES.filter((r) => r.source === "user");
+  const officialRoutes = ROUTES.filter((r) => r.source === "CREW");
+  const communityRoutes = ROUTES.filter((r) => r.source === "USER");
 
   return (
     <Layout showFooter={false}>
@@ -322,14 +322,14 @@ export default function MockupE() {
                       >
                         <span
                           className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
-                            spot.source === "spotline"
+                            spot.source === "CREW"
                               ? "bg-blue-50"
                               : "bg-purple-50"
                           }`}
                         >
                           <span
                             className={`w-4 h-4 flex items-center justify-center text-white rounded-full text-[10px] font-bold ${
-                              spot.source === "spotline"
+                              spot.source === "CREW"
                                 ? "bg-blue-600"
                                 : "bg-purple-600"
                             }`}

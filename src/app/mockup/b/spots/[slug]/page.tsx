@@ -28,7 +28,7 @@ import {
 import type { MockupSpot } from "@/types";
 
 function getSourceBadge(spot: MockupSpot) {
-  if (spot.source === "spotline") {
+  if (spot.source === "CREW") {
     return {
       label: "⚡ SpotLine",
       name: spot.spotlineAffiliation?.curatorName || spot.author,
@@ -49,7 +49,7 @@ function generateStory(spot: MockupSpot) {
   return {
     title: `${spot.name}의 이야기`,
     content: `${spot.description}\n\n${spot.area} 지역에 위치한 ${spot.categoryLabel} 장소로, ${spot.tags.map((t) => `#${t}`).join(" ")} 등의 특징이 있습니다.\n\n${
-      spot.source === "spotline"
+      spot.source === "CREW"
         ? `${spot.spotlineAffiliation?.spotlineName}의 ${spot.spotlineAffiliation?.curatorName}이(가) 큐레이션한 공간입니다.`
         : `${spot.recommendedBy?.nickname}님이 추천한 장소입니다.`
     }\n\n방문자 ${spot.userStats.visitCount}명, 좋아요 ${spot.userStats.likeCount}개를 기록하고 있으며 평점 ${spot.rating}의 인기 장소입니다.`,
@@ -201,7 +201,7 @@ export default function MockupBSpotDetail() {
 
           {/* Source & Author info */}
           <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-            {spot.source === "spotline" ? (
+            {spot.source === "CREW" ? (
               <>
                 <span className="flex items-center gap-1">
                   <Zap className="h-3.5 w-3.5 text-blue-500" />

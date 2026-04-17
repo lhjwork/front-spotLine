@@ -239,18 +239,18 @@ export interface NearbyStoreParams {
 // ============================================================
 
 export type SpotCategory =
-  | "cafe" | "restaurant" | "bar"
-  | "nature" | "culture" | "exhibition"
-  | "walk" | "activity" | "shopping" | "other";
+  | "CAFE" | "RESTAURANT" | "BAR"
+  | "NATURE" | "CULTURE" | "EXHIBITION"
+  | "WALK" | "ACTIVITY" | "SHOPPING" | "OTHER";
 
 export type SpotLineTheme =
-  | "date" | "travel" | "walk" | "hangout"
-  | "food-tour" | "cafe-tour" | "culture";
+  | "DATE" | "TRAVEL" | "WALK" | "HANGOUT"
+  | "FOOD_TOUR" | "CAFE_TOUR" | "CULTURE";
 
-export type FeedSort = "popular" | "newest";
+export type FeedSort = "POPULAR" | "NEWEST";
 
 // QR Partner System (Phase 8)
-export type PartnerTier = "basic" | "premium";
+export type PartnerTier = "BASIC" | "PREMIUM";
 
 export interface SpotPartnerInfo {
   isPartner: boolean;
@@ -343,6 +343,13 @@ export interface SpotLineSpotDetail {
   spotLongitude: number;
   crewNote: string | null;
   spotMedia: string[];
+}
+
+// Spot diff 결과 (변형 비교용)
+export interface SpotDiffResult {
+  added: SpotLineSpotDetail[];
+  removed: SpotLineSpotDetail[];
+  common: SpotLineSpotDetail[];
 }
 
 // ============================================================
@@ -582,7 +589,7 @@ export interface UserProfile {
 }
 
 // Spot 소스: SpotLine 제휴 vs 유저 추천
-export type SpotSource = "spotline" | "user";
+export type SpotSource = "CREW" | "USER" | "QR";
 
 // Spot 승인 상태
 export type SpotStatus = "PENDING" | "APPROVED" | "REJECTED";

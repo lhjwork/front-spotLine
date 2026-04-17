@@ -339,7 +339,7 @@ export default function MockupG() {
                   <div className="flex-1 p-3 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        {spot.source === "spotline" && spot.spotlineAffiliation ? (
+                        {spot.source === "CREW" && spot.spotlineAffiliation ? (
                           <span className="flex items-center gap-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                             <Zap className="h-2.5 w-2.5" />
                             {spot.spotlineAffiliation.spotlineName}

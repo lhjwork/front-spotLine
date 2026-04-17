@@ -25,7 +25,7 @@ export default function ExploreMarker({ spot }: ExploreMarkerProps) {
   }, [setSelectedSpot, spot]);
 
   const markerImage = useMemo(() => ({
-    src: createMarkerSvg(CATEGORY_COLORS[spot.category] || CATEGORY_COLORS.other),
+    src: createMarkerSvg(CATEGORY_COLORS[spot.category] || CATEGORY_COLORS.OTHER),
     size: { width: 28, height: 28 },
   }), [spot.category]);
 

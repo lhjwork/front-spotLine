@@ -74,13 +74,14 @@ export default async function SpotLinePage({ params }: SpotLinePageProps) {
 
         <CommentSection targetType="SPOTLINE" targetId={spotLine.id} commentsCount={spotLine.commentsCount ?? 0} />
 
-        {spotLine.variationsCount > 0 && (
-          <SpotLineVariations
-            spotLineId={spotLine.id}
-            parentSpotLineId={spotLine.parentSpotLineId}
-            variationsCount={spotLine.variationsCount}
-          />
-        )}
+        <SpotLineVariations
+          spotLineId={spotLine.id}
+          spotLineSlug={slug}
+          spotLineTitle={spotLine.title}
+          parentSpotLineId={spotLine.parentSpotLineId}
+          variationsCount={spotLine.variationsCount}
+          originalSpots={spotLine.spots}
+        />
       </div>
 
       <ViewTracker type="spotline" id={spotLine.id} />

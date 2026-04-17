@@ -14,16 +14,16 @@ interface ExploreSpotPreviewProps {
 }
 
 const CATEGORY_LABELS: Record<SpotCategory, string> = {
-  cafe: "카페",
-  restaurant: "맛집",
-  bar: "바",
-  nature: "자연",
-  culture: "문화",
-  exhibition: "전시",
-  walk: "산책",
-  activity: "액티비티",
-  shopping: "쇼핑",
-  other: "기타",
+  CAFE: "카페",
+  RESTAURANT: "맛집",
+  BAR: "바",
+  NATURE: "자연",
+  CULTURE: "문화",
+  EXHIBITION: "전시",
+  WALK: "산책",
+  ACTIVITY: "액티비티",
+  SHOPPING: "쇼핑",
+  OTHER: "기타",
 };
 
 export default function ExploreSpotPreview({ spot }: ExploreSpotPreviewProps) {

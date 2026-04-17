@@ -4,13 +4,13 @@ import { useSpotLineBuilderStore } from "@/store/useSpotLineBuilderStore";
 import type { SpotLineTheme } from "@/types";
 
 const THEME_OPTIONS: { value: SpotLineTheme; label: string }[] = [
-  { value: "date", label: "데이트" },
-  { value: "travel", label: "여행" },
-  { value: "walk", label: "산책" },
-  { value: "hangout", label: "모임" },
-  { value: "food-tour", label: "맛집 투어" },
-  { value: "cafe-tour", label: "카페 투어" },
-  { value: "culture", label: "문화" },
+  { value: "DATE", label: "데이트" },
+  { value: "TRAVEL", label: "여행" },
+  { value: "WALK", label: "산책" },
+  { value: "HANGOUT", label: "모임" },
+  { value: "FOOD_TOUR", label: "맛집 투어" },
+  { value: "CAFE_TOUR", label: "카페 투어" },
+  { value: "CULTURE", label: "문화" },
 ];
 
 export default function SpotLineMetaForm() {

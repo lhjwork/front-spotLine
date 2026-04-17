@@ -204,7 +204,7 @@ export default function MockupD() {
         {/* 하단 정보 */}
         <div className="absolute bottom-0 left-0 right-20 z-10 p-5 pb-8">
           {/* 소스 뱃지 */}
-          {currentSpot.source === "spotline" ? (
+          {currentSpot.source === "CREW" ? (
             <div className="flex items-center gap-1.5 mb-3">
               <span className="flex items-center gap-1 text-xs font-medium text-white bg-blue-600/80 backdrop-blur-sm px-2.5 py-1 rounded-full">
                 <Zap className="h-3 w-3" />
@@ -346,7 +346,7 @@ export default function MockupD() {
               <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-4" />
               <div className="px-5 pb-8">
                 <div className="flex items-center gap-2 mb-2">
-                  {currentSpot.source === "spotline" && (
+                  {currentSpot.source === "CREW" && (
                     <span className="flex items-center gap-1 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
                       <Zap className="h-3 w-3" />
                       {currentSpot.spotlineName}

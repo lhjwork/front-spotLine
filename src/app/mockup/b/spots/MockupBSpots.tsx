@@ -41,7 +41,7 @@ const AREA_INFO: Record<string, { name: string; subtitle: string }> = {
 };
 
 function getSourceBadge(spot: MockupSpot) {
-  if (spot.source === "spotline") {
+  if (spot.source === "CREW") {
     return {
       label: "⚡ SpotLine",
       name: spot.spotlineAffiliation?.curatorName || spot.author,

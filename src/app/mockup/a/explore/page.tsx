@@ -83,7 +83,7 @@ function MockupAExplore() {
   });
 
   const getSourceBadge = (spot: MockupSpot) => {
-    if (spot.source === "spotline") {
+    if (spot.source === "CREW") {
       return {
         label: "⚡ SpotLine",
         name: spot.spotlineAffiliation?.curatorName || spot.author,

@@ -2,28 +2,43 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GitBranch, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { GitBranch, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { SpotLineSpotDetail } from "@/types";
 import SpotLineVariationsList from "@/components/spotline/SpotLineVariationsList";
+import VariationForkTree from "@/components/spotline/VariationForkTree";
 
 interface SpotLineVariationsProps {
   spotLineId: string;
+  spotLineSlug: string;
+  spotLineTitle: string;
   parentSpotLineId: string | null;
   variationsCount: number;
-  parentSpotLineSlug?: string;
+  originalSpots: SpotLineSpotDetail[];
 }
 
 export default function SpotLineVariations({
   spotLineId,
+  spotLineSlug,
+  spotLineTitle,
   parentSpotLineId,
   variationsCount,
-  parentSpotLineSlug,
+  originalSpots,
 }: SpotLineVariationsProps) {
   const [expanded, setExpanded] = useState(false);
   const hasVariations = variationsCount > 0;
 
   return (
     <section className="mt-6">
+      {/* Fork tree */}
+      {parentSpotLineId && (
+        <VariationForkTree
+          parentSpotLineId={parentSpotLineId}
+          currentTitle={spotLineTitle}
+          variationsCount={variationsCount}
+        />
+      )}
+
       <div
         className={cn(
           "rounded-xl border border-purple-100 bg-purple-50/50 p-4",
@@ -35,12 +50,14 @@ export default function SpotLineVariations({
           <GitBranch className="h-5 w-5 shrink-0 text-purple-600" />
           <div className="flex-1">
             <p className="text-sm font-medium text-purple-800">
-              {parentSpotLineId
-                ? "이 SpotLine은 다른 SpotLine에서 변형되었습니다"
-                : `${variationsCount}개의 변형 SpotLine이 있습니다`}
+              {hasVariations
+                ? `${variationsCount}개의 변형 SpotLine이 있습니다`
+                : "아직 변형이 없습니다"}
             </p>
             <p className="mt-0.5 text-xs text-purple-600">
-              다른 사람들이 이 코스를 자신만의 방식으로 변형했어요
+              {hasVariations
+                ? "다른 사람들이 이 코스를 자신만의 방식으로 변형했어요"
+                : "첫 번째 변형을 만들어보세요!"}
             </p>
           </div>
           {hasVariations && (
@@ -55,21 +72,24 @@ export default function SpotLineVariations({
         {/* Inline variations list */}
         {expanded && hasVariations && (
           <div onClick={(e) => e.stopPropagation()}>
-            <SpotLineVariationsList spotLineId={spotLineId} />
+            <SpotLineVariationsList
+              spotLineId={spotLineId}
+              originalSpotCount={originalSpots.length}
+              originalSpots={originalSpots}
+              spotLineSlug={spotLineSlug}
+            />
           </div>
         )}
       </div>
 
-      {/* Parent route link */}
-      {parentSpotLineId && parentSpotLineSlug && (
-        <Link
-          href={`/spotline/${parentSpotLineSlug}`}
-          className="mt-2 flex items-center gap-1.5 text-sm text-purple-600 hover:text-purple-700"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          원본 SpotLine 보기
-        </Link>
-      )}
+      {/* CTA */}
+      <Link
+        href={`/create-spotline?fork=${spotLineSlug}`}
+        className="mt-3 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-purple-200 bg-purple-50/30 p-3 text-sm font-medium text-purple-600 hover:border-purple-300 hover:bg-purple-50"
+      >
+        <GitBranch className="h-4 w-4" />
+        나만의 변형 만들기
+      </Link>
     </section>
   );
 }

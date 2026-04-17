@@ -370,7 +370,7 @@ export default function SpotLineMapView({
               )}
               {filteredSpots.map((spot) => {
                 const isActive = selectedSpot?.id === spot.id;
-                const isSpotline = spot.source === "spotline";
+                const isSpotline = spot.source === "CREW";
                 return (
                   <button
                     key={spot.id}
@@ -662,7 +662,7 @@ export default function SpotLineMapView({
         {filteredSpots.map((spot) => {
           const isSelected = selectedSpot?.id === spot.id;
           const pos = MOCK_MAP_POSITIONS[spot.id] || { x: 50, y: 50 };
-          const isSpotline = spot.source === "spotline";
+          const isSpotline = spot.source === "CREW";
           const catColor = CATEGORY_COLORS[spot.category] || "#6b7280";
 
           return (
@@ -922,7 +922,7 @@ function SpotCard({
   mapStyle: MapStyle;
   theme: (typeof MAP_THEMES)[MapStyle];
 }) {
-  const isSpotline = spot.source === "spotline";
+  const isSpotline = spot.source === "CREW";
   return (
     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 w-[90%] max-w-[360px]">
       <div className={`bg-white ${t.cardRadius} ${t.controlShadow} border border-gray-200 overflow-hidden`}>

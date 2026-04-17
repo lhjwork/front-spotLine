@@ -72,9 +72,9 @@ const ACTIVITY_CONFIG = {
 } as const;
 
 export default function MockupC() {
-  const spotlineSpots = MOCK_SPOTS.filter((s) => s.source === "spotline");
+  const spotlineSpots = MOCK_SPOTS.filter((s) => s.source === "CREW");
   const userSpots = sortByPopularity(
-    MOCK_SPOTS.filter((s) => s.source === "user")
+    MOCK_SPOTS.filter((s) => s.source === "USER")
   );
 
   return (

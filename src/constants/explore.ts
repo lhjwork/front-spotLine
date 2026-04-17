@@ -14,14 +14,14 @@ export const AREA_CENTERS: Record<string, { lat: number; lng: number }> = {
 };
 
 export const CATEGORY_COLORS: Record<SpotCategory, string> = {
-  cafe: "#f59e0b",
-  restaurant: "#ef4444",
-  bar: "#8b5cf6",
-  nature: "#22c55e",
-  culture: "#6366f1",
-  exhibition: "#a855f7",
-  walk: "#14b8a6",
-  activity: "#f97316",
-  shopping: "#06b6d4",
-  other: "#6b7280",
+  CAFE: "#f59e0b",
+  RESTAURANT: "#ef4444",
+  BAR: "#8b5cf6",
+  NATURE: "#22c55e",
+  CULTURE: "#6366f1",
+  EXHIBITION: "#a855f7",
+  WALK: "#14b8a6",
+  ACTIVITY: "#f97316",
+  SHOPPING: "#06b6d4",
+  OTHER: "#6b7280",
 };

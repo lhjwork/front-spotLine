@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import type { FeedSort } from "@/types";
 
 const SORT_OPTIONS: { label: string; value: FeedSort }[] = [
-  { label: "인기순", value: "popular" },
-  { label: "최신순", value: "newest" },
+  { label: "인기순", value: "POPULAR" },
+  { label: "최신순", value: "NEWEST" },
 ];
 
 interface FeedSortDropdownProps {

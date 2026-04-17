@@ -110,7 +110,7 @@ export default function KakaoMapView({ selectedCategory, selectedSource }: Kakao
           const isSelected = selectedSpot?.id === spot.id;
           const colors = CATEGORY_COLORS_CSS[spot.category] || { bg: "bg-gray-500", border: "border-gray-500" };
           const pos = MOCK_MAP_POSITIONS[spot.id] || { x: 50, y: 50 };
-          const isSpotline = spot.source === "spotline";
+          const isSpotline = spot.source === "CREW";
           const sourceBorderClass = isSpotline ? "border-blue-500" : "border-purple-500";
 
           return (
@@ -223,7 +223,7 @@ function SpotCard({ spot, onClose }: { spot: MockupSpot; onClose: () => void }) 
             <div>
               <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                 {/* 소스 뱃지 */}
-                {spot.source === "spotline" ? (
+                {spot.source === "CREW" ? (
                   <span className="flex items-center gap-0.5 text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
                     <Zap className="h-2.5 w-2.5" />
                     SpotLine

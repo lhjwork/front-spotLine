@@ -30,7 +30,7 @@ function generateStory(spot: MockupSpot): { title: string; content: string } {
   const areaName = spot.area;
   const categoryLabel = spot.categoryLabel;
 
-  if (spot.source === "spotline") {
+  if (spot.source === "CREW") {
     return {
       title: `${areaName}에서 만나는 ${spot.name}`,
       content: `${spot.description}\n\n${spot.name}은(는) ${areaName} 지역의 ${categoryLabel} 중에서도 특별한 매력을 가진 곳입니다. SpotLine 크루가 직접 방문하고 엄선한 이 장소는 방문자들에게 잊지 못할 경험을 선사합니다.\n\n${spot.tags.map((t) => `#${t}`).join(" ")} 등의 키워드로 사랑받고 있으며, 지금까지 ${spot.userStats.visitCount}명이 방문했습니다.\n\n${spot.address}에 위치해 있으니, 가까운 곳에 계시다면 꼭 한번 들러보세요.`,
@@ -160,7 +160,7 @@ export default function SpotDetailPage() {
 
           {/* 소스 배지 */}
           <div className="absolute top-16 left-4">
-            {spot.source === "spotline" ? (
+            {spot.source === "CREW" ? (
               <span className="inline-flex items-center gap-1 text-xs font-medium bg-blue-600 text-white px-2.5 py-1 rounded-full shadow">
                 <Zap className="h-3 w-3" />
                 SpotLine 제휴
@@ -365,7 +365,7 @@ export default function SpotDetailPage() {
         </div>
 
         {/* SpotLine 정보 (제휴 Spot) */}
-        {spot.source === "spotline" && spot.spotlineAffiliation && (
+        {spot.source === "CREW" && spot.spotlineAffiliation && (
           <div className="px-4 py-5 border-b border-gray-100">
             <h2 className="text-lg font-bold text-gray-900 mb-3">
               SpotLine 정보
@@ -412,7 +412,7 @@ export default function SpotDetailPage() {
         )}
 
         {/* 추천한 유저 (유저 Spot) */}
-        {spot.source === "user" && spot.recommendedBy && (
+        {spot.source === "USER" && spot.recommendedBy && (
           <div className="px-4 py-5 border-b border-gray-100">
             <h2 className="text-lg font-bold text-gray-900 mb-3">
               추천한 유저
@@ -537,7 +537,7 @@ export default function SpotDetailPage() {
                     />
                     {/* 소스 인디케이터 */}
                     <div className="absolute top-1.5 left-1.5">
-                      {next.source === "spotline" ? (
+                      {next.source === "CREW" ? (
                         <span className="inline-flex items-center gap-0.5 text-[9px] font-medium bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
                           <Zap className="h-2.5 w-2.5" />
                           제휴

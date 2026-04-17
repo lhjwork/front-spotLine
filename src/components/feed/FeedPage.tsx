@@ -43,7 +43,7 @@ export default function FeedPage() {
     const urlKeyword = searchParams.get("keyword");
     if (urlArea) setArea(urlArea);
     if (urlCategory) setCategory(urlCategory as SpotCategory);
-    if (urlSort === "newest") setSort("newest" as FeedSort);
+    if (urlSort === "NEWEST") setSort("NEWEST" as FeedSort);
     if (urlKeyword) setKeyword(urlKeyword);
     initializedRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -55,7 +55,7 @@ export default function FeedPage() {
     const params = new URLSearchParams();
     if (area) params.set("area", area);
     if (category) params.set("category", category);
-    if (sort !== "popular") params.set("sort", sort);
+    if (sort !== "POPULAR") params.set("sort", sort);
     if (keyword) params.set("keyword", keyword);
     const query = params.toString();
     router.replace(`/feed${query ? `?${query}` : ""}`, { scroll: false });
@@ -116,7 +116,7 @@ export default function FeedPage() {
           category || undefined,
           spotsPage,
           20,
-          sort !== "popular" ? sort : undefined,
+          sort !== "POPULAR" ? sort : undefined,
           keyword || undefined
         );
         if (!cancelled) {

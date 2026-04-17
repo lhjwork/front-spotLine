@@ -283,7 +283,7 @@ export default function MockupB() {
                           {spot.name}
                         </h3>
                         {/* Source badge */}
-                        {spot.source === "spotline" ? (
+                        {spot.source === "CREW" ? (
                           <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
                             ⚡ SpotLine
                           </span>

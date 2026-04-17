@@ -5,15 +5,15 @@ import type { SpotCategory } from "@/types";
 
 const CATEGORIES: { label: string; value: SpotCategory | null }[] = [
   { label: "전체", value: null },
-  { label: "카페", value: "cafe" },
-  { label: "맛집", value: "restaurant" },
-  { label: "문화", value: "culture" },
-  { label: "자연", value: "nature" },
-  { label: "산책", value: "walk" },
-  { label: "바", value: "bar" },
-  { label: "전시", value: "exhibition" },
-  { label: "액티비티", value: "activity" },
-  { label: "쇼핑", value: "shopping" },
+  { label: "카페", value: "CAFE" },
+  { label: "맛집", value: "RESTAURANT" },
+  { label: "문화", value: "CULTURE" },
+  { label: "자연", value: "NATURE" },
+  { label: "산책", value: "WALK" },
+  { label: "바", value: "BAR" },
+  { label: "전시", value: "EXHIBITION" },
+  { label: "액티비티", value: "ACTIVITY" },
+  { label: "쇼핑", value: "SHOPPING" },
 ];
 
 interface FeedCategoryChipsProps {
