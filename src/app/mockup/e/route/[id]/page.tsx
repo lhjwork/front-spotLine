@@ -40,7 +40,7 @@ interface RouteSpot {
   description: string;
   distance: string;
   walkingTime: string;
-  source: "CREW" | "USER";
+  source: "CREW" | "USER" | "QR";
   spotlineName?: string;
   userStats: {
     visitCount: number;
@@ -53,7 +53,7 @@ interface RouteDetail {
   id: string;
   name: string;
   description: string;
-  source: "CREW" | "USER";
+  source: "CREW" | "USER" | "QR";
   spotlineName?: string;
   authorName: string;
   authorAvatar: string;
@@ -208,7 +208,7 @@ function SourceBadge({
   source,
   spotlineName,
 }: {
-  source: "CREW" | "USER";
+  source: "CREW" | "USER" | "QR";
   spotlineName?: string;
 }) {
   if (source === "CREW") {

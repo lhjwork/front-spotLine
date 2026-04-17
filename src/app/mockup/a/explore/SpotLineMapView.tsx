@@ -197,9 +197,9 @@ const MAP_THEMES = {
 
 interface SpotLineMapViewProps {
   selectedCategory: string;
-  selectedSource: "all" | "spotline" | "user";
+  selectedSource: "all" | "CREW" | "USER" | "QR";
   onCategoryChange: (cat: string) => void;
-  onSourceChange: (src: "all" | "spotline" | "user") => void;
+  onSourceChange: (src: "all" | "CREW" | "USER" | "QR") => void;
   mapStyle?: MapStyle;
 }
 
@@ -329,12 +329,12 @@ export default function SpotLineMapView({
 
             {/* 소스 필터 */}
             <div className="flex gap-1 px-3 py-2 border-b border-gray-100">
-              {(["all", "spotline", "user"] as const).map((src) => {
+              {(["all", "CREW", "USER"] as const).map((src) => {
                 const isActive = selectedSource === src;
                 const label =
                   src === "all"
                     ? "전체"
-                    : src === "spotline"
+                    : src === "CREW"
                     ? "⚡ SpotLine"
                     : "👤 유저";
                 return (

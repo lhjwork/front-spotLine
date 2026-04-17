@@ -100,7 +100,7 @@ function spotLineSpotDetailToBuilderSpot(
       media: s.spotMedia,
       // fill minimal defaults for fields not available from SpotLineSpotDetail
       description: null,
-      source: "crew",
+      source: "CREW",
       sido: null,
       sigungu: null,
       dong: null,

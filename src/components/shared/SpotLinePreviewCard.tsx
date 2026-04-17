@@ -8,19 +8,19 @@ import OptimizedImage from "@/components/common/OptimizedImage";
 import type { SpotLinePreview } from "@/types";
 
 const themeLabels: Record<string, string> = {
-  date: "데이트", travel: "여행", walk: "산책",
-  hangout: "놀거리", "food-tour": "맛집 투어",
-  "cafe-tour": "카페 투어", culture: "문화",
+  DATE: "데이트", TRAVEL: "여행", WALK: "산책",
+  HANGOUT: "놀거리", FOOD_TOUR: "맛집 투어",
+  CAFE_TOUR: "카페 투어", CULTURE: "문화",
 };
 
 const themeColors: Record<string, string> = {
-  date: "bg-pink-100 text-pink-700",
-  travel: "bg-blue-100 text-blue-700",
-  walk: "bg-green-100 text-green-700",
-  hangout: "bg-yellow-100 text-yellow-700",
-  "food-tour": "bg-red-100 text-red-700",
-  "cafe-tour": "bg-amber-100 text-amber-700",
-  culture: "bg-purple-100 text-purple-700",
+  DATE: "bg-pink-100 text-pink-700",
+  TRAVEL: "bg-blue-100 text-blue-700",
+  WALK: "bg-green-100 text-green-700",
+  HANGOUT: "bg-yellow-100 text-yellow-700",
+  FOOD_TOUR: "bg-red-100 text-red-700",
+  CAFE_TOUR: "bg-amber-100 text-amber-700",
+  CULTURE: "bg-purple-100 text-purple-700",
 };
 
 interface SpotLinePreviewCardProps {

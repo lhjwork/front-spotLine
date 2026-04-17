@@ -40,7 +40,7 @@ const MOCK_MAP_POSITIONS: Record<string, { x: number; y: number }> = {
 
 interface KakaoMapViewProps {
   selectedCategory: string;
-  selectedSource: "all" | "spotline" | "user";
+  selectedSource: "all" | "CREW" | "USER" | "QR";
 }
 
 export default function KakaoMapView({ selectedCategory, selectedSource }: KakaoMapViewProps) {

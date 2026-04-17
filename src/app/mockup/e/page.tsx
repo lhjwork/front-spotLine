@@ -28,12 +28,12 @@ interface RouteItem {
   id: string;
   name: string;
   description: string;
-  source: "CREW" | "USER";
+  source: "CREW" | "USER" | "QR";
   spotlineName?: string;
   spotlineColor?: string;
   authorName: string;
   authorAvatar: string;
-  spots: { name: string; category: string; source: "CREW" | "USER" }[];
+  spots: { name: string; category: string; source: "CREW" | "USER" | "QR" }[];
   totalDistance: string;
   totalTime: string;
   completionCount: number;

@@ -4,9 +4,9 @@ import { formatWalkingTime } from "@/lib/utils";
 import type { SpotLinePreview } from "@/types";
 
 const themeLabels: Record<string, string> = {
-  date: "데이트", travel: "여행", walk: "산책",
-  hangout: "놀거리", "food-tour": "맛집 투어",
-  "cafe-tour": "카페 투어", culture: "문화",
+  DATE: "데이트", TRAVEL: "여행", WALK: "산책",
+  HANGOUT: "놀거리", FOOD_TOUR: "맛집 투어",
+  CAFE_TOUR: "카페 투어", CULTURE: "문화",
 };
 
 interface SpotSpotLinesProps {

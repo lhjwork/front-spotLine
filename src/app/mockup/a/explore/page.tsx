@@ -27,7 +27,7 @@ import { MOCK_SPOTS } from "@/data/mockup";
 import type { MockupSpot } from "@/types";
 
 type ViewMode = "list" | "kakao" | "naver";
-type SourceFilter = "all" | "spotline" | "user";
+type SourceFilter = "all" | "CREW" | "USER" | "QR";
 
 const CATEGORIES = [
   { key: "all", label: "전체", icon: SlidersHorizontal },
@@ -40,8 +40,8 @@ const CATEGORIES = [
 
 const SOURCE_FILTERS: { key: SourceFilter; label: string }[] = [
   { key: "all", label: "전체" },
-  { key: "spotline", label: "⚡ SpotLine" },
-  { key: "user", label: "👤 유저" },
+  { key: "CREW", label: "⚡ SpotLine" },
+  { key: "USER", label: "👤 유저" },
 ];
 
 const SORT_OPTIONS = ["가까운 순", "평점 높은 순", "최신 등록 순"];
