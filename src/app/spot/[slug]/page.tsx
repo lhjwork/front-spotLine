@@ -77,10 +77,12 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
     fetchNearbySpots(spot.latitude, spot.longitude, spot.id, 6),
   ]);
 
-  const allPhotos = [
+  const allPhotos = [...new Set([
     ...(spot.placeInfo?.photos || []),
     ...spot.media,
-  ].filter(Boolean);
+  ].filter(Boolean))];
+
+  const heroPhotos = allPhotos.slice(0, 5);
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
@@ -89,7 +91,7 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         { name: spot.area, url: `/city/${spot.area}` },
         { name: spot.title },
       ]} />
-      <SpotHero spot={spot} />
+      <SpotHero spot={spot} heroPhotos={heroPhotos} />
 
       <div className="mx-auto max-w-lg px-4">
         {isQrMode && (
@@ -142,7 +144,7 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         )}
 
         {spotLines.length > 0 && (
-          <SpotSpotLines spotLines={spotLines} />
+          <SpotSpotLines spotLines={spotLines} id="spotlines" />
         )}
 
         {nearbySpots.length > 0 && (
@@ -158,7 +160,7 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
 
       <ViewTracker type="spot" id={spot.id} />
       <SocialHydrator type="spot" id={spot.id} likesCount={spot.likesCount} savesCount={spot.savesCount} visitedCount={spot.visitedCount} />
-      <SpotBottomBar spot={spot} />
+      <SpotBottomBar spot={spot} spotLinesCount={spotLines.length} />
     </main>
   );
 }

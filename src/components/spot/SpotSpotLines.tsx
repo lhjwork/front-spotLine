@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Route, Clock, MapPin } from "lucide-react";
 import { formatWalkingTime } from "@/lib/utils";
+import OptimizedImage from "@/components/common/OptimizedImage";
 import type { SpotLinePreview } from "@/types";
 
 const themeLabels: Record<string, string> = {
@@ -11,11 +12,12 @@ const themeLabels: Record<string, string> = {
 
 interface SpotSpotLinesProps {
   spotLines: SpotLinePreview[];
+  id?: string;
 }
 
-export default function SpotSpotLines({ spotLines }: SpotSpotLinesProps) {
+export default function SpotSpotLines({ spotLines, id }: SpotSpotLinesProps) {
   return (
-    <section className="mt-4">
+    <section className="mt-4" id={id}>
       <h2 className="mb-3 text-sm font-semibold text-gray-900">
         이 Spot이 포함된 SpotLine
       </h2>
@@ -26,9 +28,20 @@ export default function SpotSpotLines({ spotLines }: SpotSpotLinesProps) {
             href={`/spotline/${spotLine.slug}`}
             className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 transition-colors hover:bg-gray-50"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100">
-              <Route className="h-5 w-5 text-purple-600" />
-            </div>
+            {spotLine.coverImageUrl ? (
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
+                <OptimizedImage
+                  src={spotLine.coverImageUrl}
+                  alt={spotLine.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100">
+                <Route className="h-5 w-5 text-purple-600" />
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-sm font-medium text-gray-900">
                 {spotLine.title}

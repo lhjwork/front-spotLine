@@ -15,9 +15,10 @@ import type { SpotDetailResponse } from "@/types";
 
 interface SpotBottomBarProps {
   spot: SpotDetailResponse;
+  spotLinesCount?: number;
 }
 
-export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
+export default function SpotBottomBar({ spot, spotLinesCount = 0 }: SpotBottomBarProps) {
   const item = useSocialStore((s) => s.getItem("spot", spot.id));
   const toggleLike = useSocialStore((s) => s.toggleLike);
   const toggleSave = useSocialStore((s) => s.toggleSave);
@@ -135,13 +136,26 @@ export default function SpotBottomBar({ spot }: SpotBottomBarProps) {
             </button>
           )}
 
-          <Link
-            href={`/create-spotline?spot=${spot.slug}`}
-            className="flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50 px-3 py-2.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100"
-          >
-            <Route className="h-4 w-4" />
-            <span className="hidden sm:inline">코스</span>
-          </Link>
+          {spotLinesCount > 0 ? (
+            <button
+              onClick={() => document.getElementById("spotlines")?.scrollIntoView({ behavior: "smooth" })}
+              className="relative flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50 px-3 py-2.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100"
+            >
+              <Route className="h-4 w-4" />
+              <span className="hidden sm:inline">코스</span>
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-purple-600 px-1 text-[10px] font-bold text-white">
+                {spotLinesCount}
+              </span>
+            </button>
+          ) : (
+            <Link
+              href={`/create-spotline?spot=${spot.slug}`}
+              className="flex items-center gap-1 rounded-xl border border-purple-200 bg-purple-50 px-3 py-2.5 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100"
+            >
+              <Route className="h-4 w-4" />
+              <span className="hidden sm:inline">코스</span>
+            </Link>
+          )}
 
           <button
             onClick={() => setShowMap(!showMap)}

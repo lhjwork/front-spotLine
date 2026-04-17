@@ -1,6 +1,6 @@
 import { ArrowLeft, MapPin, Star, Eye } from "lucide-react";
 import Link from "next/link";
-import OptimizedImage from "@/components/common/OptimizedImage";
+import HeroCarousel from "@/components/spot/HeroCarousel";
 import PartnerBadge from "@/components/spot/PartnerBadge";
 import SpotBusinessStatus from "@/components/spot/SpotBusinessStatus";
 import type { SpotDetailResponse } from "@/types";
@@ -20,37 +20,25 @@ const categoryLabels: Record<string, string> = {
 
 interface SpotHeroProps {
   spot: SpotDetailResponse;
+  heroPhotos: string[];
 }
 
-export default function SpotHero({ spot }: SpotHeroProps) {
-  const imageUrl = spot.placeInfo?.photos?.[0] || spot.media?.[0];
+export default function SpotHero({ spot, heroPhotos }: SpotHeroProps) {
   const categoryLabel = categoryLabels[spot.category] || spot.category;
   const rating = spot.placeInfo?.rating;
 
   return (
     <section className="relative">
-      {/* Hero Image */}
-      <div className="relative h-64 w-full bg-gray-200 md:h-80">
-        {imageUrl ? (
-          <OptimizedImage
-            src={imageUrl}
-            alt={spot.title}
-            fill
-            className="object-cover"
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <MapPin className="h-12 w-12 text-gray-300" />
-          </div>
-        )}
+      {/* Hero Carousel */}
+      <div className="relative">
+        <HeroCarousel photos={heroPhotos} title={spot.title} />
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
         {/* Back button */}
         <Link
           href="/"
-          className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
+          className="absolute left-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
         >
           <ArrowLeft className="h-5 w-5 text-gray-800" />
         </Link>
