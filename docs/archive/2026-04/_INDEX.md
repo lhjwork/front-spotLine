@@ -10,3 +10,4 @@
 | performance-optimization | 2026-04-17 | 100% | 34 (0 NEW, 34 MODIFY) | Completed |
 | spotline-variations-ui | 2026-04-17 | 96% | 8 (3 NEW, 5 MODIFY) | Completed |
 | spot-detail-page-v2 | 2026-04-17 | 100% | 7 (1 NEW, 6 MODIFY) | Completed |
+| spotline-schedule-management | 2026-04-17 | 100% | 9 (4 NEW, 5 MODIFY) | Completed |
