@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchSpotLineDetail } from "@/lib/api";
+import { formatWalkingTime, formatDistance } from "@/lib/utils";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumb from "@/components/seo/Breadcrumb";
 import { generateSpotLineJsonLd } from "@/lib/seo/jsonld";
@@ -38,6 +39,9 @@ export async function generateMetadata({ params }: SpotLinePageProps): Promise<M
       title: `${spotLine.title} | Spotline`,
       description,
       type: "article",
+      ...(spotLine.spots?.[0]?.spotMedia?.[0] && {
+        images: [{ url: spotLine.spots[0].spotMedia[0] }],
+      }),
     },
     twitter: {
       card: "summary_large_image",
@@ -65,23 +69,61 @@ export default async function SpotLinePage({ params }: SpotLinePageProps) {
       ]} />
       <SpotLineHeader spotLine={spotLine} />
 
-      <div className="mx-auto max-w-lg px-4">
-        <SpotLineTimeline spots={spotLine.spots} />
+      {/* Desktop: 2-column, Mobile: single column */}
+      <div className="mx-auto max-w-5xl px-4 md:flex md:gap-8">
+        {/* Left column: Timeline + Comments + Variations */}
+        <div className="min-w-0 md:flex-1">
+          <SpotLineTimeline spots={spotLine.spots} />
 
+          {/* Mobile: Map below timeline */}
+          {spotLine.spots.length >= 2 && (
+            <div className="md:hidden">
+              <SpotLineMapPreview spots={spotLine.spots} title={spotLine.title} />
+            </div>
+          )}
+
+          <div className="mt-6">
+            <CommentSection targetType="SPOTLINE" targetId={spotLine.id} commentsCount={spotLine.commentsCount ?? 0} />
+          </div>
+
+          <div className="mt-6">
+            <SpotLineVariations
+              spotLineId={spotLine.id}
+              spotLineSlug={slug}
+              spotLineTitle={spotLine.title}
+              parentSpotLineId={spotLine.parentSpotLineId}
+              variationsCount={spotLine.variationsCount}
+              originalSpots={spotLine.spots}
+            />
+          </div>
+        </div>
+
+        {/* Right column: Map + Course Summary (sticky, desktop only) */}
         {spotLine.spots.length >= 2 && (
-          <SpotLineMapPreview spots={spotLine.spots} title={spotLine.title} />
+          <div className="hidden md:block md:w-80 md:shrink-0">
+            <div className="sticky top-4 space-y-4">
+              <SpotLineMapPreview spots={spotLine.spots} title={spotLine.title} />
+              {/* Course summary card */}
+              <div className="rounded-xl border border-gray-200 bg-white p-4">
+                <h3 className="text-sm font-semibold text-gray-900">코스 요약</h3>
+                <div className="mt-2 space-y-2 text-xs text-gray-500">
+                  <div className="flex justify-between">
+                    <span>전체 소요</span>
+                    <span className="font-medium text-gray-700">{formatWalkingTime(spotLine.totalDuration)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>총 거리</span>
+                    <span className="font-medium text-gray-700">{formatDistance(spotLine.totalDistance)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>장소 수</span>
+                    <span className="font-medium text-gray-700">{spotLine.spots.length}곳</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
-
-        <CommentSection targetType="SPOTLINE" targetId={spotLine.id} commentsCount={spotLine.commentsCount ?? 0} />
-
-        <SpotLineVariations
-          spotLineId={spotLine.id}
-          spotLineSlug={slug}
-          spotLineTitle={spotLine.title}
-          parentSpotLineId={spotLine.parentSpotLineId}
-          variationsCount={spotLine.variationsCount}
-          originalSpots={spotLine.spots}
-        />
       </div>
 
       <ViewTracker type="spotline" id={spotLine.id} />
