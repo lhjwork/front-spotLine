@@ -90,7 +90,7 @@ export const handleSpotlineExperience = async (): Promise<void> => {
       window.location.href = `${baseUrl}/spotline/${experienceResult.qrId}`;
     }
   } catch (error) {
-    console.error("SpotLine 체험 중 오류:", error);
+    if (process.env.NODE_ENV === "development") console.error("SpotLine 체험 중 오류:", error);
     // 폴백: 기본 매장으로 이동
     const baseUrl = getBaseUrl();
     window.location.href = `${baseUrl}/spotline/${DEFAULT_QR_CODE}`;
@@ -115,7 +115,7 @@ export const handleSpotlineExperienceWithSession = async (area?: AreaType): Prom
     const baseUrl = getBaseUrl();
     window.location.href = `${baseUrl}/spotline/${qrId}`;
   } catch (error) {
-    console.error("SpotLine Experience 세션 시작 중 오류:", error);
+    if (process.env.NODE_ENV === "development") console.error("SpotLine Experience 세션 시작 중 오류:", error);
     // 폴백: 기본 체험하기
     await handleSpotlineExperience();
   }
@@ -124,7 +124,7 @@ export const handleSpotlineExperienceWithSession = async (area?: AreaType): Prom
 // 1. 기본 구현 (추천) - Experience API 사용
 export const handleSpotlineExperienceBasic = (): void => {
   handleSpotlineExperience().catch((error) => {
-    console.error("SpotLine 체험 실패:", error);
+    if (process.env.NODE_ENV === "development") console.error("SpotLine 체험 실패:", error);
   });
 };
 

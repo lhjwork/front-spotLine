@@ -537,7 +537,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("근처 스팟 검색 오류:", error);
+    if (process.env.NODE_ENV === "development") console.error("근처 스팟 검색 오류:", error);
     return NextResponse.json(
       {
         success: false,

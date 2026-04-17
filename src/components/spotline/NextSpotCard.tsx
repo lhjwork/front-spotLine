@@ -20,7 +20,7 @@ export default function NextSpotCard({ spot, qrId, storeId, position, onSpotClic
       // 실제 운영에서만 통계 수집
       logSpotClick(qrId, storeId, spot.id, position);
     } else {
-      console.log(`데모 Spot 클릭: ${spot.name} (통계 수집하지 않음)`);
+      if (process.env.NODE_ENV === "development") console.log(`데모 Spot 클릭: ${spot.name} (통계 수집하지 않음)`);
     }
     onSpotClick(spot);
   };
@@ -31,7 +31,7 @@ export default function NextSpotCard({ spot, qrId, storeId, position, onSpotClic
       // 실제 운영에서만 통계 수집
       logMapLinkClick(qrId, storeId, spot.id);
     } else {
-      console.log(`데모 지도 클릭: ${spot.name} (통계 수집하지 않음)`);
+      if (process.env.NODE_ENV === "development") console.log(`데모 지도 클릭: ${spot.name} (통계 수집하지 않음)`);
     }
     
     // 데모 모드에서는 지도 링크가 없을 수 있으므로 기본 지도 검색으로 대체

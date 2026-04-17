@@ -35,7 +35,7 @@ export default function BlogCoverEditor({
       });
       onCoverChange(fileUrl);
     } catch {
-      console.warn("커버 이미지 업로드 실패");
+      if (process.env.NODE_ENV === "development") console.warn("커버 이미지 업로드 실패");
     } finally {
       setIsUploading(false);
       if (inputRef.current) inputRef.current.value = "";

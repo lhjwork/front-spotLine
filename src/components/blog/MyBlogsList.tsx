@@ -34,7 +34,7 @@ export default function MyBlogsList() {
       }
       setHasMore(!result.last);
     } catch (err) {
-      console.warn("블로그 목록 로딩 실패:", err);
+      if (process.env.NODE_ENV === "development") console.warn("블로그 목록 로딩 실패:", err);
     } finally {
       setIsLoading(false);
     }

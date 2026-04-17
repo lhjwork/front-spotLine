@@ -42,11 +42,11 @@ export default function DemoStorePage() {
           throw new Error(result.message || '데모 데이터 로딩에 실패했습니다.');
         }
       } catch (err) {
-        console.error('데모 데이터 로딩 실패:', err);
+        if (process.env.NODE_ENV === "development") console.error('데모 데이터 로딩 실패:', err);
         setError(err instanceof Error ? err.message : '데모 데이터를 불러올 수 없습니다.');
       } finally {
         setIsLoading(false);
-        console.log("데모 모드: 통계 수집하지 않음");
+        if (process.env.NODE_ENV === "development") console.log("데모 모드: 통계 수집하지 않음");
       }
     };
 

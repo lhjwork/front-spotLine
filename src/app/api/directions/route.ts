@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
       error: "경로를 찾을 수 없습니다.",
     });
   } catch (error) {
-    console.error("길찾기 API 오류:", error);
+    if (process.env.NODE_ENV === "development") console.error("길찾기 API 오류:", error);
     return NextResponse.json(
       {
         success: false,

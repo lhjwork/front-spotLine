@@ -51,7 +51,7 @@ const getApiBaseUrl = (): string => {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!baseUrl) {
-    console.warn("NEXT_PUBLIC_API_BASE_URL 환경 변수가 설정되지 않았습니다. 기본값을 사용합니다.");
+    if (process.env.NODE_ENV === "development") console.warn("NEXT_PUBLIC_API_BASE_URL 환경 변수가 설정되지 않았습니다. 기본값을 사용합니다.");
     return "http://localhost:4000";
   }
 
@@ -236,7 +236,7 @@ export const getStoreInfo = async (identifier: string, isStoreId: boolean = fals
       };
     }
   } catch (error) {
-    console.error("매장 정보 조회 오류:", error);
+    if (process.env.NODE_ENV === "development") console.error("매장 정보 조회 오류:", error);
     throw error;
   }
 };
@@ -333,7 +333,7 @@ export const fetchSpotSpotLines = async (spotId: string): Promise<SpotLinePrevie
     const response = await apiV2.get<SpotLinePreview[]>(`/spots/${spotId}/spotlines`, { timeout: 5000 });
     return response.data;
   } catch (error) {
-    console.warn("Spot SpotLines 조회 실패:", error);
+    if (process.env.NODE_ENV === "development") console.warn("Spot SpotLines 조회 실패:", error);
     return [];
   }
 };
@@ -356,7 +356,7 @@ export const fetchNearbySpots = async (
     const response = await apiV2.get<SpotDetailResponse[]>(`/spots/nearby?${params.toString()}`, { timeout: 5000 });
     return response.data;
   } catch (error) {
-    console.warn("근처 Spot 조회 실패:", error);
+    if (process.env.NODE_ENV === "development") console.warn("근처 Spot 조회 실패:", error);
     return [];
   }
 };
@@ -385,7 +385,7 @@ export const fetchPopularSpotLines = async (area?: string, limit: number = 10): 
     const response = await apiV2.get<{ content: SpotLinePreview[] }>(`/spotlines/popular?${params.toString()}`, { timeout: 5000 });
     return response.data.content;
   } catch (error) {
-    console.warn("인기 SpotLine 조회 실패:", error);
+    if (process.env.NODE_ENV === "development") console.warn("인기 SpotLine 조회 실패:", error);
     return [];
   }
 };
@@ -787,9 +787,9 @@ export const logSpotlineEvent = async (eventData: SpotlineAnalyticsEvent): Promi
   } catch (error) {
     // 분석 이벤트 실패는 사용자 경험에 영향을 주지 않도록 조용히 처리
     if (error instanceof Error && error.name === "AbortError") {
-      console.warn("SpotLine 이벤트 로깅 타임아웃:", error);
+      if (process.env.NODE_ENV === "development") console.warn("SpotLine 이벤트 로깅 타임아웃:", error);
     } else {
-      console.warn("SpotLine 이벤트 로깅 실패:", error);
+      if (process.env.NODE_ENV === "development") console.warn("SpotLine 이벤트 로깅 실패:", error);
     }
   }
 };

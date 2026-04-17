@@ -73,7 +73,7 @@ export const useMySpotLinesStore = create<MySpotLinesState>((set, get) => ({
     try {
       await apiUpdateStatus(mySpotLineId, "completed");
     } catch {
-      console.warn(`완주 마킹 API 실패 (${mySpotLineId}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`완주 마킹 API 실패 (${mySpotLineId}) — 로컬 상태 유지`);
     }
   },
 
@@ -87,7 +87,7 @@ export const useMySpotLinesStore = create<MySpotLinesState>((set, get) => ({
     try {
       await apiDeleteSpotLine(mySpotLineId);
     } catch {
-      console.warn(`삭제 API 실패 (${mySpotLineId}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`삭제 API 실패 (${mySpotLineId}) — 로컬 상태 유지`);
     }
   },
 

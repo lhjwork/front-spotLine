@@ -49,7 +49,7 @@ export default function BlockMediaUpload({
       };
       onAddMedia(blockId, media);
     } catch (err) {
-      console.warn("이미지 업로드 실패:", err);
+      if (process.env.NODE_ENV === "development") console.warn("이미지 업로드 실패:", err);
     } finally {
       setIsUploading(false);
       if (inputRef.current) inputRef.current.value = "";

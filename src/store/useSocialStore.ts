@@ -103,7 +103,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
       }));
     } catch {
       // API 실패 시 optimistic 상태 유지 (graceful fallback)
-      console.warn(`좋아요 API 실패 (${type}:${id}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`좋아요 API 실패 (${type}:${id}) — 로컬 상태 유지`);
     }
   },
 
@@ -133,7 +133,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
         },
       }));
     } catch {
-      console.warn(`저장 API 실패 (${type}:${id}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`저장 API 실패 (${type}:${id}) — 로컬 상태 유지`);
     }
   },
 
@@ -162,7 +162,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
         },
       }));
     } catch {
-      console.warn(`방문 API 실패 (spot:${id}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`방문 API 실패 (spot:${id}) — 로컬 상태 유지`);
     }
   },
 
@@ -247,7 +247,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
         },
       }));
     } catch {
-      console.warn(`팔로우 API 실패 (${userId}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`팔로우 API 실패 (${userId}) — 로컬 상태 유지`);
     }
   },
 

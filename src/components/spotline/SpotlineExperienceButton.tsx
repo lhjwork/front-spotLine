@@ -67,7 +67,7 @@ const SpotlineStartButton: React.FC<SpotlineStartButtonProps> = ({
         throw new Error(data.message || "SpotLine을 시작할 수 없습니다.");
       }
     } catch (error) {
-      console.error("SpotLine 시작 오류:", error);
+      if (process.env.NODE_ENV === "development") console.error("SpotLine 시작 오류:", error);
 
       if (onError) {
         const errorObj = error instanceof Error ? error : new Error("SpotLine 시작 중 오류가 발생했습니다.");

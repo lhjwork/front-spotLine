@@ -91,7 +91,7 @@ export default function SpotPhotoUpload({
       };
       onMediaUpdate([...mediaItems, newItem]);
     } catch (err) {
-      console.warn("사진 업로드 실패:", err);
+      if (process.env.NODE_ENV === "development") console.warn("사진 업로드 실패:", err);
     } finally {
       setIsUploading(false);
       if (inputRef.current) inputRef.current.value = "";

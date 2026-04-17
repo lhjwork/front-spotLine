@@ -111,7 +111,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error('데모 데이터 조회 오류:', error);
+    if (process.env.NODE_ENV === "development") console.error('데모 데이터 조회 오류:', error);
     return NextResponse.json({
       success: false,
       message: "데모 데이터를 가져올 수 없습니다.",

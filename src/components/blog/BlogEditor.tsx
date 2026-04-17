@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Save, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBlogEditorStore } from "@/store/useBlogEditorStore";
+import { useShallow } from "zustand/react/shallow";
 import { createBlog, getBlogBySlug } from "@/lib/api";
 import BlockEditor from "./BlockEditor";
 import TransitionBlock from "./TransitionBlock";
@@ -26,20 +27,37 @@ export default function BlogEditor({ mode, spotLineId, editSlug }: BlogEditorPro
   const [isLoading, setIsLoading] = useState(true);
   const [showPublishSheet, setShowPublishSheet] = useState(false);
 
-  const initFromBlog = useBlogEditorStore((s) => s.initFromBlog);
-  const blocks = useBlogEditorStore((s) => s.blocks);
-  const activeBlockId = useBlogEditorStore((s) => s.activeBlockId);
-  const title = useBlogEditorStore((s) => s.title);
-  const coverImageUrl = useBlogEditorStore((s) => s.coverImageUrl);
-  const status = useBlogEditorStore((s) => s.status);
-  const isSaving = useBlogEditorStore((s) => s.isSaving);
-  const setTitle = useBlogEditorStore((s) => s.setTitle);
-  const setCoverImage = useBlogEditorStore((s) => s.setCoverImage);
-  const setActiveBlock = useBlogEditorStore((s) => s.setActiveBlock);
-  const updateBlockContent = useBlogEditorStore((s) => s.updateBlockContent);
-  const addBlockMedia = useBlogEditorStore((s) => s.addBlockMedia);
-  const removeBlockMedia = useBlogEditorStore((s) => s.removeBlockMedia);
-  const saveDraft = useBlogEditorStore((s) => s.saveDraft);
+  const {
+    initFromBlog,
+    blocks,
+    activeBlockId,
+    title,
+    coverImageUrl,
+    status,
+    isSaving,
+    setTitle,
+    setCoverImage,
+    setActiveBlock,
+    updateBlockContent,
+    addBlockMedia,
+    removeBlockMedia,
+    saveDraft,
+  } = useBlogEditorStore(useShallow((s) => ({
+    initFromBlog: s.initFromBlog,
+    blocks: s.blocks,
+    activeBlockId: s.activeBlockId,
+    title: s.title,
+    coverImageUrl: s.coverImageUrl,
+    status: s.status,
+    isSaving: s.isSaving,
+    setTitle: s.setTitle,
+    setCoverImage: s.setCoverImage,
+    setActiveBlock: s.setActiveBlock,
+    updateBlockContent: s.updateBlockContent,
+    addBlockMedia: s.addBlockMedia,
+    removeBlockMedia: s.removeBlockMedia,
+    saveDraft: s.saveDraft,
+  })));
 
   // Initialize blog
   useEffect(() => {
@@ -59,7 +77,7 @@ export default function BlogEditor({ mode, spotLineId, editSlug }: BlogEditorPro
           initFromBlog(blog);
         }
       } catch (err) {
-        console.error("블로그 초기화 실패:", err);
+        if (process.env.NODE_ENV === "development") console.error("블로그 초기화 실패:", err);
         router.replace("/my-blogs");
       } finally {
         setIsLoading(false);

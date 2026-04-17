@@ -17,7 +17,7 @@ export default function SpotlineStoreInfo({ store, qrId, isDemoMode = false }: S
   const handleExternalLinkClick = (linkType: string, url: string) => {
     if (isDemoMode) {
       // 데모에서는 통계 수집하지 않음
-      console.log(`데모 외부 링크 클릭: ${linkType} (통계 수집하지 않음)`);
+      if (process.env.NODE_ENV === "development") console.log(`데모 외부 링크 클릭: ${linkType} (통계 수집하지 않음)`);
     } else {
       // 실제 운영에서는 통계 수집
       logExternalLinkClick(qrId, store.id, linkType);
@@ -31,7 +31,7 @@ export default function SpotlineStoreInfo({ store, qrId, isDemoMode = false }: S
 
     if (isDemoMode) {
       // 데모에서는 통계 수집하지 않음
-      console.log(`데모 스토리 ${newState ? "확장" : "접기"}: ${qrId} (통계 수집하지 않음)`);
+      if (process.env.NODE_ENV === "development") console.log(`데모 스토리 ${newState ? "확장" : "접기"}: ${qrId} (통계 수집하지 않음)`);
     } else {
       // 실제 운영에서는 통계 수집
       if (newState) {

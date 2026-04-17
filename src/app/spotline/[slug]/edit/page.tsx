@@ -1,10 +1,21 @@
 "use client";
 
 import { use } from "react";
-import { ArrowLeft } from "lucide-react";
+import dynamic from "next/dynamic";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import AuthGuard from "@/components/common/AuthGuard";
-import SpotLineBuilder from "@/components/spotline-builder/SpotLineBuilder";
+
+const SpotLineBuilder = dynamic(
+  () => import("@/components/spotline-builder/SpotLineBuilder"),
+  {
+    loading: () => (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    ),
+  }
+);
 
 interface EditSpotLinePageProps {
   params: Promise<{ slug: string }>;

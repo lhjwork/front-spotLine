@@ -36,7 +36,7 @@ export default function QRPage() {
           return;
         }
       } catch (err) {
-        console.error("QR 코드 처리 실패:", err);
+        if (process.env.NODE_ENV === "development") console.error("QR 코드 처리 실패:", err);
         setError(err instanceof Error ? err.message : "QR 코드를 처리할 수 없습니다");
       }
     };

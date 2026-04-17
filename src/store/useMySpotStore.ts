@@ -67,7 +67,7 @@ export const useMySpotStore = create<MySpotState>((set, get) => ({
     try {
       await apiDeleteSpot(slug);
     } catch {
-      console.warn(`Spot 삭제 API 실패 (${slug}) — 로컬 상태 유지`);
+      if (process.env.NODE_ENV === "development") console.warn(`Spot 삭제 API 실패 (${slug}) — 로컬 상태 유지`);
     }
   },
 

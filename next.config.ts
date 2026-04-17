@@ -44,6 +44,16 @@ const nextConfig: NextConfig = {
   // 성능 최적화
   experimental: {
     optimizeCss: true,
+    optimizePackageImports: [
+      "lucide-react",
+      "@tiptap/react",
+      "@tiptap/starter-kit",
+      "@dnd-kit/core",
+      "@dnd-kit/sortable",
+      "@dnd-kit/utilities",
+      "react-kakao-maps-sdk",
+      "date-fns",
+    ],
   },
 
   // 헤더 설정

@@ -37,7 +37,7 @@ export default function SpotlineLegacyPage({ storeId, qrId }: SpotlineLegacyPage
           const experience = JSON.parse(savedExperience) as ExperienceSession;
           setExperienceSession(experience);
         } catch (error) {
-          console.warn("Experience 세션 파싱 실패:", error);
+          if (process.env.NODE_ENV === "development") console.warn("Experience 세션 파싱 실패:", error);
         }
       }
     }
@@ -58,7 +58,7 @@ export default function SpotlineLegacyPage({ storeId, qrId }: SpotlineLegacyPage
         if (isDemoMode) {
           storeData = await getDemoStoreByQR(storeId);
           spotsData = await getDemoNextSpots(storeData.id, 4);
-          console.log("데모 모드: 통계 수집하지 않음");
+          if (process.env.NODE_ENV === "development") console.log("데모 모드: 통계 수집하지 않음");
         } else {
           storeData = await getSpotlineStoreById(storeId);
           await logPageEnter(storeId, qrId || undefined);
@@ -73,7 +73,7 @@ export default function SpotlineLegacyPage({ storeId, qrId }: SpotlineLegacyPage
         setStore(storeData);
         setNextSpots(spotsData);
       } catch (err) {
-        console.error("SpotLine 데이터 로딩 실패:", err);
+        if (process.env.NODE_ENV === "development") console.error("SpotLine 데이터 로딩 실패:", err);
         setError(err instanceof Error ? err.message : "데이터를 불러올 수 없습니다");
       } finally {
         setIsLoading(false);
@@ -89,9 +89,9 @@ export default function SpotlineLegacyPage({ storeId, qrId }: SpotlineLegacyPage
       if (store) {
         const stayDuration = Date.now() - startTime;
         if (isDemoMode) {
-          console.log(`데모 체류 시간: ${stayDuration}ms (로깅하지 않음)`);
+          if (process.env.NODE_ENV === "development") console.log(`데모 체류 시간: ${stayDuration}ms (로깅하지 않음)`);
         } else {
-          console.log(`SpotLine 체류 시간: ${stayDuration}ms`);
+          if (process.env.NODE_ENV === "development") console.log(`SpotLine 체류 시간: ${stayDuration}ms`);
         }
       }
     };

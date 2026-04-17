@@ -653,7 +653,7 @@ export default function MockupHPage() {
       doFetchSpots();
       setShowSearchHere(false);
     } catch (e) {
-      console.error("지도 초기화 실패:", e);
+      if (process.env.NODE_ENV === "development") console.error("지도 초기화 실패:", e);
       setMapError("지도를 초기화하는데 실패했습니다.");
     }
   }, [isMapLoaded, userLocation]);
