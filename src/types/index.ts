@@ -249,6 +249,19 @@ export type SpotLineTheme =
 
 export type FeedSort = "POPULAR" | "NEWEST";
 
+// FR-02: Time-based sort period (frontend-only, converted to createdAfter param)
+export type FeedSortPeriod = "ALL" | "WEEKLY" | "MONTHLY";
+
+// FR-03: Feed layout preference
+export type FeedLayout = "grid" | "list";
+
+// FR-04: Category curation section item
+export interface CategoryCurationItem {
+  category: SpotCategory;
+  label: string;
+  spots: SpotDetailResponse[];
+}
+
 // QR Partner System (Phase 8)
 export type PartnerTier = "BASIC" | "PREMIUM";
 

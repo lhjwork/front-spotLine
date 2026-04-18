@@ -407,7 +407,8 @@ export const fetchFeedSpots = async (
   size = 20,
   sort?: string,
   keyword?: string,
-  partner?: boolean
+  partner?: boolean,
+  createdAfter?: string
 ): Promise<PaginatedResponse<SpotDetailResponse>> => {
   try {
     const params: Record<string, string | number | boolean> = { page, size };
@@ -416,6 +417,7 @@ export const fetchFeedSpots = async (
     if (sort) params.sort = sort;
     if (keyword) params.keyword = keyword;
     if (partner) params.partner = true;
+    if (createdAfter) params.createdAfter = createdAfter;
     const response = await apiV2.get<PaginatedResponse<SpotDetailResponse>>("/spots", { params, timeout: 5000 });
     return response.data;
   } catch (error) {

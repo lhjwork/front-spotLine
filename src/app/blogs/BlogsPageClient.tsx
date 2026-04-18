@@ -110,7 +110,7 @@ export default function BlogsPageClient({ initialBlogs, initialHasMore }: BlogsP
               <h1 className="text-xl font-bold text-gray-900">블로그</h1>
               <p className="mt-1 text-sm text-gray-500">경험이 담긴 이야기를 만나보세요</p>
             </div>
-            <FeedSortDropdown selected={sort} onSelect={handleSortChange} />
+            <FeedSortDropdown selectedSort={sort} selectedPeriod="ALL" onSelect={(s) => handleSortChange(s)} />
           </div>
         </div>
 

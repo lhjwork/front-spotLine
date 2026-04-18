@@ -6,14 +6,17 @@ import { useFeedStore } from "@/store/useFeedStore";
 import { fetchFeedSpots, fetchFeedSpotLines, fetchBlogs } from "@/lib/api";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { SpotCategory, FeedSort, BlogListItem } from "@/types";
+import type { SpotCategory, FeedSort, FeedSortPeriod, BlogListItem } from "@/types";
 import FeedAreaTabs from "./FeedAreaTabs";
 import FeedCategoryChips from "./FeedCategoryChips";
 import FeedSearchBar from "./FeedSearchBar";
 import FeedSortDropdown from "./FeedSortDropdown";
+import FeedLayoutToggle from "./FeedLayoutToggle";
 import FeedFilterReset from "./FeedFilterReset";
+import FeedTrendingSection from "./FeedTrendingSection";
 import FeedSpotLineSection from "./FeedSpotLineSection";
 import FeedRecommendationSection from "./FeedRecommendationSection";
+import FeedCategoryCuration from "./FeedCategoryCuration";
 import FeedBlogSection from "./FeedBlogSection";
 import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
@@ -30,6 +33,8 @@ export default function FeedPage() {
   const initializedRef = useRef(false);
   const {
     area, category, sort, keyword,
+    sortPeriod, setSortPeriod,
+    feedLayout, setFeedLayout,
     feedTab, setFeedTab,
     spots, spotsPage, hasMoreSpots, spotLines,
     isLoading, error,
@@ -114,6 +119,12 @@ export default function FeedPage() {
       setIsLoading(true);
       setError(null);
       try {
+        let createdAfter: string | undefined;
+        if (sortPeriod === "WEEKLY") {
+          createdAfter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        } else if (sortPeriod === "MONTHLY") {
+          createdAfter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        }
         const result = await fetchFeedSpots(
           area || undefined,
           category || undefined,
@@ -121,7 +132,8 @@ export default function FeedPage() {
           20,
           sort !== "POPULAR" ? sort : undefined,
           keyword || undefined,
-          partnerOnly || undefined
+          partnerOnly || undefined,
+          createdAfter
         );
         if (!cancelled) {
           appendSpots(result.content, !result.last);
@@ -140,7 +152,7 @@ export default function FeedPage() {
     loadSpots();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [area, category, sort, keyword, spotsPage, partnerOnly]);
+  }, [area, category, sort, sortPeriod, keyword, spotsPage, partnerOnly]);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMoreSpots) {
@@ -218,7 +230,12 @@ export default function FeedPage() {
           {/* Search + Sort row */}
           <div className="flex items-center gap-2 px-4 py-2">
             <FeedSearchBar value={keyword} onChange={setKeyword} />
-            <FeedSortDropdown selected={sort} onSelect={setSort} />
+            <FeedLayoutToggle layout={feedLayout} onToggle={setFeedLayout} />
+            <FeedSortDropdown
+              selectedSort={sort}
+              selectedPeriod={sortPeriod}
+              onSelect={(s: FeedSort, p: FeedSortPeriod) => { setSort(s); setSortPeriod(p); }}
+            />
           </div>
 
           <FeedFilterReset
@@ -230,12 +247,15 @@ export default function FeedPage() {
           />
 
           <div ref={contentRef} />
+          <FeedTrendingSection />
           <FeedRecommendationSection />
+          <FeedCategoryCuration area={area} />
           <FeedSpotLineSection spotLines={spotLines} />
           <FeedBlogSection blogs={blogs} />
           <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>
             <FeedSpotGrid
               spots={spots}
+              layout={feedLayout}
               hasMore={hasMoreSpots}
               onLoadMore={handleLoadMore}
               isLoading={isLoading}

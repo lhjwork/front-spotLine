@@ -17,6 +17,16 @@ export default function FeedSkeleton() {
         ))}
       </div>
 
+      {/* Trending section skeleton */}
+      <div className="animate-pulse px-4 py-4">
+        <div className="mb-3 h-6 w-28 rounded bg-gray-200" />
+        <div className="flex gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-48 w-36 shrink-0 rounded-xl bg-gray-200" />
+          ))}
+        </div>
+      </div>
+
       {/* Route section skeleton */}
       <div className="animate-pulse px-4 py-4">
         <div className="mb-3 h-6 w-24 rounded bg-gray-200" />

@@ -75,7 +75,7 @@ export default function MyBlogsList() {
             </button>
           ))}
         </div>
-        <FeedSortDropdown selected={sort} onSelect={handleSortChange} />
+        <FeedSortDropdown selectedSort={sort} selectedPeriod="ALL" onSelect={(s) => handleSortChange(s)} />
       </div>
 
       {/* Blog grid */}

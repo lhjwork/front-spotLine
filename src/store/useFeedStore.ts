@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SpotDetailResponse, SpotLinePreview, SpotCategory, FeedSort } from "@/types";
+import type { SpotDetailResponse, SpotLinePreview, SpotCategory, FeedSort, FeedSortPeriod, FeedLayout } from "@/types";
 
 interface FeedState {
   area: string | null;
@@ -11,6 +11,12 @@ interface FeedState {
   setSort: (sort: FeedSort) => void;
   setKeyword: (keyword: string) => void;
   resetFilters: () => void;
+
+  sortPeriod: FeedSortPeriod;
+  setSortPeriod: (period: FeedSortPeriod) => void;
+
+  feedLayout: FeedLayout;
+  setFeedLayout: (layout: FeedLayout) => void;
 
   feedTab: "all" | "following";
   setFeedTab: (tab: "all" | "following") => void;
@@ -38,6 +44,8 @@ export const useFeedStore = create<FeedState>((set) => ({
   category: null,
   sort: "POPULAR",
   keyword: "",
+  sortPeriod: "ALL",
+  feedLayout: (typeof window !== "undefined" ? localStorage.getItem("feed-layout") as FeedLayout : null) || "grid",
   feedTab: "all",
   spots: [],
   spotsPage: 0,
@@ -66,6 +74,16 @@ export const useFeedStore = create<FeedState>((set) => ({
     return { keyword, spots: [], spotsPage: 0, hasMoreSpots: true, error: null };
   }),
 
+  setSortPeriod: (sortPeriod) => set((state) => {
+    if (state.sortPeriod === sortPeriod) return state;
+    return { sortPeriod, spots: [], spotsPage: 0, hasMoreSpots: true, error: null };
+  }),
+
+  setFeedLayout: (feedLayout) => {
+    try { localStorage.setItem("feed-layout", feedLayout); } catch {}
+    set({ feedLayout });
+  },
+
   setFeedTab: (feedTab) => set({
     feedTab,
     spots: [],
@@ -79,6 +97,7 @@ export const useFeedStore = create<FeedState>((set) => ({
     area: null,
     category: null,
     sort: "POPULAR",
+    sortPeriod: "ALL",
     keyword: "",
     spots: [],
     spotsPage: 0,
