@@ -10,6 +10,7 @@ import SpotPlaceInfo from "@/components/spot/SpotPlaceInfo";
 import SpotImageGallery from "@/components/spot/SpotImageGallery";
 import SpotSpotLines from "@/components/spot/SpotSpotLines";
 import SpotNearby from "@/components/spot/SpotNearby";
+import SimilarSpots from "@/components/spot/SimilarSpots";
 import SpotBottomBar from "@/components/spot/SpotBottomBar";
 import SpotBusinessStatus from "@/components/spot/SpotBusinessStatus";
 import SpotMenu from "@/components/spot/SpotMenu";
@@ -150,6 +151,8 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
         {nearbySpots.length > 0 && (
           <SpotNearby spots={nearbySpots} />
         )}
+
+        <SimilarSpots spotId={spot.id} />
 
         <CommentSection targetType="SPOT" targetId={spot.id} commentsCount={spot.commentsCount ?? 0} />
 

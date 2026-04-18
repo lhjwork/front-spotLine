@@ -11,6 +11,7 @@ import SpotLineTimeline from "@/components/spotline/SpotLineTimeline";
 import SpotLineMapPreview from "@/components/spotline/SpotLineMapPreview";
 import SpotLineMapFAB from "@/components/spotline/SpotLineMapFAB";
 import SpotLineVariations from "@/components/spotline/SpotLineVariations";
+import SimilarSpotLines from "@/components/spotline/SimilarSpotLines";
 import SpotLineBottomBar from "@/components/spotline/SpotLineBottomBar";
 import SocialHydrator from "@/components/social/SocialHydrator";
 import CommentSection from "@/components/comment/CommentSection";
@@ -99,6 +100,8 @@ export default async function SpotLinePage({ params }: SpotLinePageProps) {
               originalSpots={spotLine.spots}
             />
           </div>
+
+          <SimilarSpotLines spotlineId={spotLine.id} />
         </div>
 
         {/* Right column: Map + Course Summary (sticky, desktop only) */}

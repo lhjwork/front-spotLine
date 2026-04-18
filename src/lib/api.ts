@@ -48,6 +48,9 @@ import type {
   PartnerApplicationResponse,
   PartnerDashboardData,
   PartnerDailyTrend,
+  RecommendedSpot,
+  SimilarSpotLine,
+  RecommendationSource,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -1792,3 +1795,47 @@ export const fetchPartnerTrends = async (
     return [];
   }
 };
+
+// ── 추천 엔진 ──
+
+export async function fetchRecommendedSpots(
+  page = 0,
+  size = 10
+): Promise<PaginatedResponse<RecommendedSpot>> {
+  const sessionId = generateSessionId();
+  const res = await apiV2.get("/recommendations/feed", {
+    params: { page, size, sessionId },
+  });
+  return res.data;
+}
+
+export async function fetchSimilarSpots(
+  spotId: string,
+  size = 6
+): Promise<RecommendedSpot[]> {
+  const res = await apiV2.get(`/spots/${spotId}/similar`, {
+    params: { size },
+  });
+  return res.data;
+}
+
+export async function fetchSimilarSpotLines(
+  spotlineId: string,
+  size = 4
+): Promise<SimilarSpotLine[]> {
+  const res = await apiV2.get(`/spotlines/${spotlineId}/similar`, {
+    params: { size },
+  });
+  return res.data;
+}
+
+export function logRecommendationEvent(
+  eventType: "impression" | "click",
+  source: RecommendationSource,
+  itemId: string
+): void {
+  const sessionId = generateSessionId();
+  apiV2
+    .post("/recommendations/events", { eventType, source, itemId, sessionId })
+    .catch(() => {});
+}

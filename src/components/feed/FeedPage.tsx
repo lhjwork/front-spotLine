@@ -13,6 +13,7 @@ import FeedSearchBar from "./FeedSearchBar";
 import FeedSortDropdown from "./FeedSortDropdown";
 import FeedFilterReset from "./FeedFilterReset";
 import FeedSpotLineSection from "./FeedSpotLineSection";
+import FeedRecommendationSection from "./FeedRecommendationSection";
 import FeedBlogSection from "./FeedBlogSection";
 import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
@@ -229,6 +230,7 @@ export default function FeedPage() {
           />
 
           <div ref={contentRef} />
+          <FeedRecommendationSection />
           <FeedSpotLineSection spotLines={spotLines} />
           <FeedBlogSection blogs={blogs} />
           <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>

@@ -1037,3 +1037,33 @@ export interface PartnerDashboardData {
   dailyTrends: PartnerDailyTrend[];
   qrCodes: PartnerQrCode[];
 }
+
+// ── 추천 엔진 ──
+
+export interface RecommendedSpot {
+  id: string;
+  slug: string;
+  title: string;
+  category: SpotCategory;
+  area: string;
+  likesCount: number;
+  savesCount: number;
+  coverImageUrl: string | null;
+  reasonLabel: string | null;
+  score: number;
+}
+
+export interface SimilarSpotLine {
+  id: string;
+  slug: string;
+  title: string;
+  theme: string;
+  area: string;
+  spotCount: number;
+  totalDuration: number;
+  likesCount: number;
+  coverImageUrl: string | null;
+  reasonLabel: string | null;
+}
+
+export type RecommendationSource = "feed_recommendation" | "similar_spot" | "similar_spotline";
