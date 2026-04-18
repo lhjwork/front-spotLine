@@ -4,6 +4,7 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFeedStore } from "@/store/useFeedStore";
 import { fetchFeedSpots, fetchFeedSpotLines, fetchBlogs } from "@/lib/api";
+import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SpotCategory, FeedSort, BlogListItem } from "@/types";
 import FeedAreaTabs from "./FeedAreaTabs";
@@ -24,6 +25,7 @@ export default function FeedPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isFiltering, setIsFiltering] = useState(false);
   const [blogs, setBlogs] = useState<BlogListItem[]>([]);
+  const [partnerOnly, setPartnerOnly] = useState(false);
   const initializedRef = useRef(false);
   const {
     area, category, sort, keyword,
@@ -117,7 +119,8 @@ export default function FeedPage() {
           spotsPage,
           20,
           sort !== "POPULAR" ? sort : undefined,
-          keyword || undefined
+          keyword || undefined,
+          partnerOnly || undefined
         );
         if (!cancelled) {
           appendSpots(result.content, !result.last);
@@ -136,7 +139,7 @@ export default function FeedPage() {
     loadSpots();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [area, category, sort, keyword, spotsPage]);
+  }, [area, category, sort, keyword, spotsPage, partnerOnly]);
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMoreSpots) {
@@ -193,6 +196,23 @@ export default function FeedPage() {
         <>
           <FeedAreaTabs selected={area} onSelect={setArea} />
           <FeedCategoryChips selected={category} onSelect={setCategory} />
+
+          {/* Partner filter */}
+          <div className="px-4 py-1">
+            <button
+              type="button"
+              onClick={() => setPartnerOnly((prev) => !prev)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                partnerOnly
+                  ? "bg-amber-100 text-amber-700"
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+            >
+              <Zap className="h-3.5 w-3.5" />
+              파트너 혜택
+            </button>
+          </div>
 
           {/* Search + Sort row */}
           <div className="flex items-center gap-2 px-4 py-2">

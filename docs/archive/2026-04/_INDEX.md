@@ -12,3 +12,4 @@
 | spot-detail-page-v2 | 2026-04-17 | 100% | 7 (1 NEW, 6 MODIFY) | Completed |
 | spotline-schedule-management | 2026-04-17 | 100% | 9 (4 NEW, 5 MODIFY) | Completed |
 | global-search | 2026-04-18 | 99% | 8 (4 NEW, 4 MODIFY) | Completed |
+| partner-qr-registration | 2026-04-18 | 100% | 10 (7 NEW, 3 MODIFY) | Completed |

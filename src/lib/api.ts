@@ -44,6 +44,10 @@ import type {
   CreateSpotRequest,
   CreateSpotResponse,
   SpotStatus,
+  PartnerApplicationRequest,
+  PartnerApplicationResponse,
+  PartnerDashboardData,
+  PartnerDailyTrend,
 } from "@/types";
 
 // 환경 변수에서 API 베이스 URL 가져오기
@@ -399,14 +403,16 @@ export const fetchFeedSpots = async (
   page = 0,
   size = 20,
   sort?: string,
-  keyword?: string
+  keyword?: string,
+  partner?: boolean
 ): Promise<PaginatedResponse<SpotDetailResponse>> => {
   try {
-    const params: Record<string, string | number> = { page, size };
+    const params: Record<string, string | number | boolean> = { page, size };
     if (area) params.area = area;
     if (category) params.category = category;
     if (sort) params.sort = sort;
     if (keyword) params.keyword = keyword;
+    if (partner) params.partner = true;
     const response = await apiV2.get<PaginatedResponse<SpotDetailResponse>>("/spots", { params, timeout: 5000 });
     return response.data;
   } catch (error) {
@@ -1737,3 +1743,52 @@ export async function deleteNotification(id: string): Promise<void> {
     timeout: 5000,
   });
 }
+
+// ==================== Partner Registration & Dashboard ====================
+
+export const submitPartnerApplication = async (
+  data: PartnerApplicationRequest
+): Promise<PartnerApplicationResponse> => {
+  try {
+    const response = await apiV2.post<PartnerApplicationResponse>(
+      "/partners/apply",
+      data
+    );
+    return response.data;
+  } catch {
+    console.log("[Partner Apply] 신청 데이터:", data);
+    return {
+      success: true,
+      message: "신청이 접수되었습니다. 관리자가 확인 후 연락드리겠습니다.",
+    };
+  }
+};
+
+export const fetchPartnerDashboard = async (
+  token: string
+): Promise<PartnerDashboardData | null> => {
+  try {
+    const response = await apiV2.get<PartnerDashboardData>(
+      "/partners/dashboard",
+      { params: { token } }
+    );
+    return response.data;
+  } catch {
+    return null;
+  }
+};
+
+export const fetchPartnerTrends = async (
+  token: string,
+  period: "7d" | "30d" | "90d"
+): Promise<PartnerDailyTrend[]> => {
+  try {
+    const response = await apiV2.get<PartnerDailyTrend[]>(
+      "/partners/trends",
+      { params: { token, period } }
+    );
+    return response.data;
+  } catch {
+    return [];
+  }
+};

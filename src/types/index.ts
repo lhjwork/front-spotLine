@@ -981,3 +981,59 @@ export interface CreateSpotResponse {
   address: string;
   createdAt: string;
 }
+
+// ==================== Partner Registration & Dashboard ====================
+
+export interface PartnerApplicationRequest {
+  spotId: string;
+  businessName: string;
+  contactPhone: string;
+  contactEmail: string;
+  benefitText: string;
+  brandColor: string;
+  tier: PartnerTier;
+}
+
+export interface PartnerApplicationResponse {
+  success: boolean;
+  message: string;
+  applicationId?: string;
+}
+
+export interface PartnerAnalyticsSummary {
+  totalScans: number;
+  uniqueVisitors: number;
+  conversionRate: number;
+  thisWeekScans: number;
+  lastWeekScans: number;
+  weeklyChange: number;
+}
+
+export interface PartnerDailyTrend {
+  date: string;
+  scans: number;
+  uniqueVisitors: number;
+  conversions: number;
+}
+
+export interface PartnerQrCode {
+  id: string;
+  label: string;
+  qrUrl: string;
+  scans: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface PartnerDashboardData {
+  partnerId: string;
+  businessName: string;
+  spotSlug: string;
+  spotTitle: string;
+  brandColor: string;
+  benefitText: string;
+  tier: PartnerTier;
+  summary: PartnerAnalyticsSummary;
+  dailyTrends: PartnerDailyTrend[];
+  qrCodes: PartnerQrCode[];
+}
