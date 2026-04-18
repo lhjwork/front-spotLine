@@ -11,6 +11,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: siteUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
     { url: `${siteUrl}/feed`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
+    { url: `${siteUrl}/explore`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
+    { url: `${siteUrl}/search`, lastModified: new Date(), changeFrequency: "daily", priority: 0.6 },
+    { url: `${siteUrl}/blogs`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
     { url: `${siteUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
   ];
 
@@ -38,14 +41,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${siteUrl}/spot/${entry.slug}`,
     lastModified: new Date(entry.updatedAt),
     changeFrequency: "weekly" as const,
-    priority: 0.8,
+    priority: 0.9,
   }));
 
   const spotLinePages: MetadataRoute.Sitemap = spotLineSlugs.map((entry) => ({
     url: `${siteUrl}/spotline/${entry.slug}`,
     lastModified: new Date(entry.updatedAt),
     changeFrequency: "weekly" as const,
-    priority: 0.8,
+    priority: 0.9,
   }));
 
   const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({

@@ -4,7 +4,7 @@ import AuthInitializer from "@/components/auth/AuthInitializer";
 import BottomNavBar from "@/components/layout/BottomNavBar";
 import FloatingCreateButton from "@/components/common/FloatingCreateButton";
 import JsonLd from "@/components/seo/JsonLd";
-import { generateOrganizationJsonLd } from "@/lib/seo/jsonld";
+import { generateOrganizationJsonLd, generateWebSiteJsonLd } from "@/lib/seo/jsonld";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -73,6 +73,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <JsonLd data={generateOrganizationJsonLd()} />
+        <JsonLd data={generateWebSiteJsonLd()} />
         <AuthInitializer />
         {children}
         <FloatingCreateButton />

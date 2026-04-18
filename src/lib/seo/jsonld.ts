@@ -149,6 +149,24 @@ export function generateOrganizationJsonLd(): Record<string, unknown> {
   };
 }
 
+/** WebSite + SearchAction JSON-LD (루트 레이아웃용) */
+export function generateWebSiteJsonLd(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Spotline",
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
 /** BreadcrumbList JSON-LD */
 export function generateBreadcrumbJsonLd(
   items: Array<{ name: string; url?: string }>
