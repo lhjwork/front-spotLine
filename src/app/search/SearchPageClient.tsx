@@ -3,13 +3,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Clock, MapPin } from "lucide-react";
-import { fetchFeedSpots, fetchFeedSpotLines } from "@/lib/api";
+import { fetchFeedSpots, fetchFeedSpotLines, fetchBlogs } from "@/lib/api";
 import SpotPreviewCard from "@/components/shared/SpotPreviewCard";
 import SpotLinePreviewCard from "@/components/shared/SpotLinePreviewCard";
+import BlogCard from "@/components/blog/BlogCard";
 import SearchFilters from "@/components/search/SearchFilters";
-import type { SpotDetailResponse, SpotLinePreview } from "@/types";
+import SearchAutocomplete from "@/components/search/SearchAutocomplete";
+import type { SpotDetailResponse, SpotLinePreview, BlogListItem } from "@/types";
 
-type SearchTab = "spot" | "spotline";
+type SearchTab = "spot" | "spotline" | "blog";
 type SortOption = "POPULAR" | "NEWEST";
 
 const STORAGE_KEY = "spotline_recent_searches";
@@ -69,10 +71,13 @@ export default function SearchPageClient() {
   const [spotLinesPage, setSpotLinesPage] = useState(0);
   const [hasMoreSpotLines, setHasMoreSpotLines] = useState(true);
 
+  const [blogResults, setBlogResults] = useState<BlogListItem[]>([]);
+  const [blogPage, setBlogPage] = useState(0);
+  const [hasMoreBlogs, setHasMoreBlogs] = useState(true);
+
   const [loading, setLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
-  const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // 디바운스
@@ -104,6 +109,7 @@ export default function SearchPageClient() {
     if (!hasActiveFilter) {
       setSpots([]);
       setSpotLines([]);
+      setBlogResults([]);
       setTotalCount(0);
       return;
     }
@@ -132,7 +138,7 @@ export default function SearchPageClient() {
             setHasMoreSpots(!result.last);
             setTotalCount(result.totalElements);
           }
-        } else {
+        } else if (tab === "spotline") {
           const result = await fetchFeedSpotLines(
             area ?? undefined,
             theme ?? undefined,
@@ -145,6 +151,19 @@ export default function SearchPageClient() {
             setSpotLines(result.content);
             setSpotLinesPage(0);
             setHasMoreSpotLines(!result.last);
+            setTotalCount(result.totalElements);
+          }
+        } else {
+          const result = await fetchBlogs(
+            0,
+            PAGE_SIZE,
+            area ?? undefined,
+            sort
+          );
+          if (!cancelled) {
+            setBlogResults(result.content);
+            setBlogPage(0);
+            setHasMoreBlogs(!result.last);
             setTotalCount(result.totalElements);
           }
         }
@@ -176,7 +195,7 @@ export default function SearchPageClient() {
         setSpots((prev) => [...prev, ...result.content]);
         setSpotsPage(nextPage);
         setHasMoreSpots(!result.last);
-      } else {
+      } else if (tab === "spotline") {
         const nextPage = spotLinesPage + 1;
         const result = await fetchFeedSpotLines(
           area ?? undefined,
@@ -189,18 +208,28 @@ export default function SearchPageClient() {
         setSpotLines((prev) => [...prev, ...result.content]);
         setSpotLinesPage(nextPage);
         setHasMoreSpotLines(!result.last);
+      } else {
+        const nextPage = blogPage + 1;
+        const result = await fetchBlogs(
+          nextPage,
+          PAGE_SIZE,
+          area ?? undefined,
+          sort
+        );
+        setBlogResults((prev) => [...prev, ...result.content]);
+        setBlogPage(nextPage);
+        setHasMoreBlogs(!result.last);
       }
     } catch {
       // 조용히 처리
     } finally {
       setLoading(false);
     }
-  }, [loading, hasActiveFilter, debouncedQuery, tab, area, category, theme, sort, spotsPage, spotLinesPage]);
+  }, [loading, hasActiveFilter, debouncedQuery, tab, area, category, theme, sort, spotsPage, spotLinesPage, blogPage]);
 
-  // 초기화: 최근 검색어 + autoFocus
+  // 초기화: 최근 검색어
   useEffect(() => {
     setRecentSearches(getRecentSearches());
-    inputRef.current?.focus();
   }, []);
 
   // 탭 변경
@@ -212,10 +241,14 @@ export default function SearchPageClient() {
       setSpots([]);
       setSpotsPage(0);
       setHasMoreSpots(true);
-    } else {
+    } else if (newTab === "spotline") {
       setSpotLines([]);
       setSpotLinesPage(0);
       setHasMoreSpotLines(true);
+    } else {
+      setBlogResults([]);
+      setBlogPage(0);
+      setHasMoreBlogs(true);
     }
   }, []);
 
@@ -224,6 +257,7 @@ export default function SearchPageClient() {
     setArea(newArea);
     setSpotsPage(0);
     setSpotLinesPage(0);
+    setBlogPage(0);
   }, []);
 
   const handleCategoryChange = useCallback((newCategory: string | null) => {
@@ -248,26 +282,11 @@ export default function SearchPageClient() {
     <div className="mx-auto max-w-2xl pb-20">
       {/* 검색 입력 */}
       <div className="sticky top-16 z-40 bg-white px-4 py-3 border-b border-gray-100">
-        <div className="flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2.5">
-          <Search className="h-4 w-4 shrink-0 text-gray-400" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Spot, SpotLine 검색..."
-            className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => { setQuery(""); inputRef.current?.focus(); }}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+        <SearchAutocomplete
+          defaultValue={query}
+          onSearch={(keyword) => setQuery(keyword)}
+          placeholder="Spot, SpotLine, Blog 검색"
+        />
       </div>
 
       {/* 필터 칩 */}
@@ -326,6 +345,7 @@ export default function SearchPageClient() {
             {([
               { key: "spot" as const, label: "Spot" },
               { key: "spotline" as const, label: "SpotLine" },
+              { key: "blog" as const, label: "Blog" },
             ]).map((t) => (
               <button
                 key={t.key}
@@ -345,7 +365,7 @@ export default function SearchPageClient() {
           {!loading && (
             <div className="flex items-center justify-between px-4 py-2">
               <span className="text-sm text-gray-500">
-                {totalCount}개의 {tab === "spot" ? "Spot" : "SpotLine"}
+                {totalCount}개의 {tab === "spot" ? "Spot" : tab === "spotline" ? "SpotLine" : "Blog"}
               </span>
               <select
                 value={sort}
@@ -456,6 +476,46 @@ export default function SearchPageClient() {
             </div>
           )}
 
+          {/* Blog 결과 */}
+          {tab === "blog" && (
+            <div className="px-4 py-4">
+              {blogResults.length === 0 && !loading ? (
+                <div className="py-12 text-center">
+                  <Search className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                  <p className="text-sm text-gray-400 mb-4">
+                    검색 결과가 없습니다
+                  </p>
+                  {area && (
+                    <button
+                      onClick={handleResetFilters}
+                      className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                    >
+                      필터 초기화
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {blogResults.map((blog) => (
+                      <BlogCard key={blog.id} blog={blog} />
+                    ))}
+                  </div>
+                  {hasMoreBlogs && !loading && (
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        onClick={handleLoadMore}
+                        className="rounded-lg border border-gray-200 px-6 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                      >
+                        더 보기
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
           {/* 로딩 */}
           {loading && (
             <div className="flex justify-center py-8">
@@ -469,7 +529,7 @@ export default function SearchPageClient() {
       {!hasActiveFilter && recentSearches.length === 0 && (
         <div className="px-4 py-16 text-center">
           <Search className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-          <p className="text-sm text-gray-400">Spot이나 SpotLine을 검색해보세요</p>
+          <p className="text-sm text-gray-400">Spot, SpotLine, Blog를 검색해보세요</p>
         </div>
       )}
     </div>

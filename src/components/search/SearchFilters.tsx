@@ -19,7 +19,7 @@ const CATEGORY_LABELS: Record<SpotCategory, string> = {
 };
 
 export interface SearchFiltersProps {
-  tab: "spot" | "spotline";
+  tab: "spot" | "spotline" | "blog";
   area: string | null;
   category: string | null;
   theme: string | null;
@@ -58,47 +58,45 @@ export default function SearchFilters({
         ))}
       </div>
 
-      {/* Category (Spot 탭) / Theme (SpotLine 탭) 칩 */}
-      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-        {tab === "spot" ? (
-          <>
+      {/* Category (Spot 탭) / Theme (SpotLine 탭) 칩 — Blog 탭은 area만 */}
+      {tab === "spot" ? (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          <ChipButton
+            active={!category}
+            onClick={() => onCategoryChange(null)}
+          >
+            전체
+          </ChipButton>
+          {categories.map((c) => (
             <ChipButton
-              active={!category}
-              onClick={() => onCategoryChange(null)}
+              key={c}
+              active={category === c}
+              onClick={() =>
+                onCategoryChange(category === c ? null : c)
+              }
             >
-              전체
+              {CATEGORY_LABELS[c]}
             </ChipButton>
-            {categories.map((c) => (
-              <ChipButton
-                key={c}
-                active={category === c}
-                onClick={() =>
-                  onCategoryChange(category === c ? null : c)
-                }
-              >
-                {CATEGORY_LABELS[c]}
-              </ChipButton>
-            ))}
-          </>
-        ) : (
-          <>
-            <ChipButton active={!theme} onClick={() => onThemeChange(null)}>
-              전체
+          ))}
+        </div>
+      ) : tab === "spotline" ? (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          <ChipButton active={!theme} onClick={() => onThemeChange(null)}>
+            전체
+          </ChipButton>
+          {THEMES.map((t) => (
+            <ChipButton
+              key={t.slug}
+              active={theme === t.slug}
+              onClick={() =>
+                onThemeChange(theme === t.slug ? null : t.slug)
+              }
+            >
+              {t.name}
             </ChipButton>
-            {THEMES.map((t) => (
-              <ChipButton
-                key={t.slug}
-                active={theme === t.slug}
-                onClick={() =>
-                  onThemeChange(theme === t.slug ? null : t.slug)
-                }
-              >
-                {t.name}
-              </ChipButton>
-            ))}
-          </>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
