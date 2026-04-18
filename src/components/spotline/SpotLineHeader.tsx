@@ -33,6 +33,12 @@ const themeGradients: Record<string, string> = {
   CULTURE: "from-purple-100 to-violet-200",
 };
 
+const themeEmojis: Record<string, string> = {
+  DATE: "💑", TRAVEL: "✈️", WALK: "🚶",
+  HANGOUT: "🎉", FOOD_TOUR: "🍽️",
+  CAFE_TOUR: "☕", CULTURE: "🎭",
+};
+
 interface SpotLineHeaderProps {
   spotLine: SpotLineDetailResponse;
 }
@@ -41,17 +47,34 @@ export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
   const themeLabel = themeLabels[spotLine.theme] || spotLine.theme;
   const themeColor = themeColors[spotLine.theme] || "bg-gray-100 text-gray-700";
   const gradient = themeGradients[spotLine.theme] || "from-gray-100 to-gray-200";
+  const themeEmoji = themeEmojis[spotLine.theme] || "";
 
   const heroPhotos = spotLine.spots
     .map(s => s.spotMedia?.[0])
     .filter((url): url is string => Boolean(url));
 
+  const hasHeroPhotos = heroPhotos.length > 0;
+
   return (
     <section className="bg-white pb-4">
       {/* Hero section */}
-      {heroPhotos.length > 0 ? (
+      {hasHeroPhotos ? (
         <div className="relative">
           <HeroCarousel photos={heroPhotos} title={spotLine.title} />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 z-[5] bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
+          {/* Stats overlay */}
+          <div className="absolute bottom-4 left-4 right-4 z-[6] flex items-center gap-4 text-xs text-white">
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              {spotLine.area} · {spotLine.spots.length}곳
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {formatWalkingTime(spotLine.totalDuration)}
+            </span>
+            <span>{formatDistance(spotLine.totalDistance)}</span>
+          </div>
           <div className="absolute left-4 top-4 z-10">
             <Link
               href="/"
@@ -77,9 +100,9 @@ export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
 
       {/* Header info */}
       <div className="px-4 pt-4">
-        {/* Theme badge */}
+        {/* Theme badge with emoji */}
         <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${themeColor}`}>
-          {themeLabel}
+          {themeEmoji} {themeLabel}
         </span>
 
         <h1 className="mt-2 text-2xl font-bold text-gray-900">{spotLine.title}</h1>
@@ -90,20 +113,22 @@ export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
           </p>
         )}
 
-        {/* Stats */}
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" />
-            {spotLine.area} · {spotLine.spots.length}곳
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            {formatWalkingTime(spotLine.totalDuration)}
-          </span>
-          <span className="flex items-center gap-1">
-            {formatDistance(spotLine.totalDistance)}
-          </span>
-        </div>
+        {/* Stats — only show when no hero photos (fallback gradient) */}
+        {!hasHeroPhotos && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              {spotLine.area} · {spotLine.spots.length}곳
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {formatWalkingTime(spotLine.totalDuration)}
+            </span>
+            <span className="flex items-center gap-1">
+              {formatDistance(spotLine.totalDistance)}
+            </span>
+          </div>
+        )}
 
         {/* Social stats */}
         <div className="mt-2 flex items-center gap-4 text-xs text-gray-400">
@@ -123,11 +148,11 @@ export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
 
         {/* Creator profile section */}
         {spotLine.creatorName && (
-          <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="mt-4">
             {spotLine.creatorId ? (
               <Link
                 href={`/profile/${spotLine.creatorId}`}
-                className="flex items-center gap-3 rounded-lg -mx-1 px-1 py-1 transition-colors hover:bg-gray-50"
+                className="flex items-center gap-3 rounded-xl bg-gray-50 p-3 transition-colors hover:bg-gray-100"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
                   {spotLine.creatorName.charAt(0).toUpperCase()}
@@ -148,7 +173,7 @@ export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
                 <ArrowLeft className="h-4 w-4 rotate-180 text-gray-300" />
               </Link>
             ) : (
-              <div className="flex items-center gap-3 px-1 py-1">
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 p-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
                   {spotLine.creatorName.charAt(0).toUpperCase()}
                 </div>

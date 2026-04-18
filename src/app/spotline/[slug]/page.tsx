@@ -6,8 +6,10 @@ import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumb from "@/components/seo/Breadcrumb";
 import { generateSpotLineJsonLd } from "@/lib/seo/jsonld";
 import SpotLineHeader from "@/components/spotline/SpotLineHeader";
+import SpotLineProgressBar from "@/components/spotline/SpotLineProgressBar";
 import SpotLineTimeline from "@/components/spotline/SpotLineTimeline";
 import SpotLineMapPreview from "@/components/spotline/SpotLineMapPreview";
+import SpotLineMapFAB from "@/components/spotline/SpotLineMapFAB";
 import SpotLineVariations from "@/components/spotline/SpotLineVariations";
 import SpotLineBottomBar from "@/components/spotline/SpotLineBottomBar";
 import SocialHydrator from "@/components/social/SocialHydrator";
@@ -68,12 +70,13 @@ export default async function SpotLinePage({ params }: SpotLinePageProps) {
         { name: spotLine.title },
       ]} />
       <SpotLineHeader spotLine={spotLine} />
+      <SpotLineProgressBar spots={spotLine.spots} totalDuration={spotLine.totalDuration} theme={spotLine.theme} />
 
       {/* Desktop: 2-column, Mobile: single column */}
       <div className="mx-auto max-w-5xl px-4 md:flex md:gap-8">
         {/* Left column: Timeline + Comments + Variations */}
         <div className="min-w-0 md:flex-1">
-          <SpotLineTimeline spots={spotLine.spots} />
+          <SpotLineTimeline spots={spotLine.spots} theme={spotLine.theme} />
 
           {/* Mobile: Map below timeline */}
           {spotLine.spots.length >= 2 && (
@@ -128,6 +131,9 @@ export default async function SpotLinePage({ params }: SpotLinePageProps) {
 
       <ViewTracker type="spotline" id={spotLine.id} />
       <SocialHydrator type="spotline" id={spotLine.id} likesCount={spotLine.likesCount} savesCount={spotLine.savesCount} />
+      {spotLine.spots.length >= 2 && (
+        <SpotLineMapFAB spots={spotLine.spots} title={spotLine.title} />
+      )}
       <SpotLineBottomBar spotLine={spotLine} />
     </main>
   );

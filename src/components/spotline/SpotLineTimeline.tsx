@@ -3,9 +3,10 @@ import type { SpotLineSpotDetail } from "@/types";
 
 interface SpotLineTimelineProps {
   spots: SpotLineSpotDetail[];
+  theme?: string;
 }
 
-export default function SpotLineTimeline({ spots }: SpotLineTimelineProps) {
+export default function SpotLineTimeline({ spots, theme }: SpotLineTimelineProps) {
   const sorted = [...spots].sort((a, b) => a.order - b.order);
 
   return (
@@ -18,6 +19,7 @@ export default function SpotLineTimeline({ spots }: SpotLineTimelineProps) {
             spot={spot}
             isLast={index === sorted.length - 1}
             index={index}
+            theme={theme}
           />
         ))}
       </div>

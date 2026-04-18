@@ -1,4 +1,5 @@
 import { Map, ExternalLink } from "lucide-react";
+import OptimizedImage from "@/components/common/OptimizedImage";
 import type { SpotLineSpotDetail } from "@/types";
 
 interface SpotLineMapPreviewProps {
@@ -28,13 +29,19 @@ export default function SpotLineMapPreview({ spots, title }: SpotLineMapPreviewP
 
       {/* Always-visible content */}
       <div className="rounded-xl border border-gray-200 bg-white p-4">
-        {/* Spot list with numbered markers */}
+        {/* Spot list with thumbnails */}
         <div className="space-y-1.5">
           {sorted.map((spot, index) => (
             <div key={spot.spotId} className="flex items-center gap-2 text-xs">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">
-                {index + 1}
-              </span>
+              {spot.spotMedia?.[0] ? (
+                <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
+                  <OptimizedImage src={spot.spotMedia[0]} alt="" fill className="object-cover" />
+                </div>
+              ) : (
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">
+                  {index + 1}
+                </span>
+              )}
               <span className="truncate text-gray-700">{spot.spotTitle}</span>
               <span className="shrink-0 text-gray-400">{spot.spotArea}</span>
             </div>
