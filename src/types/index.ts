@@ -302,6 +302,7 @@ export interface SpotDetailResponse {
   visitedCount: number;
   viewsCount: number;
   commentsCount: number;
+  sharesCount: number;
   creatorId: string | null;
   creatorType: string;
   creatorName: string | null;
@@ -330,6 +331,7 @@ export interface SpotLineDetailResponse {
   replicationsCount: number;
   completionsCount: number;
   commentsCount: number;
+  sharesCount: number;
   creatorId: string | null;
   creatorType: string;
   creatorName: string | null;

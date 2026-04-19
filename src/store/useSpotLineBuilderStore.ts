@@ -116,6 +116,7 @@ function spotLineSpotDetailToBuilderSpot(
       visitedCount: 0,
       viewsCount: 0,
       commentsCount: 0,
+      sharesCount: 0,
       creatorId: null,
       creatorType: "crew",
       creatorName: null,

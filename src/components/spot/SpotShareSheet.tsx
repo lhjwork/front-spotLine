@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Copy, Share2, MessageCircle, Check } from "lucide-react";
+import { X, Copy, Share2, MessageCircle, Check, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
 import {
   copyToClipboard,
   nativeShare,
   isNativeShareSupported,
   shareToKakao,
+  buildShareUrl,
 } from "@/lib/share";
+import { trackShare } from "@/lib/api";
 import type { SpotDetailResponse } from "@/types";
 
 interface SpotShareSheetProps {
@@ -25,6 +28,7 @@ export default function SpotShareSheet({
 }: SpotShareSheetProps) {
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -64,6 +68,7 @@ export default function SpotShareSheet({
     if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      trackShare("SPOT", spot.id, "LINK");
     }
   };
 
@@ -74,14 +79,21 @@ export default function SpotShareSheet({
       imageUrl,
       webUrl: shareUrl,
     });
+    trackShare("SPOT", spot.id, "KAKAO");
   };
 
   const handleNative = async () => {
-    await nativeShare({
+    const ok = await nativeShare({
       title: spot.title,
       text: shareText,
       url: shareUrl,
     });
+    if (ok) trackShare("SPOT", spot.id, "NATIVE");
+  };
+
+  const handleQr = () => {
+    setShowQr(!showQr);
+    if (!showQr) trackShare("SPOT", spot.id, "QR");
   };
 
   return createPortal(
@@ -143,6 +155,29 @@ export default function SpotShareSheet({
             </div>
             <p className="text-sm font-medium text-gray-900">카카오톡 공유</p>
           </button>
+
+          {/* QR 코드 */}
+          <button
+            type="button"
+            onClick={handleQr}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-gray-50"
+          >
+            <div className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-full",
+              showQr ? "bg-purple-100" : "bg-gray-100"
+            )}>
+              <QrCode className={cn("h-5 w-5", showQr ? "text-purple-600" : "text-gray-600")} />
+            </div>
+            <p className="text-sm font-medium text-gray-900">QR 코드</p>
+          </button>
+
+          {showQr && (
+            <div className="flex justify-center py-3">
+              <div className="rounded-xl border border-gray-200 bg-white p-4">
+                <QRCodeSVG value={shareUrl} size={160} level="M" />
+              </div>
+            </div>
+          )}
 
           {isNativeShareSupported() && (
             <button

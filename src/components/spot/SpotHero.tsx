@@ -1,4 +1,4 @@
-import { ArrowLeft, MapPin, Star, Eye } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Eye, Share2 } from "lucide-react";
 import Link from "next/link";
 import HeroCarousel from "@/components/spot/HeroCarousel";
 import PartnerBadge from "@/components/spot/PartnerBadge";
@@ -89,6 +89,12 @@ export default function SpotHero({ spot, heroPhotos }: SpotHeroProps) {
               <Eye className="h-3 w-3" />
               {spot.viewsCount.toLocaleString()}
             </span>
+            {spot.sharesCount > 0 && (
+              <span className="flex items-center gap-0.5">
+                <Share2 className="h-3 w-3" />
+                {spot.sharesCount.toLocaleString()}
+              </span>
+            )}
           </div>
 
           {/* Tags */}

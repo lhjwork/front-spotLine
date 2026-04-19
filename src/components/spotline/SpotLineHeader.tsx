@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Clock, MapPin, Heart, Users, Copy, Route } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Heart, Users, Copy, Route, Share2 } from "lucide-react";
 import Link from "next/link";
 import { formatDistance, formatWalkingTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -144,6 +144,12 @@ export default function SpotLineHeader({ spotLine }: SpotLineHeaderProps) {
             <Users className="h-3 w-3" />
             {spotLine.completionsCount.toLocaleString()} 완주
           </span>
+          {spotLine.sharesCount > 0 && (
+            <span className="flex items-center gap-1">
+              <Share2 className="h-3 w-3" />
+              {spotLine.sharesCount.toLocaleString()}
+            </span>
+          )}
         </div>
 
         {/* Creator profile section */}

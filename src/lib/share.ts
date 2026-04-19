@@ -1,3 +1,14 @@
+/** 공유 URL 생성 (레퍼럴 파라미터 포함) */
+export function buildShareUrl(
+  baseUrl: string,
+  referrerId?: string | null
+): string {
+  if (!referrerId) return baseUrl;
+  const url = new URL(baseUrl);
+  url.searchParams.set("ref", referrerId);
+  return url.toString();
+}
+
 /** 클립보드에 URL 복사 */
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {

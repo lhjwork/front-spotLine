@@ -1422,6 +1422,27 @@ export async function incrementBlogView(blogId: string): Promise<void> {
   }
 }
 
+// ==================== Share Tracking (v2 — 공유 추적) ====================
+
+/** 공유 이벤트 추적 (fire-and-forget) */
+export async function trackShare(
+  targetType: "SPOT" | "SPOTLINE",
+  targetId: string,
+  channel: "LINK" | "KAKAO" | "QR" | "NATIVE",
+  referrerId?: string | null
+): Promise<void> {
+  try {
+    await apiV2.post("/shares", {
+      targetType,
+      targetId,
+      channel,
+      referrerId: referrerId || undefined,
+    }, { timeout: 3000 });
+  } catch {
+    // fire-and-forget: 에러 무시
+  }
+}
+
 // ==================== Sitemap API (v2 — slug 목록) ====================
 
 export interface SlugEntry {
