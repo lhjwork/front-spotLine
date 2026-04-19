@@ -21,6 +21,7 @@ interface SpotLineBuilderProps {
   forkSlug?: string;
   editSlug?: string;
   spotSlug?: string;
+  spotSlugs?: string[];
 }
 
 export default function SpotLineBuilder({
@@ -28,11 +29,12 @@ export default function SpotLineBuilder({
   forkSlug,
   editSlug,
   spotSlug,
+  spotSlugs,
 }: SpotLineBuilderProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"search" | "course">("search");
   const [isInitializing, setIsInitializing] = useState(
-    mode !== "create" || !!spotSlug
+    mode !== "create" || !!spotSlug || !!spotSlugs?.length
   );
 
   const spots = useSpotLineBuilderStore((s) => s.spots);
@@ -66,6 +68,14 @@ export default function SpotLineBuilder({
           router.back();
           return;
         }
+      } else if (mode === "create" && spotSlugs?.length) {
+        clearAll();
+        const results = await Promise.allSettled(
+          spotSlugs.map((s) => fetchSpotDetail(s))
+        );
+        for (const r of results) {
+          if (r.status === "fulfilled" && r.value) addSpot(r.value);
+        }
       } else if (mode === "create" && spotSlug) {
         clearAll();
         try {
@@ -81,7 +91,7 @@ export default function SpotLineBuilder({
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, forkSlug, editSlug, spotSlug]);
+  }, [mode, forkSlug, editSlug, spotSlug, spotSlugs]);
 
   // 미저장 경고
   useEffect(() => {

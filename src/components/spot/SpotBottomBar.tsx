@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Bookmark, MapPinCheck, Share2, Navigation2, ChevronDown, ChevronUp, Route, Flag } from "lucide-react";
+import { Heart, Bookmark, MapPinCheck, Share2, Navigation2, ChevronDown, ChevronUp, Route, Flag, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -11,14 +11,16 @@ import SpotShareSheet from "@/components/spot/SpotShareSheet";
 import CheckinMemoModal from "@/components/spot/CheckinMemoModal";
 import ExternalMapButtons from "@/components/map/ExternalMapButtons";
 import ReportModal from "@/components/comment/ReportModal";
+import AddToSpotLineSheet from "@/components/qr/AddToSpotLineSheet";
 import type { SpotDetailResponse } from "@/types";
 
 interface SpotBottomBarProps {
   spot: SpotDetailResponse;
   spotLinesCount?: number;
+  isQrMode?: boolean;
 }
 
-export default function SpotBottomBar({ spot, spotLinesCount = 0 }: SpotBottomBarProps) {
+export default function SpotBottomBar({ spot, spotLinesCount = 0, isQrMode = false }: SpotBottomBarProps) {
   const item = useSocialStore((s) => s.getItem("spot", spot.id));
   const toggleLike = useSocialStore((s) => s.toggleLike);
   const toggleSave = useSocialStore((s) => s.toggleSave);
@@ -33,6 +35,7 @@ export default function SpotBottomBar({ spot, spotLinesCount = 0 }: SpotBottomBa
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showAddSheet, setShowAddSheet] = useState(false);
 
   const liked = item?.liked ?? false;
   const saved = item?.saved ?? false;
@@ -136,6 +139,23 @@ export default function SpotBottomBar({ spot, spotLinesCount = 0 }: SpotBottomBa
             </button>
           )}
 
+          {isQrMode && (
+            <button
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setLoginMessage("로그인하고 SpotLine에 추가해보세요");
+                  setShowLogin(true);
+                  return;
+                }
+                setShowAddSheet(true);
+              }}
+              className="flex items-center gap-1 rounded-xl border border-green-200 bg-green-50 px-3 py-2.5 text-sm font-medium text-green-700 transition-colors hover:bg-green-100"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">추가</span>
+            </button>
+          )}
+
           {spotLinesCount > 0 ? (
             <button
               onClick={() => document.getElementById("spotlines")?.scrollIntoView({ behavior: "smooth" })}
@@ -221,6 +241,12 @@ export default function SpotBottomBar({ spot, spotLinesCount = 0 }: SpotBottomBa
           onSuccess={() => setShowReport(false)}
         />
       )}
+
+      <AddToSpotLineSheet
+        isOpen={showAddSheet}
+        onClose={() => setShowAddSheet(false)}
+        spotSlug={spot.slug}
+      />
     </>
   );
 }

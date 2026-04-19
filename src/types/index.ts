@@ -1080,3 +1080,14 @@ export interface SimilarSpotLine {
 }
 
 export type RecommendationSource = "feed_recommendation" | "similar_spot" | "similar_spotline";
+
+// QR 스캔 히스토리
+export interface QrScanHistoryItem {
+  spotId: string;
+  slug: string;
+  title: string;
+  category: string;
+  thumbnailUrl?: string;
+  qrId: string;
+  scannedAt: string;
+}

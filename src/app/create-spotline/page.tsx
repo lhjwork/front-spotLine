@@ -22,8 +22,10 @@ function CreateSpotLineContent() {
   const searchParams = useSearchParams();
   const forkSlug = searchParams.get("fork");
   const spotSlug = searchParams.get("spot");
+  const spotsParam = searchParams.get("spots");
 
   const mode = forkSlug ? "fork" : "create";
+  const spotSlugs = spotsParam ? spotsParam.split(",").filter(Boolean) : undefined;
 
   return (
     <AuthGuard>
@@ -43,6 +45,7 @@ function CreateSpotLineContent() {
           mode={mode}
           forkSlug={forkSlug || undefined}
           spotSlug={spotSlug || undefined}
+          spotSlugs={spotSlugs}
         />
       </div>
     </AuthGuard>

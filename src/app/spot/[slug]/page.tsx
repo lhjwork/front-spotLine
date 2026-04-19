@@ -19,6 +19,7 @@ import SpotFacilities from "@/components/spot/SpotFacilities";
 import SocialHydrator from "@/components/social/SocialHydrator";
 import QrBanner from "@/components/qr/QrBanner";
 import QrAnalytics from "@/components/qr/QrAnalytics";
+import QrSessionBanner from "@/components/qr/QrSessionBanner";
 import { PartnerQrBannerWrapper } from "@/components/qr/PartnerQrBanner";
 import AreaCta from "@/components/shared/AreaCta";
 import PartnerBenefit from "@/components/spot/PartnerBenefit";
@@ -140,11 +141,15 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
           kakaoPlaceId={spot.placeInfo?.placeId ?? null}
         />
 
+        {isQrMode && spotLines.length > 0 && (
+          <SpotSpotLines spotLines={spotLines} id="spotlines" heading="이 장소가 포함된 추천 코스" highlight />
+        )}
+
         {allPhotos.length > 1 && (
           <SpotImageGallery photos={allPhotos} title={spot.title} />
         )}
 
-        {spotLines.length > 0 && (
+        {!isQrMode && spotLines.length > 0 && (
           <SpotSpotLines spotLines={spotLines} id="spotlines" />
         )}
 
@@ -163,7 +168,8 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
 
       <ViewTracker type="spot" id={spot.id} />
       <SocialHydrator type="spot" id={spot.id} likesCount={spot.likesCount} savesCount={spot.savesCount} visitedCount={spot.visitedCount} />
-      <SpotBottomBar spot={spot} spotLinesCount={spotLines.length} />
+      {isQrMode && <QrSessionBanner />}
+      <SpotBottomBar spot={spot} spotLinesCount={spotLines.length} isQrMode={isQrMode} />
     </main>
   );
 }

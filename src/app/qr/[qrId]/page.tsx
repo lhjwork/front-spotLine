@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { resolveQrToSpot } from "@/lib/api";
+import { addQrScanToHistory } from "@/lib/qr-history";
 
 export default function QRPage() {
   const params = useParams();
@@ -26,6 +27,14 @@ export default function QRPage() {
         const result = await resolveQrToSpot(qrId);
 
         if (result) {
+          addQrScanToHistory({
+            spotId: result.spotId,
+            slug: result.slug,
+            title: result.slug,
+            category: "",
+            qrId,
+          });
+
           if (result.source === "v2") {
             router.replace(`/spot/${result.slug}?qr=${qrId}`);
           } else {

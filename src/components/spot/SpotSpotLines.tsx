@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Route, Clock, MapPin } from "lucide-react";
-import { formatWalkingTime } from "@/lib/utils";
+import { cn, formatWalkingTime } from "@/lib/utils";
 import OptimizedImage from "@/components/common/OptimizedImage";
 import type { SpotLinePreview } from "@/types";
 
@@ -13,13 +13,15 @@ const themeLabels: Record<string, string> = {
 interface SpotSpotLinesProps {
   spotLines: SpotLinePreview[];
   id?: string;
+  heading?: string;
+  highlight?: boolean;
 }
 
-export default function SpotSpotLines({ spotLines, id }: SpotSpotLinesProps) {
+export default function SpotSpotLines({ spotLines, id, heading, highlight }: SpotSpotLinesProps) {
   return (
-    <section className="mt-4" id={id}>
-      <h2 className="mb-3 text-sm font-semibold text-gray-900">
-        이 Spot이 포함된 SpotLine
+    <section className={cn("mt-4", highlight && "rounded-xl bg-purple-50 p-3")} id={id}>
+      <h2 className={cn("mb-3 text-sm font-semibold", highlight ? "text-purple-700" : "text-gray-900")}>
+        {heading || "이 Spot이 포함된 SpotLine"}
       </h2>
       <div className="space-y-2">
         {spotLines.map((spotLine) => (
