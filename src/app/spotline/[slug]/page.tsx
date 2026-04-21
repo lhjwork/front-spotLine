@@ -16,6 +16,7 @@ import SpotLineBottomBar from "@/components/spotline/SpotLineBottomBar";
 import SocialHydrator from "@/components/social/SocialHydrator";
 import CommentSection from "@/components/comment/CommentSection";
 import ViewTracker from "@/components/common/ViewTracker";
+import ReferralBannerWrapper from "@/components/common/ReferralBannerWrapper";
 
 interface SpotLinePageProps {
   params: Promise<{ slug: string }>;
@@ -64,6 +65,7 @@ export default async function SpotLinePage({ params }: SpotLinePageProps) {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
+      <ReferralBannerWrapper />
       <JsonLd data={generateSpotLineJsonLd(spotLine)} />
       <Breadcrumb items={[
         { name: spotLine.area, url: `/city/${spotLine.area}` },

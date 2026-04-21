@@ -126,7 +126,7 @@ export default function SpotBottomBar({ spot, spotLinesCount = 0, isQrMode = fal
             className="flex items-center gap-1 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
           >
             <Share2 className="h-4 w-4" />
-            <span>공유</span>
+            <span>{spot.sharesCount > 0 ? spot.sharesCount : "공유"}</span>
           </button>
 
           {isAuthenticated && !isOwner && (

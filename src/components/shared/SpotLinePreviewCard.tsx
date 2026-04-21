@@ -81,6 +81,7 @@ export default function SpotLinePreviewCard({ spotLine }: SpotLinePreviewCardPro
                 id={spotLine.id}
                 initialLikesCount={spotLine.likesCount}
                 initialSavesCount={0}
+                initialSharesCount={spotLine.sharesCount ?? 0}
                 size="sm"
               />
             </div>

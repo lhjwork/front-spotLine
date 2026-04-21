@@ -71,6 +71,7 @@ export default function SpotPreviewCard({ spot }: SpotPreviewCardProps) {
             id={spot.id}
             initialLikesCount={spot.likesCount}
             initialSavesCount={spot.savesCount}
+            initialSharesCount={spot.sharesCount}
             size="sm"
           />
         </div>

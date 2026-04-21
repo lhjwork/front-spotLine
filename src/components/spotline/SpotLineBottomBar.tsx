@@ -105,6 +105,7 @@ export default function SpotLineBottomBar({ spotLine }: SpotLineBottomBarProps) 
             className="flex items-center gap-1 rounded-xl px-2.5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
           >
             <Share2 className="h-4 w-4" />
+            <span>{spotLine.sharesCount > 0 ? spotLine.sharesCount : "공유"}</span>
           </button>
 
           {isAuthenticated && !isOwner && (

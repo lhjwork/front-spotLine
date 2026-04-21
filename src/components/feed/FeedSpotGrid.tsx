@@ -83,6 +83,7 @@ function SpotListCard({ spot }: { spot: SpotDetailResponse }) {
             id={spot.id}
             initialLikesCount={spot.likesCount}
             initialSavesCount={spot.savesCount}
+            initialSharesCount={spot.sharesCount}
             size="sm"
           />
         </div>

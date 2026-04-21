@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Bookmark } from "lucide-react";
+import { Heart, Bookmark, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -12,6 +12,7 @@ interface SocialActionButtonsProps {
   id: string;
   initialLikesCount: number;
   initialSavesCount: number;
+  initialSharesCount?: number;
   size?: "sm" | "md";
 }
 
@@ -20,6 +21,7 @@ export default function SocialActionButtons({
   id,
   initialLikesCount,
   initialSavesCount,
+  initialSharesCount = 0,
   size = "sm",
 }: SocialActionButtonsProps) {
   const item = useSocialStore((s) => s.getItem(type, id));
@@ -94,6 +96,12 @@ export default function SocialActionButtons({
         >
           <Bookmark className={cn(iconSize, saved && "fill-amber-500")} />
         </button>
+        {initialSharesCount > 0 && (
+          <span className={cn("flex items-center gap-0.5 text-gray-400", textSize)}>
+            <Share2 className={iconSize} />
+            <span className="tabular-nums">{initialSharesCount}</span>
+          </span>
+        )}
       </div>
 
       <LoginBottomSheet

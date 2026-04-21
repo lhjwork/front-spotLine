@@ -25,6 +25,7 @@ import AreaCta from "@/components/shared/AreaCta";
 import PartnerBenefit from "@/components/spot/PartnerBenefit";
 import CommentSection from "@/components/comment/CommentSection";
 import ViewTracker from "@/components/common/ViewTracker";
+import ReferralBannerWrapper from "@/components/common/ReferralBannerWrapper";
 
 interface SpotPageProps {
   params: Promise<{ slug: string }>;
@@ -88,6 +89,7 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
+      <ReferralBannerWrapper />
       <JsonLd data={generateSpotJsonLd(spot)} />
       <Breadcrumb items={[
         { name: spot.area, url: `/city/${spot.area}` },
