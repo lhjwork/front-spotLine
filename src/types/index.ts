@@ -313,6 +313,9 @@ export interface SpotDetailResponse {
   rejectionReason: string | null;
   reviewedAt: string | null;
   reviewedBy: string | null;
+  bestTimeOfDay: TimeOfDay | null;
+  bestWeatherCondition: WeatherCondition | null;
+  isIndoor: boolean | null;
 }
 
 // SpotLine 상세 응답 (GET /api/v2/spotlines/:slug)
@@ -1051,6 +1054,45 @@ export interface PartnerDashboardData {
   summary: PartnerAnalyticsSummary;
   dailyTrends: PartnerDailyTrend[];
   qrCodes: PartnerQrCode[];
+}
+
+// ── 날씨/시간대 ──
+
+export type TimeOfDay = "DAWN" | "MORNING" | "AFTERNOON" | "SUNSET" | "NIGHT" | "ANY";
+export type WeatherCondition = "SUNNY" | "CLOUDY" | "RAINY" | "SNOWY" | "ANY";
+
+export interface WeatherInfo {
+  temperature: number;
+  condition: WeatherCondition;
+  humidity: number;
+  windSpeed: number;
+  currentTimeOfDay: TimeOfDay;
+}
+
+export interface NowRecommendedSpot {
+  id: string;
+  slug: string;
+  title: string;
+  category: SpotCategory;
+  crewNote: string | null;
+  address: string;
+  area: string;
+  latitude: number;
+  longitude: number;
+  tags: string[];
+  thumbnailUrl: string | null;
+  viewsCount: number;
+  likesCount: number;
+  bestTimeOfDay: TimeOfDay | null;
+  bestWeatherCondition: WeatherCondition | null;
+  isIndoor: boolean | null;
+  contextScore: number;
+}
+
+export interface NowRecommendationResponse {
+  weather: WeatherInfo;
+  spots: NowRecommendedSpot[];
+  timeContext: TimeOfDay;
 }
 
 // ── 추천 엔진 ──

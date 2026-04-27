@@ -26,6 +26,7 @@ import PartnerBenefit from "@/components/spot/PartnerBenefit";
 import CommentSection from "@/components/comment/CommentSection";
 import ViewTracker from "@/components/common/ViewTracker";
 import ReferralBannerWrapper from "@/components/common/ReferralBannerWrapper";
+import WeatherBadge from "@/components/common/WeatherBadge";
 
 interface SpotPageProps {
   params: Promise<{ slug: string }>;
@@ -116,6 +117,16 @@ export default async function SpotPage({ params, searchParams }: SpotPageProps) 
 
         {spot.crewNote && (
           <SpotCrewNote crewNote={spot.crewNote} source={spot.source} />
+        )}
+
+        {(spot.bestTimeOfDay || spot.bestWeatherCondition || spot.isIndoor != null) && (
+          <div className="px-4 py-2">
+            <WeatherBadge
+              timeOfDay={spot.bestTimeOfDay}
+              weather={spot.bestWeatherCondition}
+              isIndoor={spot.isIndoor}
+            />
+          </div>
         )}
 
         {spot.partner?.isPartner && spot.partner.benefitText && (

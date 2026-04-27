@@ -1819,6 +1819,31 @@ export const fetchPartnerTrends = async (
   }
 };
 
+// ── 날씨 & 지금 추천 ──
+
+import type { WeatherInfo, NowRecommendationResponse } from "@/types";
+
+export async function getCurrentWeather(
+  lat: number,
+  lng: number
+): Promise<WeatherInfo> {
+  const res = await apiV2.get<WeatherInfo>("/weather/current", {
+    params: { lat, lng },
+  });
+  return res.data;
+}
+
+export async function getNowRecommendations(
+  lat: number,
+  lng: number,
+  size = 10
+): Promise<NowRecommendationResponse> {
+  const res = await apiV2.get<NowRecommendationResponse>("/recommendations/now", {
+    params: { lat, lng, size },
+  });
+  return res.data;
+}
+
 // ── 추천 엔진 ──
 
 export async function fetchRecommendedSpots(

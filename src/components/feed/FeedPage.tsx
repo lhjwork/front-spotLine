@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef, useState } from "react";
+import { useEffect, useCallback, useRef, useState, lazy, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFeedStore } from "@/store/useFeedStore";
 import { fetchFeedSpots, fetchFeedSpotLines, fetchBlogs } from "@/lib/api";
@@ -23,6 +23,8 @@ import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
 import FollowingFeed from "./FollowingFeed";
 import ExploreNavBar from "@/components/shared/ExploreNavBar";
+
+const NowRecommendationSection = lazy(() => import("./NowRecommendationSection"));
 
 export default function FeedPage() {
   const searchParams = useSearchParams();
@@ -248,6 +250,9 @@ export default function FeedPage() {
           />
 
           <div ref={contentRef} />
+          <Suspense fallback={null}>
+            <NowRecommendationSection />
+          </Suspense>
           <FeedTrendingSection />
           <FeedRecommendationSection />
           <FeedCategoryCuration area={area} />
