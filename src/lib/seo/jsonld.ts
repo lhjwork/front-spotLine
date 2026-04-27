@@ -1,4 +1,4 @@
-import type { SpotDetailResponse, SpotLineDetailResponse, SpotCategory } from "@/types";
+import type { SpotDetailResponse, SpotLineDetailResponse, SpotCategory, CollectionDetail } from "@/types";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://spotline.kr";
 
@@ -164,6 +164,30 @@ export function generateWebSiteJsonLd(): Record<string, unknown> {
       },
       "query-input": "required name=search_term_string",
     },
+  };
+}
+
+/** Collection → CollectionPage JSON-LD */
+export function generateCollectionJsonLd(collection: CollectionDetail): Record<string, unknown> {
+  const url = `${SITE_URL}/collection/${collection.slug}`;
+  const description = collection.description || `${collection.area}의 ${collection.title}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: collection.title,
+    description,
+    url,
+    numberOfItems: collection.itemCount,
+    hasPart: collection.items.map((item) => ({
+      "@type": item.itemType === "SPOT" ? "Place" : "TouristTrip",
+      name: item.itemType === "SPOT" ? item.spotTitle : item.spotLineTitle,
+      ...(item.itemType === "SPOT" && item.spotSlug
+        ? { url: `${SITE_URL}/spot/${item.spotSlug}` }
+        : item.spotLineSlug
+          ? { url: `${SITE_URL}/spotline/${item.spotLineSlug}` }
+          : {}),
+    })),
   };
 }
 

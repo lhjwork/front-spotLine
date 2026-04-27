@@ -17,6 +17,7 @@ import FeedTrendingSection from "./FeedTrendingSection";
 import FeedSpotLineSection from "./FeedSpotLineSection";
 import FeedRecommendationSection from "./FeedRecommendationSection";
 import FeedCategoryCuration from "./FeedCategoryCuration";
+import FeedCollectionSection from "./FeedCollectionSection";
 import FeedBlogSection from "./FeedBlogSection";
 import FeedSpotGrid from "./FeedSpotGrid";
 import FeedSkeleton from "./FeedSkeleton";
@@ -250,6 +251,7 @@ export default function FeedPage() {
           <FeedTrendingSection />
           <FeedRecommendationSection />
           <FeedCategoryCuration area={area} />
+          <FeedCollectionSection />
           <FeedSpotLineSection spotLines={spotLines} />
           <FeedBlogSection blogs={blogs} />
           <div className={cn("transition-opacity duration-200", isFiltering && "opacity-50")}>

@@ -1093,3 +1093,51 @@ export interface QrScanHistoryItem {
   qrId: string;
   scannedAt: string;
 }
+
+// ============================================================
+// Collection (큐레이션 컬렉션)
+// ============================================================
+
+export interface CollectionPreview {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  coverImageUrl: string | null;
+  theme: SpotLineTheme | null;
+  area: string | null;
+  itemCount: number;
+  viewsCount: number;
+}
+
+export interface CollectionDetail extends CollectionPreview {
+  isFeatured: boolean;
+  isPublished: boolean;
+  displayOrder: number;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: CollectionItemDetail[];
+}
+
+export interface CollectionItemDetail {
+  id: string;
+  itemType: "SPOT" | "SPOTLINE";
+  itemOrder: number;
+  itemNote: string | null;
+  // Spot fields
+  spotId?: string;
+  spotSlug?: string;
+  spotTitle?: string;
+  spotCategory?: string;
+  spotArea?: string;
+  spotCoverImage?: string;
+  // SpotLine fields
+  spotLineId?: string;
+  spotLineSlug?: string;
+  spotLineTitle?: string;
+  spotLineTheme?: string;
+  spotLineArea?: string;
+  spotLineSpotCount?: number;
+  spotLineCoverImage?: string;
+}

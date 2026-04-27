@@ -1862,3 +1862,35 @@ export function logRecommendationEvent(
     .post("/recommendations/events", { eventType, source, itemId, sessionId })
     .catch(() => {});
 }
+
+// ==================== Collection API (큐레이션 컬렉션) ====================
+
+import type { CollectionDetail, CollectionPreview } from "@/types";
+
+export async function fetchFeaturedCollections(): Promise<CollectionPreview[]> {
+  try {
+    const { data } = await apiV2.get<CollectionPreview[]>("/collections/featured");
+    return data;
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchCollections(params?: {
+  area?: string;
+  theme?: string;
+  page?: number;
+  size?: number;
+}): Promise<PaginatedResponse<CollectionPreview>> {
+  const { data } = await apiV2.get<PaginatedResponse<CollectionPreview>>("/collections", { params });
+  return data;
+}
+
+export async function fetchCollectionDetail(slug: string): Promise<CollectionDetail | null> {
+  try {
+    const { data } = await apiV2.get<CollectionDetail>(`/collections/${slug}`);
+    return data;
+  } catch {
+    return null;
+  }
+}
