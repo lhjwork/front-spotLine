@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
 import { getAndClearReturnUrl } from "@/lib/auth";
+import EmailCollectionModal from "@/components/auth/EmailCollectionModal";
 
 export default function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
+  const [needsEmail, setNeedsEmail] = useState(false);
+  const [returnUrl, setReturnUrl] = useState("/");
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -15,10 +18,26 @@ export default function AuthCallbackPage() {
         setError(err?.message || "인증 처리 중 오류가 발생했습니다.");
         return;
       }
-      const returnUrl = getAndClearReturnUrl();
-      window.location.href = returnUrl;
+      const url = getAndClearReturnUrl();
+      setReturnUrl(url);
+
+      const email = session.user.email;
+      if (!email || email.endsWith("@unknown")) {
+        setNeedsEmail(true);
+      } else {
+        window.location.href = url;
+      }
     });
   }, []);
+
+  if (needsEmail) {
+    return (
+      <EmailCollectionModal
+        onComplete={() => { window.location.href = returnUrl; }}
+        onSkip={() => { window.location.href = returnUrl; }}
+      />
+    );
+  }
 
   if (error) {
     return (

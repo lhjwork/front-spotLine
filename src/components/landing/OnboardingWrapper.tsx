@@ -1,22 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay";
 import { isFirstVisit } from "@/lib/onboarding";
 
-function useIsFirstVisit() {
-  const [show] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return isFirstVisit();
-  });
-  return show;
-}
-
 export default function OnboardingWrapper() {
-  const isFirst = useIsFirstVisit();
-  const [dismissed, setDismissed] = useState(false);
+  const [show, setShow] = useState(false);
 
-  if (!isFirst || dismissed) return null;
+  useEffect(() => {
+    if (isFirstVisit()) {
+      setShow(true);
+    }
+  }, []);
 
-  return <OnboardingOverlay onComplete={() => setDismissed(true)} />;
+  if (!show) return null;
+
+  return <OnboardingOverlay onComplete={() => setShow(false)} />;
 }

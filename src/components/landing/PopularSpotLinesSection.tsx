@@ -10,8 +10,8 @@ export default function PopularSpotLinesSection({ spotLines }: PopularSpotLinesS
   if (spotLines.length === 0) return null;
 
   return (
-    <section className="px-4 py-10">
-      <div className="mx-auto max-w-6xl">
+    <section className="px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900">지금 인기 있는 SpotLine</h2>
           <Link href="/feed" className="text-sm text-blue-600 hover:underline">

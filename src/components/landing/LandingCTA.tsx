@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function LandingCTA() {
   return (
-    <section className="bg-blue-600 px-4 py-16 text-center">
+    <section className="bg-blue-600 px-4 py-16 text-center sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
         <h2 className="text-2xl font-bold text-white lg:text-3xl">
           나만의 SpotLine을 만들어보세요

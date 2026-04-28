@@ -26,7 +26,7 @@ export default function FloatingCreateButton() {
   }, [isOpen]);
 
   return (
-    <div ref={menuRef} className="fixed bottom-20 right-4 z-30 md:right-[calc(50%-256px+16px)]">
+    <div ref={menuRef} className="fixed bottom-20 right-4 z-30 md:hidden">
       {isOpen && (
         <div className="absolute bottom-16 right-0 mb-2 w-48 rounded-xl bg-white py-2 shadow-lg ring-1 ring-gray-200">
           {MENU_ITEMS.map(({ href, icon: Icon, label }) => (

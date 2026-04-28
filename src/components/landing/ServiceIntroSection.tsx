@@ -2,8 +2,8 @@ import { SERVICE_STEPS } from "@/constants/landing";
 
 export default function ServiceIntroSection() {
   return (
-    <section className="px-4 py-10">
-      <div className="mx-auto max-w-6xl">
+    <section className="px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
         <h2 className="mb-8 text-center text-xl font-bold text-gray-900">
           Spotline은 이렇게 사용해요
         </h2>

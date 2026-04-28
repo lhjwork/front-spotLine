@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 export default function CityThemeSection() {
   return (
-    <section className="bg-gray-50 px-4 py-10">
-      <div className="mx-auto max-w-6xl">
+    <section className="bg-gray-50 px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
         <h2 className="mb-6 text-xl font-bold text-gray-900">어디로 떠나볼까요?</h2>
 
         <div className="mb-6">

@@ -22,7 +22,7 @@ export default function BottomNavBar() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)] md:hidden">
       <div className="mx-auto flex h-14 max-w-lg items-center justify-around px-2">
         {NAV_ITEMS.map((item) => {
           const active = item.match(pathname);

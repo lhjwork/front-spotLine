@@ -1226,6 +1226,19 @@ export async function updateMyProfile(request: {
   return data;
 }
 
+/** 내 이메일 업데이트 (카카오 OAuth 이메일 미보유 시) */
+export async function updateMyEmail(email: string): Promise<UserProfile> {
+  const { data } = await apiV2.put<UserProfile>(
+    "/users/me/email",
+    { email },
+    {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      timeout: 5000,
+    },
+  );
+  return data;
+}
+
 /** 아바타 업로드 URL 생성 */
 export async function requestAvatarUploadUrl(
   filename: string,

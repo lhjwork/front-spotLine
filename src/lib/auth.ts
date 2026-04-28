@@ -2,17 +2,24 @@ import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 const RETURN_URL_KEY = "spotline_auth_return_url";
 
-/** OAuth 로그인 시작 (Google/Kakao) */
+/** OAuth 로그인 시작 (Instagram via Facebook / Kakao) */
 export async function startOAuthLogin(
-  provider: "google" | "kakao",
+  provider: "instagram" | "kakao",
   returnUrl?: string
 ): Promise<void> {
   sessionStorage.setItem(RETURN_URL_KEY, returnUrl || window.location.href);
   const supabase = createSupabaseBrowserClient();
+
+  // Instagram은 Supabase에서 Facebook provider를 통해 처리
+  const supabaseProvider = provider === "instagram" ? "facebook" : provider;
+
   await supabase.auth.signInWithOAuth({
-    provider,
+    provider: supabaseProvider,
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
+      ...(provider === "instagram" && {
+        scopes: "instagram_basic",
+      }),
     },
   });
 }
