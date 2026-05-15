@@ -13,6 +13,12 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
 
+    // [BACKEND_REQUIRED] Supabase 미설정 시 홈으로 리다이렉트
+    if (!supabase) {
+      window.location.href = "/";
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session }, error: err }) => {
       if (err || !session) {
         setError(err?.message || "인증 처리 중 오류가 발생했습니다.");

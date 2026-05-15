@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, LayoutGrid, Bookmark, User } from "lucide-react";
+import { Compass } from "lucide-react";
+// [BACKEND_REQUIRED] import { LayoutGrid, Bookmark, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { icon: Compass, label: "발견", href: "/", match: (p: string) => p === "/" },
-  { icon: LayoutGrid, label: "피드", href: "/feed", match: (p: string) => p.startsWith("/feed") },
-  { icon: Bookmark, label: "저장", href: "/saves", match: (p: string) => p.startsWith("/saves") },
-  { icon: User, label: "마이", href: "/profile/me", match: (p: string) => p.startsWith("/profile") },
+  // [BACKEND_REQUIRED] { icon: LayoutGrid, label: "피드", href: "/feed", match: (p: string) => p.startsWith("/feed") },
+  // [BACKEND_REQUIRED] { icon: Bookmark, label: "저장", href: "/saves", match: (p: string) => p.startsWith("/saves") },
+  // [BACKEND_REQUIRED] { icon: User, label: "마이", href: "/profile/me", match: (p: string) => p.startsWith("/profile") },
 ] as const;
 
 const HIDDEN_PREFIXES = ["/spot/", "/spotline/", "/qr/"];

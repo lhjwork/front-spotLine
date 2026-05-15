@@ -9,16 +9,22 @@ export default function AuthInitializer() {
   const setSession = useAuthStore((s) => s.setSession);
 
   useEffect(() => {
-    initFromSupabase();
+    try {
+      initFromSupabase();
 
-    const supabase = createSupabaseBrowserClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+      const supabase = createSupabaseBrowserClient();
+      // [BACKEND_REQUIRED] Supabase 미설정 시 구독 스킵
+      if (!supabase) return;
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    } catch (err) {
+      console.warn("Auth 초기화 실패:", err);
+    }
   }, [initFromSupabase, setSession]);
 
   return null;

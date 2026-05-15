@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import AuthInitializer from "@/components/auth/AuthInitializer";
+// [BACKEND_REQUIRED] import AuthInitializer from "@/components/auth/AuthInitializer";
 import BottomNavBar from "@/components/layout/BottomNavBar";
-import FloatingCreateButton from "@/components/common/FloatingCreateButton";
+// [BACKEND_REQUIRED] import FloatingCreateButton from "@/components/common/FloatingCreateButton";
 import JsonLd from "@/components/seo/JsonLd";
 import { generateOrganizationJsonLd, generateWebSiteJsonLd } from "@/lib/seo/jsonld";
 import "./globals.css";
@@ -74,9 +74,9 @@ export default function RootLayout({
       >
         <JsonLd data={generateOrganizationJsonLd()} />
         <JsonLd data={generateWebSiteJsonLd()} />
-        <AuthInitializer />
+        {/* [BACKEND_REQUIRED] <AuthInitializer /> */}
         {children}
-        <FloatingCreateButton />
+        {/* [BACKEND_REQUIRED] <FloatingCreateButton /> */}
         <BottomNavBar />
       </body>
     </html>

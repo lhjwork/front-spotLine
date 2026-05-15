@@ -44,16 +44,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signOut();
+    // [BACKEND_REQUIRED] Supabase 미설정 시 로컬만 정리
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
     clearCachedProfile();
     set({ isAuthenticated: false, session: null, user: null });
   },
 
   initFromSupabase: async () => {
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    get().setSession(session);
-    set({ isLoading: false });
+    try {
+      const supabase = createSupabaseBrowserClient();
+      // [BACKEND_REQUIRED] Supabase 미설정 시 스킵
+      if (!supabase) {
+        set({ isLoading: false });
+        return;
+      }
+      const { data: { session } } = await supabase.auth.getSession();
+      get().setSession(session);
+    } catch (err) {
+      console.warn("Supabase 세션 초기화 실패:", err);
+    } finally {
+      set({ isLoading: false });
+    }
   },
 }));
 
