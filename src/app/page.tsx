@@ -9,6 +9,8 @@ import LandingCTA from "@/components/landing/LandingCTA";
 import OnboardingWrapper from "@/components/landing/OnboardingWrapper";
 // [BACKEND_REQUIRED] import { fetchPopularSpotLines, fetchFeedSpots } from "@/lib/api";
 // [BACKEND_REQUIRED] import type { SpotLinePreview, SpotDetailResponse } from "@/types";
+//test
+
 
 export const metadata: Metadata = {
   title: "Spotline — 다음 장소, Spotline이 추천해요",
